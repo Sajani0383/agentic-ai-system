@@ -1,39 +1,29 @@
-import os
-from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.agents import initialize_agent, AgentType
-from langchain.memory import ConversationBufferMemory
-from tools import get_tools
+class AgentMemory:
 
-load_dotenv()
+    def __init__(self):
+        self.history = []
 
+    def add(self, state):
+        self.history.append(state)
 
-def create_agent(monitoring_agent, demand_agent, bayesian_agent, environment):
+        if len(self.history) > 20:
+            self.history.pop(0)
 
-    tools = get_tools(
-        monitoring_agent,
-        demand_agent,
-        bayesian_agent,
-        environment
-    )
+    def get_metrics(self):
+        metrics = []
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-        temperature=0
-    )
+        for snapshot in self.history:
+            total_free = sum(snapshot[z]["free_slots"] for z in snapshot)
+            avg_free = total_free / len(snapshot)
 
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True
-    )
+            # Better congestion detection
+            congestion = sum(
+                1 for z in snapshot if snapshot[z]["free_slots"] <= 10
+            )
 
-    agent = initialize_agent(
-        tools=tools,
-        llm=llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        memory=memory,
-        verbose=True
-    )
+            metrics.append({
+                "avg_free_slots": round(avg_free, 2),
+                "congestion_count": congestion
+            })
 
-    return agent
+        return metrics

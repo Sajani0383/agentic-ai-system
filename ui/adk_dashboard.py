@@ -1,155 +1,167 @@
 import streamlit as st
+import time
 import sys
 import os
-import time
-import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# ✅ LOAD ENV
+from dotenv import load_dotenv
+load_dotenv()
+
+# SYSTEM IMPORTS
 from environment.parking_environment import ParkingEnvironment
-from agents.monitoring_agent import MonitoringAgent
 from agents.demand_agent import DemandAgent
-from agents.bayesian_agent import BayesianAgent
+from agents.monitoring_agent import MonitoringAgent
 from agents.policy_agent import PolicyAgent
+from agents.bayesian_agent import BayesianAgent
+from agents.reward_agent import RewardAgent
+from agent_memory import AgentMemory
 
-from tools import get_tools
-from llm_reasoning import create_llm_agent
+# ✅ GEMINI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-# ZONES
-zones = ['Mall', 'Hospital', 'Office', 'Residential', 'Commercial']
+# ------------------ API KEY FIX ------------------
+api_key = os.getenv("GOOGLE_API_KEY")
 
-# INIT
-environment = ParkingEnvironment(zones)
-monitor = MonitoringAgent()
-demand_agent = DemandAgent()
-bayesian_agent = BayesianAgent()
-policy_agent = PolicyAgent(zones)
+if not api_key:
+    st.error("❌ GOOGLE_API_KEY not found. Check .env file")
+    st.stop()
 
-# SESSION STATE
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0.3,
+    google_api_key=api_key
+)
 
-if "trace" not in st.session_state:
-    st.session_state.trace = []
-
-if "events" not in st.session_state:
-    st.session_state.events = []
-
-if "state" not in st.session_state:
-    st.session_state.state = {}
-
-if "artifacts" not in st.session_state:
-    st.session_state.artifacts = {}
-
-if "auto_run" not in st.session_state:
-    st.session_state.auto_run = False
-
-if "agent" not in st.session_state:
-    tools = get_tools(monitor, demand_agent, bayesian_agent, policy_agent, environment)
-    st.session_state.agent = create_llm_agent(tools)
-
-st.set_page_config(layout="wide")
-
-col1, col2 = st.columns([1, 3])
-
-# ================= LEFT PANEL =================
-with col1:
-    st.title("⚙️ Controls")
-
-    if st.button("🔄 Reset Chat"):
-        st.session_state.messages = []
-        st.session_state.trace = []
-        st.session_state.events = []
-        st.session_state.state = {}
-        st.session_state.artifacts = {}
-
-    if st.button("▶ Start Auto Simulation"):
-        st.session_state.auto_run = True
-
-    if st.button("⏹ Stop Auto Simulation"):
-        st.session_state.auto_run = False
-
-    st.markdown("---")
-
-    tab1, tab2, tab3, tab4 = st.tabs(["Trace", "Events", "State", "Artifacts"])
-
-    # TRACE
-    with tab1:
-        for t in st.session_state.trace:
-            st.success(t)
-
-    # EVENTS
-    with tab2:
-        for e in st.session_state.events:
-            st.info(e)
-
-    # STATE
-    with tab3:
-        state = st.session_state.state
-
-        st.write("DEBUG STATE:", state)
-
-        if isinstance(state, dict):
-            for zone, data in state.items():
-                st.write(f"**{zone}**")
-                st.write(f"Free Slots: {data.get('free_slots')}")
-                st.write(f"Entry: {data.get('entry_count')}")
-                st.write(f"Exit: {data.get('exit_count')}")
-                st.markdown("---")
-
-            df = pd.DataFrame(state).T
-            if "free_slots" in df.columns:
-                st.bar_chart(df["free_slots"])
-        else:
-            st.write("No state available")
-
-    # ARTIFACTS
-    with tab4:
-        st.write(st.session_state.artifacts)
-
-# ================= RIGHT PANEL =================
-with col2:
-    st.title("🚗 Agentic AI Smart Parking Assistant")
-    st.markdown("### 🧠 Monitoring → Prediction → Decision → Optimization")
-
-    # CHAT HISTORY
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    # INPUT
-    user_input = st.chat_input("Ask anything about parking...")
-
-    if user_input:
-        st.session_state.messages.append({"role": "user", "content": user_input})
-
-        with st.chat_message("assistant"):
-            try:
-                with st.spinner("Thinking..."):
-
-                    # ✅ SMART ROUTING (FINAL FIX)
-                    if any(word in user_input.lower() for word in [
-                        "state", "parking", "slots", "simulate", "demand", "congestion"
-                    ]):
-                        response = st.session_state.agent.run(user_input)
-                    else:
-                        llm = create_llm_agent([])
-                        response = llm.invoke(user_input).content
-
-            except Exception as e:
-                response = f"Error: {str(e)}"
-
-            st.markdown(response)
-
-        st.session_state.messages.append({"role": "assistant", "content": response})
-
-# ================= AUTO SIMULATION =================
-if st.session_state.auto_run:
+def ask_llm(prompt):
     try:
-        for _ in range(2):
-            st.session_state.agent.run("simulate parking")
-            time.sleep(1)
-    except:
-        pass
+        return llm.invoke(prompt).content
+    except Exception as e:
+        return f"LLM Error: {e}"
 
+# ------------------ STREAMLIT ------------------
+st.set_page_config(layout="wide")
+st.title("🚗 Intelligent Agentic Parking System")
+
+# ------------------ SESSION STATE ------------------
+if "env" not in st.session_state:
+    st.session_state.env = ParkingEnvironment()
+
+if "memory" not in st.session_state:
+    st.session_state.memory = AgentMemory()
+
+if "run" not in st.session_state:
+    st.session_state.run = False
+
+if "reasoning" not in st.session_state:
+    st.session_state.reasoning = ""
+
+env = st.session_state.env
+memory = st.session_state.memory
+
+# ------------------ AGENTS ------------------
+demand_agent = DemandAgent()
+monitor = MonitoringAgent()
+policy = PolicyAgent()
+bayesian = BayesianAgent()
+reward = RewardAgent()
+
+# ------------------ TOGGLE ------------------
+auto = st.toggle("Autonomous Mode")
+
+st.session_state.run = auto
+
+# ------------------ MAIN LOOP ------------------
+if st.session_state.run:
+
+    state = env.get_state()
+
+    monitored = monitor.observe(state)
+    demand = demand_agent.predict()
+    insight = bayesian.infer(monitored)
+
+    action = policy.decide(monitored, demand, insight)
+
+    if action:
+        env.apply_action(action)
+
+    new_state = env.step()
+
+    reward.evaluate(state, new_state)
+    memory.add(new_state)
+
+    # ✅ GEMINI REASONING
+    prompt = f"""
+    Parking system state:
+    {new_state}
+
+    Tell:
+    - Most crowded area
+    - Best parking area
+    - Short reasoning
+    """
+
+    st.session_state.reasoning = ask_llm(prompt)
+
+    time.sleep(1)
     st.rerun()
+
+# ------------------ DISPLAY ------------------
+state = env.get_state()
+
+st.subheader("📊 Live Status")
+st.table(state)
+
+# ------------------ ALERTS ------------------
+st.subheader("🚨 Alerts")
+
+for z in state:
+    if state[z]["free_slots"] <= 5:
+        st.error(f"{z} FULL 🚨")
+    elif state[z]["free_slots"] <= 10:
+        st.warning(f"{z} almost full")
+
+# ------------------ BAR CHART ------------------
+st.subheader("📊 Free Slots")
+st.bar_chart([state[z]["free_slots"] for z in state])
+
+# ------------------ TREND ------------------
+st.subheader("📈 Trend")
+
+trend = env.get_trend()
+
+if trend:
+    for z in trend[0]:
+        st.line_chart([t[z] for t in trend])
+
+# ------------------ METRICS ------------------
+st.subheader("📉 Performance Metrics")
+st.write(memory.get_metrics())
+
+# ------------------ AI REASONING ------------------
+st.subheader("🧠 Autonomous AI Thinking")
+
+if st.session_state.reasoning:
+    st.info(st.session_state.reasoning)
+
+# ------------------ CHAT ------------------
+st.subheader("💬 AI Chat (Gemini)")
+
+user_query = st.text_input("Ask anything about parking...")
+
+if user_query:
+    prompt = f"""
+    Parking data:
+    {state}
+
+    User question: {user_query}
+
+    Answer clearly and intelligently.
+    """
+
+    response = ask_llm(prompt)
+    st.success(response)
+
+# ------------------ DEBUG ------------------
+st.write("DEBUG:", state)

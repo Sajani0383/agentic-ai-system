@@ -2,4 +2,3 @@ __pycache__/
 *.pyc
 .env
 parking_env/
-*.csv

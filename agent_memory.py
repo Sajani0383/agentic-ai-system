@@ -1,34 +1,21 @@
-import json
-import os
-
-
 class AgentMemory:
 
     def __init__(self):
+        self.history = []
 
-        self.file = "agent_memory.json"
+    def add(self, state):
+        self.history.append(state)
+        if len(self.history) > 30:
+            self.history.pop(0)
 
-        if not os.path.exists(self.file):
-            with open(self.file, "w") as f:
-                json.dump([], f)
+    def get_metrics(self):
+        metrics = []
+        for s in self.history:
+            avg = sum(s[z]["free_slots"] for z in s) / len(s)
+            congestion = sum(1 for z in s if s[z]["free_slots"] <= 10)
 
-    def save(self, step, zone, reward):
-
-        with open(self.file, "r") as f:
-            data = json.load(f)
-
-        data.append({
-            "step": step,
-            "zone": zone,
-            "reward": reward
-        })
-
-        with open(self.file, "w") as f:
-            json.dump(data, f, indent=4)
-
-    def load(self):
-
-        with open(self.file, "r") as f:
-            data = json.load(f)
-
-        return data
+            metrics.append({
+                "avg_free_slots": round(avg, 2),
+                "congestion_count": congestion
+            })
+        return metrics

@@ -1,81 +1,60 @@
 from langchain.tools import Tool
-import streamlit as st
 
-def get_tools(monitoring_agent, demand_agent, bayesian_agent, policy_agent, environment):
+def get_tools(environment, history):
 
-    def get_parking_state(_input=None):
-        state = monitoring_agent.observe(environment)
+    def get_state(_=None):
+        return str(environment.get_state())
 
-        st.session_state.state = state
-        st.session_state.trace.append("Fetched parking state")
+    def simulate(_=None):
+        state = environment.step()
+        history.add(state)
+        return f"Simulation updated:\n{state}"
 
-        return f"""Parking Status:
-{format_state(state)}"""
-
-    def predict_demand(_input=None):
-        state = monitoring_agent.observe(environment)
-        demand = demand_agent.predict(state)
-
-        st.session_state.trace.append("Predicted demand")
-        st.session_state.artifacts["demand"] = demand
-
-        return f"""Predicted Demand:
-{demand}"""
-
-    def compute_congestion(_input=None):
-        state = monitoring_agent.observe(environment)
-        congestion = bayesian_agent.compute_probability(state)
-
-        st.session_state.events.append("Computed congestion")
-        st.session_state.artifacts["congestion"] = congestion
-
-        return f"""Congestion Probability:
-{congestion}"""
-
-    def simulate_step(_input=None):
-        state = monitoring_agent.observe(environment)
-        demand = demand_agent.predict(state)
-
-        zone, mode = policy_agent.choose_zone(demand)
-        reward = environment.step(zone)
-
-        st.session_state.events.append(f"Simulated: {zone}")
-        st.session_state.trace.append("Simulation step executed")
-
-        st.session_state.state = monitoring_agent.observe(environment)
-
-        return f"""Simulation Result:
-Zone: {zone}
-Mode: {mode}
-Reward: {reward}"""
-
-    def format_state(state):
-        text = ""
+    def predict(_=None):
+        state = environment.get_state()
+        result = []
         for zone, data in state.items():
-            text += f"{zone}: {data['free_slots']} free, {data['entry_count']} entry, {data['exit_count']} exit\n"
-        return text
+            score = data["entry"] - data["exit"]
+            result.append(f"{zone}: demand pressure = {score}")
+        return "\n".join(result)
 
-    tools = [
-        Tool(
-            name="Parking State",
-            func=get_parking_state,
-            description="Use this to get current parking status"
-        ),
-        Tool(
-            name="Demand Prediction",
-            func=predict_demand,
-            description="Use this to predict parking demand"
-        ),
-        Tool(
-            name="Congestion Probability",
-            func=compute_congestion,
-            description="Use this to compute congestion"
-        ),
-        Tool(
-            name="Simulate Parking",
-            func=simulate_step,
-            description="Use this to simulate parking changes"
+    def decision(_=None):
+        state = environment.get_state()
+
+        best_zone = None
+        best_score = float("inf")
+        explanation = []
+
+        for zone, data in state.items():
+            pressure = data["entry"] - data["exit"]
+
+            explanation.append(
+                f"{zone}: free={data['free_slots']} pressure={pressure}"
+            )
+
+            if pressure < best_score:
+                best_score = pressure
+                best_zone = zone
+
+        confidence = round(1 / (1 + best_score), 2)
+
+        return (
+            f"Best zone: {best_zone}\n"
+            f"Confidence: {confidence}\n"
+            f"Reason:\n" + "\n".join(explanation)
         )
-    ]
 
-    return tools
+    def trend(_=None):
+        return str(history.get_trend())
+
+    def metrics(_=None):
+        return str(history.get_metrics())
+
+    return [
+        Tool(name="Get State", func=get_state, description="Current parking state"),
+        Tool(name="Simulate", func=simulate, description="Run simulation"),
+        Tool(name="Predict Demand", func=predict, description="Demand analysis"),
+        Tool(name="Decision", func=decision, description="Best action"),
+        Tool(name="Trend", func=trend, description="Trend analysis"),
+        Tool(name="Metrics", func=metrics, description="Performance metrics"),
+    ]

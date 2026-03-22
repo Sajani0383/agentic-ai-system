@@ -1,64 +1,81 @@
 import random
+from datetime import datetime
+from ml.predict import predict_demand
 
 class ParkingEnvironment:
 
-    def __init__(self, zones):
-        self.zones = zones
+    def __init__(self):
+        self.zones = ["Mall", "Hospital", "Office", "Residential", "Commercial"]
+        self.zone_map = {z: i for i, z in enumerate(self.zones)}
 
-        self.total_slots = {zone: random.randint(80, 100) for zone in zones}
-        self.occupied_slots = {zone: random.randint(10, 50) for zone in zones}
+        self.state = {
+            z: {
+                "total_slots": random.randint(80, 120),
+                "occupied": random.randint(20, 50),
+                "entry": 0,
+                "exit": 0
+            }
+            for z in self.zones
+        }
 
-        self.entry_count = {zone: 0 for zone in zones}
-        self.exit_count = {zone: 0 for zone in zones}
+        self.history = []
 
-    def reset(self):
-        for zone in self.zones:
-            self.occupied_slots[zone] = random.randint(10, 50)
-            self.entry_count[zone] = 0
-            self.exit_count[zone] = 0
-        return self.get_state()
+    def step(self):
+        now = datetime.now()
+        hour = now.hour
+        day = now.day
 
-    def get_free_slots(self, zone):
-        return self.total_slots[zone] - self.occupied_slots[zone]
+        snapshot = {}
 
-    def get_state(self):
-        state = []
+        for z in self.zones:
+            zone_id = self.zone_map[z]
 
-        for zone in self.zones:
-            state.append({
-                "zone": zone,
-                "free_slots": self.get_free_slots(zone),
-                "entry_count": self.entry_count[zone],
-                "exit_count": self.exit_count[zone]
-            })
+            demand = max(20, predict_demand(hour, day, zone_id, 0))
 
-        return state
+            entry = int(demand * random.uniform(0.2, 0.4))
+            exit = int(entry * random.uniform(0.3, 0.6))
 
-    def step(self, action):
-        # simulate entries and exits
-        for zone in self.zones:
-            entry = random.randint(0, 10)
-            exit = random.randint(0, 10)
+            entry += random.randint(-5, 5)
+            exit += random.randint(-3, 3)
 
-            self.entry_count[zone] = entry
-            self.exit_count[zone] = exit
+            entry = max(0, entry)
+            exit = max(0, exit)
 
-            self.occupied_slots[zone] += entry - exit
+            self.state[z]["entry"] = entry
+            self.state[z]["exit"] = exit
 
-            # keep within limits
-            self.occupied_slots[zone] = max(
-                0,
-                min(self.occupied_slots[zone], self.total_slots[zone])
+            self.state[z]["occupied"] += entry - exit
+
+            self.state[z]["occupied"] = max(0, self.state[z]["occupied"])
+            self.state[z]["occupied"] = min(
+                self.state[z]["occupied"],
+                self.state[z]["total_slots"]
             )
 
-        # reward logic
-        free_slots = self.get_free_slots(action)
+            snapshot[z] = self.state[z]["total_slots"] - self.state[z]["occupied"]
 
-        if free_slots > 50:
-            reward = 2
-        elif free_slots > 20:
-            reward = 1
-        else:
-            reward = -1
+        self.history.append(snapshot)
 
-        return self.get_state(), reward
+        if len(self.history) > 30:
+            self.history.pop(0)
+
+        return self.get_state()
+
+    def apply_action(self, action):
+        if action and action["type"] == "redirect":
+            z = action["from"]
+            self.state[z]["occupied"] -= action["amount"]
+            self.state[z]["occupied"] = max(0, self.state[z]["occupied"])
+
+    def get_state(self):
+        return {
+            z: {
+                "free_slots": self.state[z]["total_slots"] - self.state[z]["occupied"],
+                "entry": self.state[z]["entry"],
+                "exit": self.state[z]["exit"]
+            }
+            for z in self.zones
+        }
+
+    def get_trend(self):
+        return self.history

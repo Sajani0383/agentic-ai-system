@@ -1,34 +1,26 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
 import os
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-load_dotenv()
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0.3,
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
 
-def create_llm_agent(tools):
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-        temperature=0
-    )
+def get_llm_decision(state):
+    prompt = f"""
+    You are an intelligent parking system AI.
 
-    from langchain.agents import initialize_agent
+    Current parking state:
+    {state}
 
-    agent = initialize_agent(
-        tools,
-        llm,
-        agent="zero-shot-react-description",
-        verbose=True,
-        handle_parsing_errors=True,
-        agent_kwargs={
-            "system_message": """
-You are a smart parking AI assistant.
+    Tasks:
+    1. Which area is most crowded?
+    2. Where should vehicles be redirected?
+    3. Give a short reasoning.
 
-IMPORTANT:
-- Use tools ONLY for parking data (state, demand, simulation)
-- For general questions (why parking, benefits, etc), answer directly
-- Always give clear, human-friendly answers
-"""
-        }
-    )
+    Answer clearly.
+    """
 
-    return agent
+    response = llm.invoke(prompt)
+    return response.content
