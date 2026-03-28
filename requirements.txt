@@ -1,0 +1,15 @@
+streamlit
+pandas
+numpy
+plotly
+scikit-learn
+google-genai
+python-dotenv
+matplotlib
+langchain
+langchain-community
+langchain-google-genai
+google-generativeai
+fastapi
+uvicorn
+requests

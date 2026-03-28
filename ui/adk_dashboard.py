@@ -1,167 +1,198 @@
-import streamlit as st
-import time
-import sys
 import os
+import sys
+import time
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-# ✅ LOAD ENV
+import pandas as pd
+import streamlit as st
 from dotenv import load_dotenv
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 load_dotenv()
 
-# SYSTEM IMPORTS
-from environment.parking_environment import ParkingEnvironment
-from agents.demand_agent import DemandAgent
-from agents.monitoring_agent import MonitoringAgent
-from agents.policy_agent import PolicyAgent
-from agents.bayesian_agent import BayesianAgent
-from agents.reward_agent import RewardAgent
+from agent_controller import AgentController
 from agent_memory import AgentMemory
+from environment.parking_environment import ParkingEnvironment
+from llm_reasoning import get_llm, get_local_chat_response, summarize_state
 
-# ✅ GEMINI
-from langchain_google_genai import ChatGoogleGenerativeAI
 
-# ------------------ API KEY FIX ------------------
-api_key = os.getenv("GOOGLE_API_KEY")
+st.set_page_config(layout="wide", page_title="Intelligent Parking System")
+st.title("Intelligent Agentic Parking System")
 
-if not api_key:
-    st.error("❌ GOOGLE_API_KEY not found. Check .env file")
-    st.stop()
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0.3,
-    google_api_key=api_key
-)
+def _format_state_table(state):
+    frame = pd.DataFrame(state).T
+    return frame[["total_slots", "occupied", "free_slots", "entry", "exit"]]
 
-def ask_llm(prompt):
-    try:
-        return llm.invoke(prompt).content
-    except Exception as e:
-        return f"LLM Error: {e}"
 
-# ------------------ STREAMLIT ------------------
-st.set_page_config(layout="wide")
-st.title("🚗 Intelligent Agentic Parking System")
-
-# ------------------ SESSION STATE ------------------
 if "env" not in st.session_state:
     st.session_state.env = ParkingEnvironment()
-
 if "memory" not in st.session_state:
     st.session_state.memory = AgentMemory()
-
+if "controller" not in st.session_state:
+    st.session_state.controller = AgentController(environment=st.session_state.env)
 if "run" not in st.session_state:
     st.session_state.run = False
-
+if "last_run" not in st.session_state:
+    st.session_state.last_run = 0.0
+if "agent_data" not in st.session_state:
+    st.session_state.agent_data = {}
 if "reasoning" not in st.session_state:
     st.session_state.reasoning = ""
+if "latest_reward" not in st.session_state:
+    st.session_state.latest_reward = 0.0
+if "chat_response" not in st.session_state:
+    st.session_state.chat_response = ""
 
 env = st.session_state.env
 memory = st.session_state.memory
+controller = st.session_state.controller
+llm = get_llm()
 
-# ------------------ AGENTS ------------------
-demand_agent = DemandAgent()
-monitor = MonitoringAgent()
-policy = PolicyAgent()
-bayesian = BayesianAgent()
-reward = RewardAgent()
-
-# ------------------ TOGGLE ------------------
-auto = st.toggle("Autonomous Mode")
-
+st.subheader("Controls")
+auto = st.toggle("Autonomous Mode", value=st.session_state.run)
 st.session_state.run = auto
+speed = st.slider("Simulation Speed (seconds)", 0.2, 3.0, 1.0)
 
-# ------------------ MAIN LOOP ------------------
-if st.session_state.run:
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("Start"):
+        st.session_state.run = True
+with col2:
+    if st.button("Pause"):
+        st.session_state.run = False
+with col3:
+    if st.button("Reset Simulation"):
+        st.session_state.env = ParkingEnvironment()
+        st.session_state.controller = AgentController(environment=st.session_state.env)
+        st.session_state.memory = st.session_state.controller.memory
+        st.session_state.agent_data = {}
+        st.session_state.reasoning = ""
+        st.session_state.latest_reward = 0.0
+        st.session_state.chat_response = ""
+        st.rerun()
 
-    state = env.get_state()
+current_time = time.time()
 
-    monitored = monitor.observe(state)
-    demand = demand_agent.predict()
-    insight = bayesian.infer(monitored)
+if st.session_state.run and (current_time - st.session_state.last_run > speed):
+    st.session_state.last_run = current_time
+    result = controller.step()
+    new_state = result["state"]
 
-    action = policy.decide(monitored, demand, insight)
-
-    if action:
-        env.apply_action(action)
-
-    new_state = env.step()
-
-    reward.evaluate(state, new_state)
-    memory.add(new_state)
-
-    # ✅ GEMINI REASONING
-    prompt = f"""
-    Parking system state:
-    {new_state}
-
-    Tell:
-    - Most crowded area
-    - Best parking area
-    - Short reasoning
-    """
-
-    st.session_state.reasoning = ask_llm(prompt)
-
-    time.sleep(1)
+    st.session_state.latest_reward = result["environment_reward"]
+    st.session_state.agent_data = {
+        "mode": result["mode"],
+        "demand": result["demand"],
+        "monitored": new_state,
+        "insight": result["insight"],
+        "llm_action": result["llm_action"],
+        "final_action": result["action"],
+        "reward_score": result["reward_score"],
+        "summary": result["summary"],
+    }
+    st.session_state.reasoning = result["reasoning"]
+    st.session_state.memory = controller.memory
     st.rerun()
 
-# ------------------ DISPLAY ------------------
+env = st.session_state.controller.environment
+memory = st.session_state.controller.memory
 state = env.get_state()
+state_frame = _format_state_table(state)
+summary = summarize_state(state)
+most_crowded = summary["most_crowded"]
+best_zone = summary["best_zone"]
+total_free = sum(state[zone]["free_slots"] for zone in state)
+total_capacity = sum(state[zone]["total_slots"] for zone in state)
+congestion = 100 - (total_free / total_capacity * 100) if total_capacity else 0
 
-st.subheader("📊 Live Status")
-st.table(state)
+metric1, metric2, metric3 = st.columns(3)
+metric1.metric("Congestion Level (%)", round(congestion, 2))
+metric2.metric("Latest Environment Reward", st.session_state.latest_reward)
+metric3.metric("Best Zone", best_zone)
 
-# ------------------ ALERTS ------------------
-st.subheader("🚨 Alerts")
+st.subheader("Live Status")
+st.dataframe(state_frame, use_container_width=True)
 
-for z in state:
-    if state[z]["free_slots"] <= 5:
-        st.error(f"{z} FULL 🚨")
-    elif state[z]["free_slots"] <= 10:
-        st.warning(f"{z} almost full")
+st.subheader("Quick Insight")
+quick1, quick2 = st.columns(2)
+quick1.error(f"Most Crowded: {most_crowded}")
+quick2.success(f"Best Parking: {best_zone}")
 
-# ------------------ BAR CHART ------------------
-st.subheader("📊 Free Slots")
-st.bar_chart([state[z]["free_slots"] for z in state])
+st.subheader("Zone Status")
+status_cols = st.columns(len(state))
+for index, zone in enumerate(state):
+    free = state[zone]["free_slots"]
+    if free <= 5:
+        status_cols[index].error(f"{zone}\n{free} free")
+    elif free <= 15:
+        status_cols[index].warning(f"{zone}\n{free} free")
+    else:
+        status_cols[index].success(f"{zone}\n{free} free")
 
-# ------------------ TREND ------------------
-st.subheader("📈 Trend")
+st.subheader("Alerts")
+alert_count = 0
+for zone, data in state.items():
+    if data["free_slots"] <= 3:
+        alert_count += 1
+        st.error(f"{zone} is nearly full. Entry: {data['entry']}, Exit: {data['exit']}")
+    elif data["free_slots"] <= 10:
+        alert_count += 1
+        st.warning(f"{zone} is approaching congestion.")
+if alert_count == 0:
+    st.success("No critical congestion alerts right now.")
 
+st.subheader("Free Slots")
+st.bar_chart(state_frame["free_slots"])
+
+st.subheader("Trend")
 trend = env.get_trend()
-
 if trend:
-    for z in trend[0]:
-        st.line_chart([t[z] for t in trend])
+    trend_frame = pd.DataFrame(
+        [{zone: snapshot[zone]["free_slots"] for zone in snapshot} for snapshot in trend]
+    )
+    st.line_chart(trend_frame)
 
-# ------------------ METRICS ------------------
-st.subheader("📉 Performance Metrics")
-st.write(memory.get_metrics())
+st.subheader("Performance Metrics")
+st.json(memory.get_metrics())
 
-# ------------------ AI REASONING ------------------
-st.subheader("🧠 Autonomous AI Thinking")
+st.subheader("Agent Communication")
+agent_data = st.session_state.get("agent_data", {})
+if agent_data:
+    st.write("Mode:", agent_data.get("mode"))
+    st.write("Demand Agent:", {
+        zone: f"{value}/100"
+        for zone, value in agent_data.get("demand", {}).items()
+    })
+    st.write("Monitoring Agent:", agent_data.get("monitored"))
+    st.write("Bayesian Agent:", agent_data.get("insight"))
+    st.write("LLM Decision:", agent_data.get("llm_action"))
+    st.write("Final Action:", agent_data.get("final_action"))
+    st.write("Reward Agent Score:", agent_data.get("reward_score"))
+else:
+    st.info("Start autonomous mode to see agent communication.")
 
-if st.session_state.reasoning:
-    st.info(st.session_state.reasoning)
+st.subheader("Autonomous AI Thinking")
+st.info(st.session_state.reasoning or "Run the simulation to generate reasoning.")
 
-# ------------------ CHAT ------------------
-st.subheader("💬 AI Chat (Gemini)")
+st.subheader("AI Chat")
 
-user_query = st.text_input("Ask anything about parking...")
+with st.form("chat_form", clear_on_submit=False):
+    query = st.text_input("Ask anything about parking...")
+    submitted = st.form_submit_button("Ask")
 
-if user_query:
-    prompt = f"""
-    Parking data:
-    {state}
+if submitted and query.strip():
+    if llm is None:
+        st.session_state.chat_response = get_local_chat_response(state, query.strip())
+    else:
+        try:
+            response = llm.invoke(
+                f"Parking state: {state}\nUser question: {query.strip()}\n"
+                "Answer in 2-3 short sentences and use the state values."
+            ).content
+            st.session_state.chat_response = response
+        except Exception:
+            st.warning("LLM request failed. Falling back to local reasoning.")
+            st.session_state.chat_response = get_local_chat_response(state, query.strip())
 
-    User question: {user_query}
-
-    Answer clearly and intelligently.
-    """
-
-    response = ask_llm(prompt)
-    st.success(response)
-
-# ------------------ DEBUG ------------------
-st.write("DEBUG:", state)
+if st.session_state.chat_response:
+    st.success(st.session_state.chat_response)

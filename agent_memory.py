@@ -5,17 +5,34 @@ class AgentMemory:
 
     def add(self, state):
         self.history.append(state)
-        if len(self.history) > 30:
+
+        if len(self.history) > 20:
             self.history.pop(0)
 
     def get_metrics(self):
-        metrics = []
-        for s in self.history:
-            avg = sum(s[z]["free_slots"] for z in s) / len(s)
-            congestion = sum(1 for z in s if s[z]["free_slots"] <= 10)
 
-            metrics.append({
-                "avg_free_slots": round(avg, 2),
-                "congestion_count": congestion
-            })
-        return metrics
+        if not self.history:
+            return {}
+
+        congestion_count = 0
+        total_free = 0
+        count = 0
+
+        for state in self.history:
+            for zone in state:
+
+                free_slots = state[zone]["free_slots"]
+
+                total_free += free_slots
+                count += 1
+
+                if free_slots < 10:
+                    congestion_count += 1
+
+        avg_free = total_free / count if count else 0
+
+        return {
+            "steps": len(self.history),
+            "avg_free_slots": round(avg_free, 2),
+            "congestion_events": congestion_count
+        }

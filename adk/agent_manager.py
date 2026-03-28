@@ -1,28 +1,18 @@
-from tools import get_tools
+from agent_memory import AgentMemory
+from environment.parking_environment import ParkingEnvironment
 from llm_reasoning import create_llm_agent
+from tools import get_tools
 
 trace_log = []
 
+
 def run_agent(user_input):
-
-    from agents.monitoring_agent import MonitoringAgent
-    from agents.demand_agent import DemandAgent
-    from agents.bayesian_agent import BayesianAgent
-    from environment.parking_environment import ParkingEnvironment
-
     environment = ParkingEnvironment()
-    monitoring_agent = MonitoringAgent()
-    demand_agent = DemandAgent()
-    bayesian_agent = BayesianAgent()
-
-    tools = get_tools(monitoring_agent, demand_agent, bayesian_agent, environment)
-
+    history = AgentMemory()
+    tools = get_tools(environment, history)
     agent = create_llm_agent(tools)
-
     result = agent.run(user_input)
-
-    trace_log.append(result)
-
+    trace_log.append({"input": user_input, "output": result})
     return result
 
 

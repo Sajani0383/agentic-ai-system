@@ -1,76 +1,43 @@
-from agents.monitoring_agent import MonitoringAgent
-from agents.demand_agent import DemandAgent
-from agents.bayesian_agent import BayesianAgent
-from agents.policy_agent import PolicyAgent
-from agents.reward_agent import RewardAgent
-
+from agent_controller import AgentController
 from environment.parking_environment import ParkingEnvironment
-
-from tools import get_tools
 from llm_reasoning import create_llm_agent
+from tools import get_tools
 
 
-def run_simulation():
-
+def run_simulation(steps=10):
     print("SMART PARKING AGENTIC AI SYSTEM")
 
-    zones = ['Mall', 'Hospital', 'Office', 'Residential', 'Commercial']
-    print("Parking Zones:", zones)
+    environment = ParkingEnvironment()
+    controller = AgentController(environment=environment, use_logger=False)
 
-    # Initialize environment
-    environment = ParkingEnvironment(zones)
+    print("Parking Zones:", environment.zones)
 
-    # Initialize agents
-    monitoring_agent = MonitoringAgent()
-    demand_agent = DemandAgent()
-    bayesian_agent = BayesianAgent()
-    policy_agent = PolicyAgent(zones)
-    reward_agent = RewardAgent()
-
-    # ---------------- LLM (RUN ONLY ONCE) ----------------
-    print("\nLLM Strategic Analysis (One-Time)\n")
-
-    tools = get_tools(
-        monitoring_agent,
-        demand_agent,
-        bayesian_agent,
-        environment
-    )
-
+    tools = get_tools(environment, controller.memory)
     llm_agent = create_llm_agent(tools)
+    overview = llm_agent.invoke(
+        "Find the best parking zone based on availability, demand and congestion."
+    )
+    print("\nStrategic Overview")
+    print(overview["output"])
 
-    query = "Find the best parking zone based on availability, demand and congestion"
+    print("\n--- SIMULATION START ---")
 
-    result = llm_agent.invoke(query)
+    controller.reset()
 
-    best_zone = result["output"]
+    for step in range(steps):
+        print(f"\nSTEP: {step + 1}")
 
-    print("LLM Recommendation:", best_zone)
+        result = controller.step()
+        new_state = result["state"]
 
-    # ---------------- SIMULATION (NO LLM HERE) ----------------
-    print("\n--- SIMULATION START ---\n")
-
-    environment.reset()
-
-    for step in range(10):
-
-        print(f"\nSTEP: {step}")
-
-        # Get current state
-        state = monitoring_agent.observe(environment)
-
-        # Get demand
-        demand = demand_agent.predict(state)
-
-        # Choose action (NO LLM)
-        action, mode = policy_agent.choose_zone(demand)
-
-        # Step environment
-        state, reward = environment.step(action)
-
-        print("Chosen Zone:", action)
-        print("Mode:", mode)
-        print("Reward:", reward)
+        print("Chosen Action:", result["action"])
+        print("Mode:", result["mode"])
+        print("Environment Reward:", result["environment_reward"])
+        print("Reward Agent Score:", result["reward_score"])
+        print(
+            "Best Zone:",
+            max(new_state, key=lambda zone: new_state[zone]["free_slots"]),
+        )
 
     print("\n--- SIMULATION END ---")
 

@@ -1,5 +1,5 @@
 class RewardAgent:
     def evaluate(self, old_state, new_state):
-        old_total = sum(old_state[z]["free_slots"] for z in old_state)
-        new_total = sum(new_state[z]["free_slots"] for z in new_state)
-        return new_total - old_total
+        old_pressure = sum(max(0, 10 - old_state[zone]["free_slots"]) for zone in old_state)
+        new_pressure = sum(max(0, 10 - new_state[zone]["free_slots"]) for zone in new_state)
+        return round(old_pressure - new_pressure, 2)
