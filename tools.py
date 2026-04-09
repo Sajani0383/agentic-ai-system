@@ -65,3 +65,71 @@ def get_tools(environment, history=None, *_unused):
         Tool(name="Trend", func=trend, description="Trend analysis"),
         Tool(name="Metrics", func=metrics, description="Performance metrics"),
     ]
+
+
+def build_runtime_tools(environment, memory):
+    def get_state_snapshot():
+        return environment.get_state()
+
+    def get_goal_status():
+        return memory.get_active_goal()
+
+    def get_recent_cycles():
+        return memory.get_recent_cycles(limit=5)
+
+    def get_memory_metrics():
+        return memory.get_metrics()
+
+    def get_learning_profile(scenario_mode=None, from_zone=None, to_zone=None):
+        return memory.get_learning_profile(
+            scenario_mode=scenario_mode,
+            from_zone=from_zone,
+            to_zone=to_zone,
+        )
+
+    def get_event_context():
+        return environment.get_event_context()
+
+    def get_scenario_mode():
+        return environment.get_scenario_mode()
+
+    def estimate_transfer_capacity(from_zone, to_zone, requested):
+        state = environment.get_state()
+        if from_zone not in state or to_zone not in state:
+            return 0
+        available = state[from_zone]["occupied"]
+        free_capacity = state[to_zone]["free_slots"]
+        return max(0, min(requested, available, free_capacity))
+
+    def build_zone_pressure_report(state, demand):
+        return {
+            zone: {
+                "free_slots": state[zone]["free_slots"],
+                "occupied": state[zone]["occupied"],
+                "demand_pressure": demand.get(zone, 0),
+            }
+            for zone in state
+        }
+
+    def suggest_best_zone(state):
+        return max(
+            state,
+            key=lambda zone: (state[zone]["free_slots"], -state[zone]["occupied"]),
+        )
+
+    def get_zone_status(zone_name):
+        return environment.get_state().get(zone_name, {})
+
+    return {
+        "get_state_snapshot": get_state_snapshot,
+        "get_goal_status": get_goal_status,
+        "get_recent_cycles": get_recent_cycles,
+        "get_memory_metrics": get_memory_metrics,
+        "get_learning_profile": get_learning_profile,
+        "get_event_context": get_event_context,
+        "get_scenario_mode": get_scenario_mode,
+        "estimate_transfer_capacity": estimate_transfer_capacity,
+        "build_zone_pressure_report": build_zone_pressure_report,
+        "suggest_best_zone": suggest_best_zone,
+        "get_zone_status": get_zone_status,
+    }

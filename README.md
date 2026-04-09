@@ -1,23 +1,26 @@
 # Smart Parking Agentic AI System
 
-An agentic AI prototype for smart parking management with:
+A simulation-first agentic AI parking project designed for campus use cases, with:
 
-- multi-zone parking simulation
-- autonomous agent controller
+- event-aware campus parking simulation
+- planner / critic / executor agent loop
+- adaptive reward learning plus Q-learning policy updates
 - demand estimation and congestion-aware routing
-- Streamlit dashboard
-- FastAPI service
-- optional Gemini-backed reasoning
+- Streamlit command-center dashboard
+- FastAPI runtime and mock notification API
+- optional Gemini-backed reasoning when API keys are available
 
 ## Project Structure
 
 - `simulation.py`: CLI simulation entry point
 - `agent_controller.py`: main orchestration layer for agents and environment
 - `environment/parking_environment.py`: parking environment and reward logic
-- `agents/`: monitoring, demand, Bayesian, policy, and reward agents
+- `agents/`: monitoring, demand, Bayesian, planner, critic, executor, policy, and reward agents
 - `ui/adk_dashboard.py`: Streamlit dashboard
 - `adk/agent_api.py`: FastAPI app
 - `ml/`: demand prediction model loading and training
+- `services/mock_notification_service.py`: mock delivery feed for app, SMS, and signage outputs
+- `tests/`: simulation validation tests
 - `start_project.ps1`: start API and UI
 - `stop_project.ps1`: stop API and UI
 
@@ -75,20 +78,45 @@ Run the dashboard:
 python -m streamlit run ui/adk_dashboard.py --server.headless true --server.address 127.0.0.1 --server.port 8501
 ```
 
+## Simulation-First Mode
+
+This project is complete as a simulation even without real hardware, live feeds, or external APIs.
+
+- demand prediction falls back safely if the saved model cannot be loaded
+- planner and critic continue through tool-driven local reasoning if no LLM key is available
+- notifications are delivered through a mock API feed so the dashboard still demonstrates proactive action
+
 ## Optional LLM Mode
 
-The project is safe by default in offline mode.
-
-To enable Gemini calls, add this to `.env`:
+If you add a valid Gemini key in `.env`, the planner and critic will prefer live model reasoning:
 
 ```env
 ENABLE_LLM=true
+GOOGLE_API_KEY=your_real_key_here
 ```
 
-If `ENABLE_LLM` is not set, the system uses local fallback reasoning so the app still works reliably.
+Without a valid key, the project still runs as a fully functional simulation.
+
+## Tests
+
+Run the simulation validation tests:
+
+```powershell
+python -m unittest discover -s tests
+```
+
+## Demo Highlights
+
+When you present the project, these are the strongest features to show:
+
+- event-aware campus scenarios such as `Sports Event`, `Exam Rush`, and `Class Changeover`
+- planner / critic / executor decisions in the dashboard agent loop
+- adaptive learning with persisted reward and Q-table updates
+- proactive notifications through the mock delivery feed
+- measurable KPI improvements such as search time, utilisation, and allocation success
 
 ## Security Note
 
 - Never commit your real `.env` file or API keys.
 - Rotate any API key that has already been exposed.
-- Keep `ENABLE_LLM=false` unless you intentionally want live external model calls.
+- Use placeholder keys only in `.env.example`.

@@ -1,0 +1,1273 @@
+{
+  "deliveries": [
+    {
+      "timestamp": "2026-04-08T03:26:07.899357",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899359",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899360",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899360",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Congestion risk at Academic Block",
+      "message": "Recommend sending incoming drivers to Library to protect event access.",
+      "level": "warning",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899361",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Congestion risk at Academic Block",
+      "message": "Recommend sending incoming drivers to Library to protect event access.",
+      "level": "warning",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899362",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Congestion risk at Academic Block",
+      "message": "Recommend sending incoming drivers to Library to protect event access.",
+      "level": "warning",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899362",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "3 vehicles were reallocated from Academic Block to Library.",
+      "level": "success",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899363",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "3 vehicles were reallocated from Academic Block to Library.",
+      "level": "success",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:26:07.899363",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "3 vehicles were reallocated from Academic Block to Library.",
+      "level": "success",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:39.275334",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:39.275339",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:39.275340",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:45.194763",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:45.194768",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:45.194769",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:47.492848",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:47.492851",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:50:47.492853",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:08.265393",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:08.265403",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:08.265404",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:08.636864",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:08.636872",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:08.636874",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:09.936111",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:09.936115",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T03:51:09.936117",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current campus event profile.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:23.981107",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:23.981115",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:23.981117",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:26.080359",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:26.080368",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:26.080370",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:27.294018",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:27.294027",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:27.294029",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:29.776521",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:29.776543",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:29.776549",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:32.181491",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:32.181501",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:21:32.181503",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:28.081343",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:28.081349",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:28.081351",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:29.116067",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:29.116075",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:29.116076",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:30.193302",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:30.193309",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:30.193311",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:31.315521",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:31.315530",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:31.315532",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:32.695368",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:32.695375",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:22:32.695376",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:42:28.338992",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:42:28.338996",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:42:28.338997",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:25.466196",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:25.466205",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:25.466207",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:26.105209",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:26.105216",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:26.105217",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:27.543837",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:27.543844",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T15:50:27.543845",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:01:20.329959",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:01:20.329964",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:01:20.329965",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:02:19.933106",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:02:19.933116",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:02:19.933118",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:23.489055",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:23.489059",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:23.489060",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:26.146897",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:26.146900",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:26.146901",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:26.789201",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:26.789204",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:03:26.789205",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:06:14.078153",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:06:14.078156",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:06:14.078158",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:08:31.529995",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:08:31.530001",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:08:31.530003",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:39.107580",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:39.107592",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:39.107594",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:45.739742",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:45.739748",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:45.739750",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:47.427331",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:47.427339",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:47.427341",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:48.426607",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:48.426616",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:48.426618",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:53.948127",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:53.948136",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:10:53.948138",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:18:28.322300",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:18:28.322303",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:18:28.322305",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:00.243034",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:00.243050",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:00.243059",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:32.193077",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:32.193082",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:32.193084",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:33.314210",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:33.314216",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:33.314218",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:34.678047",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:34.678051",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:34.678053",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:36.036292",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:36.036295",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:36.036297",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:37.256450",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:37.256456",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:37.256458",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:38.535492",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:38.535500",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:38.535501",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:39.631748",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:39.631755",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:39.631756",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:40.865155",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:40.865174",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:40.865177",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:42.112368",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:42.112376",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:42.112378",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:43.381339",
+      "channel": "mobile_app",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:43.381347",
+      "channel": "sms_gateway",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "queued"
+    },
+    {
+      "timestamp": "2026-04-08T16:26:43.381349",
+      "channel": "campus_signage",
+      "event": "Normal Day",
+      "title": "Normal Day active",
+      "message": "Use the nearest academic parking zone. Overflow demand is currently low.",
+      "level": "info",
+      "delivery_status": "sent"
+    }
+  ]
+}

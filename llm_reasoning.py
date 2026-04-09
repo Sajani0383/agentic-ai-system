@@ -1,14 +1,36 @@
 import json
 import os
+import time
+from types import SimpleNamespace
 
 from dotenv import load_dotenv
 
-load_dotenv()
+if os.path.exists(".env"):
+    load_dotenv(dotenv_path=".env", override=True)
+elif os.path.exists(".env.example"):
+    load_dotenv(dotenv_path=".env.example", override=True)
 
-try:
-    from langchain_google_genai import ChatGoogleGenerativeAI
-except Exception:
-    ChatGoogleGenerativeAI = None
+
+DEFAULT_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+LAST_LLM_ERROR = ""
+
+
+def _set_last_llm_error(message):
+    global LAST_LLM_ERROR
+    LAST_LLM_ERROR = message
+
+
+def _get_api_key():
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+    if api_key.strip().lower() in {
+        "your_google_api_key_here",
+        "your_real_key_here",
+        "replace_me",
+    }:
+        return None
+    return api_key
 
 
 def summarize_state(state):
@@ -48,22 +70,107 @@ def _build_fallback_action(state):
     }
 
 
-def get_llm():
-    if os.getenv("ENABLE_LLM", "false").lower() not in {"1", "true", "yes"}:
-        return None
+class GeminiLLMWrapper:
+    def __init__(self, api_key, model):
+        from google import genai
 
-    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-    if not api_key or ChatGoogleGenerativeAI is None:
-        return None
+        self.client = genai.Client(api_key=api_key)
+        self.model = model
+
+    def invoke(self, prompt):
+        last_exc = None
+        for attempt in range(3):
+            try:
+                response = self.client.models.generate_content(model=self.model, contents=prompt)
+                text = getattr(response, "text", None)
+                if not text:
+                    text = ""
+                    for candidate in getattr(response, "candidates", []) or []:
+                        content = getattr(candidate, "content", None)
+                        parts = getattr(content, "parts", []) if content else []
+                        for part in parts:
+                            part_text = getattr(part, "text", "")
+                            if part_text:
+                                text += part_text
+                _set_last_llm_error("")
+                return SimpleNamespace(content=(text or "").strip())
+            except Exception as exc:
+                last_exc = exc
+                message = f"{type(exc).__name__}: {exc}"
+                is_retryable = "503" in message or "UNAVAILABLE" in message.upper()
+                if is_retryable and attempt < 2:
+                    time.sleep(1.2 * (attempt + 1))
+                    continue
+                _set_last_llm_error(message)
+                raise
+        if last_exc:
+            raise last_exc
+
+
+def get_llm_status():
+    enable_llm = os.getenv("ENABLE_LLM", "true").lower() in {"1", "true", "yes"}
+    api_key = _get_api_key()
+    status = {
+        "enabled": enable_llm,
+        "api_key_present": bool(api_key),
+        "env_file_present": os.path.exists(".env"),
+        "model": DEFAULT_GEMINI_MODEL,
+        "provider": "google-genai",
+        "available": False,
+        "message": "",
+        "last_error": LAST_LLM_ERROR,
+    }
+
+    if not enable_llm:
+        status["message"] = "LLM mode is disabled by ENABLE_LLM."
+        return status
+
+    if not api_key:
+        status["message"] = "No valid GOOGLE_API_KEY or GEMINI_API_KEY found in .env or .env.example."
+        return status
 
     try:
-        return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            temperature=0.2,
-            google_api_key=api_key,
-        )
+        from google import genai  # noqa: F401
+    except Exception as exc:
+        status["message"] = f"google-genai import failed: {type(exc).__name__}"
+        return status
+
+    status["available"] = True
+    status["message"] = "Gemini SDK is configured. Live API validation happens on first request."
+    if LAST_LLM_ERROR:
+        if "503" in LAST_LLM_ERROR or "UNAVAILABLE" in LAST_LLM_ERROR.upper():
+            status["message"] = (
+                "Gemini is configured correctly, but the provider is temporarily overloaded. "
+                "The dashboard will retry and use local fallback until Gemini responds again."
+            )
+        else:
+            status["message"] = f"Gemini configured, but last call failed: {LAST_LLM_ERROR}"
+    return status
+
+
+def get_llm():
+    status = get_llm_status()
+    if not status["available"]:
+        return None
+
+    api_key = _get_api_key()
+    try:
+        return GeminiLLMWrapper(api_key=api_key, model=DEFAULT_GEMINI_MODEL)
     except Exception:
         return None
+
+
+def _extract_json_payload(text):
+    cleaned = text.strip()
+    if "```" in cleaned:
+        parts = cleaned.split("```")
+        cleaned = next((part for part in parts if "{" in part and "}" in part), cleaned)
+    cleaned = cleaned.replace("json", "").strip()
+    start = cleaned.find("{")
+    end = cleaned.rfind("}") + 1
+    if start == -1 or end <= 0:
+        raise ValueError("No JSON object found in model output")
+    return json.loads(cleaned[start:end])
 
 
 def get_llm_decision(state):
@@ -120,12 +227,7 @@ Return JSON only in this schema:
 
     try:
         response = llm.invoke(prompt).content.strip()
-        if "```" in response:
-            response = response.split("```")[1]
-        response = response.replace("json", "").strip()
-        start = response.find("{")
-        end = response.rfind("}") + 1
-        decision = json.loads(response[start:end])
+        decision = _extract_json_payload(response)
         if "action" not in decision:
             return fallback
         return decision
@@ -133,9 +235,67 @@ Return JSON only in this schema:
         return fallback
 
 
+def ask_llm_for_structured_json(agent_name, context, schema_text, fallback, system_instruction=None):
+    llm = get_llm()
+    if llm is None:
+        return fallback
+
+    prompt = f"""
+You are the {agent_name} for an autonomous parking orchestration system.
+
+{system_instruction or "Use the provided context carefully and return valid JSON only."}
+
+Context:
+{json.dumps(context, indent=2)}
+
+Return JSON only in this schema:
+{schema_text}
+"""
+
+    try:
+        response = llm.invoke(prompt).content.strip()
+        payload = _extract_json_payload(response)
+        return payload if isinstance(payload, dict) else fallback
+    except Exception:
+        return fallback
+
+
+def _format_zone_table_lines(state, fields):
+    lines = []
+    for zone, data in state.items():
+        values = [f"{field}: {data.get(field, 0)}" for field in fields]
+        lines.append(f"- {zone}: " + ", ".join(values))
+    return "\n".join(lines)
+
+
 def get_local_chat_response(state, query):
     summary = summarize_state(state)
     query_lower = query.lower()
+
+    if (
+        "occupied in each" in query_lower
+        or "occupied slots" in query_lower
+        or "all the slots occupied" in query_lower
+        or "zone by zone" in query_lower
+    ):
+        return "Occupied slots by zone:\n" + _format_zone_table_lines(state, ["occupied", "free_slots", "total_slots"])
+
+    if "free slots in each" in query_lower or "free slots" in query_lower and "each" in query_lower:
+        return "Free slots by zone:\n" + _format_zone_table_lines(state, ["free_slots", "occupied", "total_slots"])
+
+    if "entries and exits" in query_lower or "vehicle movement" in query_lower:
+        return "Current entries and exits by zone:\n" + _format_zone_table_lines(state, ["entry", "exit", "free_slots"])
+
+    if "which zone is full" in query_lower or "fully occupied" in query_lower:
+        fullest = max(state, key=lambda zone: state[zone]["occupied"] / max(1, state[zone]["total_slots"]))
+        fullness = round((state[fullest]["occupied"] / max(1, state[fullest]["total_slots"])) * 100, 1)
+        return (
+            f"{fullest} is the closest to full right now at {fullness}% occupancy, "
+            f"with {state[fullest]['free_slots']} free slots remaining."
+        )
+
+    if "current event" in query_lower or "what event" in query_lower:
+        return "Ask the runtime event context from the dashboard cards or API to see the active campus event and routing strategy."
 
     if "slow" in query_lower or "filling" in query_lower:
         slowest = min(

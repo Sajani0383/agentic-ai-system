@@ -1,20 +1,29 @@
-from agent_memory import AgentMemory
-from environment.parking_environment import ParkingEnvironment
-from llm_reasoning import create_llm_agent
-from tools import get_tools
-
-trace_log = []
+from services.parking_runtime import runtime_service
 
 
 def run_agent(user_input):
-    environment = ParkingEnvironment()
-    history = AgentMemory()
-    tools = get_tools(environment, history)
-    agent = create_llm_agent(tools)
-    result = agent.run(user_input)
-    trace_log.append({"input": user_input, "output": result})
-    return result
+    return runtime_service.run_agent_command(user_input)
 
 
 def get_trace():
-    return trace_log
+    return runtime_service.get_runtime_snapshot()["trace"]
+
+
+def get_runtime_snapshot():
+    return runtime_service.get_runtime_snapshot()
+
+
+def get_notification_feed():
+    return runtime_service.get_notification_feed()
+
+
+def step_runtime():
+    return runtime_service.step()
+
+
+def reset_runtime(clear_memory=False):
+    return runtime_service.reset(clear_memory=clear_memory)
+
+
+def set_runtime_scenario(scenario_mode):
+    return runtime_service.set_scenario_mode(scenario_mode)
