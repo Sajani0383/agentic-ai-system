@@ -328,6 +328,85 @@ class SimulationRuntimeTests(unittest.TestCase):
         self.assertEqual(plan["proposed_action"]["to"], "C")
         self.assertEqual(plan["goal"]["priority_zone"], "B")
 
+    def test_planner_generates_multi_step_alternatives_scoring_and_feedback(self):
+        planner = PlannerAgent()
+        state = {
+            "A": {"total_slots": 100, "occupied": 90, "free_slots": 10, "entry": 7, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 8, "exit": 1},
+            "C": {"total_slots": 100, "occupied": 45, "free_slots": 55, "entry": 2, "exit": 4},
+            "D": {"total_slots": 100, "occupied": 50, "free_slots": 50, "entry": 2, "exit": 2},
+        }
+        demand = {"A": 30, "B": 80, "C": 20, "D": 18}
+        insight = {
+            "confidence": 0.82,
+            "uncertainty": {"entropy": 1.1, "confidence_gap": 0.32},
+        }
+        tools = {
+            "get_goal_status": lambda: {},
+            "build_zone_pressure_report": lambda current_state, current_demand: {
+                zone: {"free_slots": current_state[zone]["free_slots"], "demand_pressure": current_demand.get(zone, 0)}
+                for zone in current_state
+            },
+            "get_recent_cycles": lambda: [
+                {"kpis": {"queue_length": 4}},
+                {"kpis": {"queue_length": 5}},
+            ],
+            "get_event_context": lambda: {
+                "name": "Exam Rush",
+                "severity": "high",
+                "focus_zone": "A",
+                "recommended_zone": "C",
+                "allocation_strategy": "Demand smoothing",
+            },
+            "get_operational_signals": lambda: {"queue_length": 5, "blocked_zone": None},
+            "get_scenario_mode": lambda: "Exam Rush",
+            "suggest_best_zone": lambda current_state: "C",
+            "get_learning_profile": lambda **_kwargs: {
+                "global_transfer_bias": 1.1,
+                "scenario_profile": {"preferred_transfer_bias": 1.15},
+                "route_profile": {"success_bias": 1.05},
+            },
+            "estimate_transfer_capacity": lambda _from, to_zone, requested: min(requested, 10 if to_zone == "C" else 7),
+        }
+
+        with patch(
+            "agents.planner_agent.ask_llm_for_structured_json",
+            side_effect=lambda _agent_name, _context, _schema_text, fallback, system_instruction=None: fallback,
+        ):
+            plan = planner.plan(state, demand, insight, {"steps": 3}, tools)
+
+        self.assertIn("alternative_actions", plan)
+        self.assertGreaterEqual(len(plan["alternative_actions"]), 1)
+        self.assertIn("action_sequence", plan)
+        self.assertEqual(len(plan["action_sequence"]), 3)
+        self.assertIn("scoring", plan)
+        self.assertIn("benefit_score", plan["scoring"])
+        self.assertIn("risk_probability", plan["scoring"])
+        self.assertIn("planner_feedback", plan)
+        self.assertIn("temporal_reasoning", plan)
+        self.assertIn("uncertainty_assessment", plan)
+        self.assertGreaterEqual(plan["goal"]["horizon_steps"], 3)
+
+    def test_planner_handles_missing_tools_without_crashing(self):
+        planner = PlannerAgent()
+        state = {
+            "A": {"total_slots": 100, "occupied": 94, "free_slots": 6, "entry": 7, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 35, "free_slots": 65, "entry": 1, "exit": 3},
+        }
+        demand = {"A": 60, "B": 10}
+        insight = {"confidence": 0.8, "uncertainty": {"entropy": 0.9}}
+
+        with patch(
+            "agents.planner_agent.ask_llm_for_structured_json",
+            side_effect=lambda _agent_name, _context, _schema_text, fallback, system_instruction=None: fallback,
+        ):
+            plan = planner.plan(state, demand, insight, {"steps": 0}, {})
+
+        self.assertIn("proposed_action", plan)
+        self.assertIn("tool_calls", plan)
+        self.assertTrue(all("tool" in call and "used" in call for call in plan["tool_calls"]))
+        self.assertIn(plan["proposed_action"]["action"], {"redirect", "none"})
+
     def test_runtime_answers_zone_by_zone_query(self):
         runtime = ParkingRuntimeService(
             storage_path=self.runtime_path,

@@ -1,6 +1,6 @@
 {
   "max_traces": 500,
-  "saved_at": "2026-04-12T07:09:32.380306",
+  "saved_at": "2026-04-12T07:32:31.678113",
   "traces": [
     {
       "time": "2026-04-11T02:33:44.653403",
@@ -4465,6 +4465,1083 @@
     },
     {
       "time": "2026-04-12T07:09:32.380281",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:28.211052",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Innovation Lab",
+          "total_free_slots": 389
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:28.968221",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:28.972673",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.476112",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Academic Block",
+          "total_free_slots": 409
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.511019",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.515442",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.589843",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Academic Block",
+          "total_free_slots": 380
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.620893",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.628010",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.690383",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 397
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.726552",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.731083",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.792301",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 347
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.830153",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 19.95,
+        "risk_probability": 0.199,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.834770",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 2,
+          "reason": "Balanced utilisation prioritizes relieving Stadium toward Library under projected elevated pressure.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.900979",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 327
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.937873",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.03,
+        "risk_probability": 0.07,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:29.942797",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 1,
+          "reason": "Balanced utilisation prioritizes relieving Stadium toward Library under projected stable pressure.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 1,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 1 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.018473",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 318
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.057278",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 6.61,
+        "risk_probability": 0.066,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.061954",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 2,
+          "reason": "Balanced utilisation prioritizes relieving Stadium toward Library under projected stable pressure.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.154955",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 349
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.191116",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.196113",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.261477",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 305
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.297693",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 68.66,
+        "risk_probability": 0.687,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.302581",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 3,
+          "reason": "Demand smoothing prioritizes relieving Hostel Hub toward Library under projected escalating pressure.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.372353",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 262
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.408808",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.95,
+        "risk_probability": 0.279,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.416292",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 1,
+          "reason": "Demand smoothing prioritizes relieving Hostel Hub toward Library under projected escalating pressure.",
+          "confidence": 0.74,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 1,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 1 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.488121",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 247
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.529069",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 37.36,
+        "risk_probability": 0.374,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.535295",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 2,
+          "reason": "Demand smoothing prioritizes relieving Hostel Hub toward Library under projected escalating pressure.",
+          "confidence": 0.65,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.619882",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 317
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.657740",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.662607",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.725638",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 290
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.762864",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 42.67,
+        "risk_probability": 0.427,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.767873",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 6,
+          "reason": "Event-priority routing prioritizes relieving Hostel Hub toward Innovation Lab under projected escalating pressure.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.836459",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Stadium",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 275
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.872692",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 51.71,
+        "risk_probability": 0.517,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.878311",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Stadium",
+          "vehicles": 5,
+          "reason": "Event-priority routing prioritizes relieving Hostel Hub toward Stadium under projected escalating pressure.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Stadium for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.953051",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 254
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.989731",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.6,
+        "risk_probability": 0.276,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:30.997528",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 3,
+          "reason": "Event-priority routing prioritizes relieving Hostel Hub toward Innovation Lab under projected elevated pressure.",
+          "confidence": 0.77,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.086098",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Stadium",
+          "most_crowded": "Library",
+          "total_free_slots": 340
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.121838",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.126967",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.196185",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Stadium",
+          "most_crowded": "Library",
+          "total_free_slots": 307
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.231558",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 40.08,
+        "risk_probability": 0.401,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.236974",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Stadium",
+          "vehicles": 7,
+          "reason": "Protective rerouting prioritizes relieving Library toward Stadium under projected escalating pressure.",
+          "confidence": 0.65,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Stadium for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.309360",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Library",
+          "total_free_slots": 273
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.345677",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 59.82,
+        "risk_probability": 0.598,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.350986",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 5,
+          "reason": "Protective rerouting prioritizes relieving Library toward Innovation Lab under projected escalating pressure.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.426693",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Library",
+          "total_free_slots": 258
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.472153",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.52,
+        "risk_probability": 0.275,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.477537",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 3,
+          "reason": "Protective rerouting prioritizes relieving Library toward Innovation Lab under projected escalating pressure.",
+          "confidence": 0.76,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.561714",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Stadium",
+          "total_free_slots": 350
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.593474",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.598829",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.639032",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Academic Block",
+          "total_free_slots": 336
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.672822",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:32:31.678081",
       "level": "INFO",
       "step": "-",
       "event": "executor_execution",
