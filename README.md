@@ -32,6 +32,12 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+On macOS/Linux, use `python3`/`pip3` if `python` is not available:
+
+```bash
+pip3 install -r requirements.txt
+```
+
 Create your env file:
 
 ```powershell
@@ -93,9 +99,18 @@ If you add a valid Gemini key in `.env`, the planner and critic will prefer live
 ```env
 ENABLE_LLM=true
 GOOGLE_API_KEY=your_real_key_here
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 Without a valid key, the project still runs as a fully functional simulation.
+
+Check Gemini directly:
+
+```bash
+python3 -c "import llm_reasoning; llm=llm_reasoning.get_llm(); print('llm', bool(llm)); print(llm.invoke('Reply with exactly: ok').content if llm else 'no llm')"
+```
+
+If this prints `ok`, the Gemini key and model are working. If it fails with `nodename nor servname provided`, the code is configured but the current runtime cannot reach the Gemini API because DNS/network access is blocked.
 
 ## Tests
 

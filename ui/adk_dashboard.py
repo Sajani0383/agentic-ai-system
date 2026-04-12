@@ -3,7 +3,6 @@ import time
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-import streamlit.components.v1 as components
 
 from services.parking_runtime import runtime_service
 
@@ -43,17 +42,10 @@ def _ensure_session_state():
 
 
 def _schedule_reload(seconds):
-    milliseconds = max(1200, int(seconds * 1000))
-    components.html(
-        f"""
-        <script>
-        window.setTimeout(function() {{
-            window.parent.location.reload();
-        }}, {milliseconds});
-        </script>
-        """,
-        height=0,
-    )
+    # Keep autonomous mode on the server side so the simulation advances
+    # even when the browser ignores or delays injected JS reloads.
+    time.sleep(max(0.2, seconds))
+    st.rerun()
 
 
 def _inject_styles():
@@ -527,6 +519,51 @@ def _build_kpi_chart(recent_states):
     return fig
 
 
+def _build_benchmark_frame(benchmark):
+    rows = []
+    for item in benchmark.get("scenarios", []):
+        rows.append(
+            {
+                "Scenario": item.get("scenario"),
+                "Agentic Search Time": item.get("agentic", {}).get("avg_search_time_min", 0),
+                "Baseline Search Time": item.get("baseline", {}).get("avg_search_time_min", 0),
+                "Search Time Gain": item.get("delta_search_time", 0),
+                "Agentic Resilience": item.get("agentic", {}).get("avg_resilience_score", 0),
+                "Baseline Resilience": item.get("baseline", {}).get("avg_resilience_score", 0),
+                "Resilience Gain": item.get("delta_resilience", 0),
+                "Hotspot Reduction": item.get("delta_hotspots", 0),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _build_benchmark_chart(frame):
+    if frame.empty:
+        return None
+    melted = frame.melt(
+        id_vars="Scenario",
+        value_vars=["Agentic Search Time", "Baseline Search Time"],
+        var_name="Mode",
+        value_name="Minutes",
+    )
+    fig = px.bar(
+        melted,
+        x="Scenario",
+        y="Minutes",
+        color="Mode",
+        barmode="group",
+        title="Agentic vs Baseline Search Time",
+        color_discrete_sequence=["#4bd38a", "#ff746c"],
+    )
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        legend_title_text="",
+        margin=dict(l=10, r=10, t=50, b=10),
+    )
+    return fig
+
+
 def _render_notifications(notifications):
     if not notifications:
         st.info("No active campus alerts right now.")
@@ -557,6 +594,25 @@ def _render_status_callout(title, body, level="info"):
         st.error(f"**{title}**\n\n{body}")
     else:
         st.info(f"**{title}**\n\n{body}")
+
+
+def _render_assistant_briefing(briefing):
+    if not briefing:
+        return
+    st.markdown("**Live AI Copilot**")
+    st.info(f"**{briefing.get('headline', 'Operations summary')}**\n\n{briefing.get('narrative', '')}")
+    cols = st.columns(2)
+    with cols[0]:
+        st.markdown("**Prediction**")
+        st.write(briefing.get("prediction", "No prediction available yet."))
+    with cols[1]:
+        st.markdown("**Decision Commentary**")
+        st.write(briefing.get("decision_commentary", "No decision commentary available yet."))
+    suggestions = briefing.get("suggestions", [])
+    if suggestions:
+        st.markdown("**Suggested Next Moves**")
+        for suggestion in suggestions:
+            st.markdown(f"- {suggestion}")
 
 
 def _render_story_cards(goal, latest_result, event_context, kpis):
@@ -615,12 +671,12 @@ def _build_llm_summary(llm_status):
         if llm_status.get("last_error"):
             return (
                 "Gemini Configured, Fallback Active",
-                f"Model: {llm_status.get('model', 'gemini')}. {message} The dashboard is using local fallback reasoning until the next Gemini call succeeds.",
+                f"Model: {llm_status.get('model', 'gemini')}. {message} Last error: {llm_status.get('last_error', 'n/a')}. The dashboard is using local fallback reasoning until the next Gemini call succeeds.",
                 "warning",
             )
         return (
             "Gemini Ready",
-            f"Model: {llm_status.get('model', 'gemini')}. Planner, critic, and chat are set to use Gemini first, with local fallback only if the live call fails.",
+            f"Model: {llm_status.get('model', 'gemini')}. Env: {llm_status.get('env_path', '.env')}. Planner, critic, and chat are set to use Gemini first, with local fallback only if the live call fails.",
             "success",
         )
     return (
@@ -775,6 +831,8 @@ def main():
     st.sidebar.caption(
         "Use Run One Step first. Switch scenarios to demonstrate campus events, agent decisions, and KPI changes without real-time data."
     )
+    benchmark_episodes = st.sidebar.slider("Benchmark Episodes", 1, 5, 3)
+    benchmark_steps = st.sidebar.slider("Benchmark Steps", 6, 15, 10)
     controls1, controls2 = st.sidebar.columns(2)
     with controls1:
         if st.button("Run One Step", width="stretch"):
@@ -800,6 +858,13 @@ def main():
         runtime_service.reset(clear_memory=True)
         st.session_state.run = False
         st.rerun()
+    if st.sidebar.button("Run Benchmark", width="stretch"):
+        runtime_service.run_benchmark(
+            episodes=benchmark_episodes,
+            steps_per_episode=benchmark_steps,
+        )
+        st.session_state.run = False
+        st.rerun()
 
     now = time.time()
     if st.session_state.run and now - st.session_state.last_run >= speed:
@@ -820,6 +885,9 @@ def main():
     recent_states = snapshot.get("recent_states", [])
     trace = snapshot.get("trace", [])
     llm_status = snapshot.get("llm_status", {})
+    benchmark = snapshot.get("benchmark", {})
+    operational_signals = latest_result.get("operational_signals", latest_transition.get("dynamic_signals", {}))
+    assistant_briefing = snapshot.get("assistant_briefing", {})
 
     if llm_status.get("available"):
         st.sidebar.success(f"Gemini active: {llm_status.get('model', 'gemini')}")
@@ -870,8 +938,8 @@ def main():
     if st.session_state.run:
         st.info(f"Autonomous mode is active. The simulation refreshes every {speed:.1f} seconds.")
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-        ["Operations", "Events & KPIs", "Agent Loop", "Memory & Goals", "Notifications", "AI Chat"]
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
+        ["Operations", "Events & KPIs", "Benchmark", "Agent Loop", "Memory & Goals", "Notifications", "AI Chat"]
     )
 
     with tab1:
@@ -883,6 +951,7 @@ def main():
         _render_story_cards(goal, latest_result, event_context, kpis)
         llm_title, llm_body, llm_level = _build_llm_summary(llm_status)
         _render_status_callout(llm_title, llm_body, llm_level)
+        _render_assistant_briefing(assistant_briefing)
         _render_zone_cards(state_frame)
 
         left, right = st.columns([1, 1])
@@ -980,6 +1049,29 @@ def main():
         )
 
     with tab3:
+        st.markdown("<div class='section-kicker'>Simulation Proof</div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='section-copy'>This benchmark compares the current agentic runtime against a no-redirect baseline over the same synthetic scenarios and seeds.</div>",
+            unsafe_allow_html=True,
+        )
+        aggregate = benchmark.get("aggregate", {})
+        _render_insight_cards(
+            [
+                {"title": "Search Time Gain", "value_label": "Average", "value": f"{aggregate.get('avg_search_time_gain_min', 0)} min", "note": "Positive means agentic mode reduces average search time."},
+                {"title": "Resilience Gain", "value_label": "Average", "value": aggregate.get("avg_resilience_gain", 0), "note": "Higher is better under synthetic disruptions."},
+                {"title": "Hotspot Reduction", "value_label": "Average", "value": aggregate.get("avg_hotspot_reduction", 0), "note": "Positive means fewer critically congested zones."},
+            ],
+            columns=3,
+        )
+        benchmark_frame = _build_benchmark_frame(benchmark)
+        chart = _build_benchmark_chart(benchmark_frame)
+        if chart is not None:
+            st.plotly_chart(chart, use_container_width=True, config={"displayModeBar": False})
+            st.dataframe(benchmark_frame, width="stretch", hide_index=True)
+        else:
+            st.info("Run the benchmark from the sidebar to generate a baseline comparison.")
+
+    with tab4:
         st.markdown("<div class='section-kicker'>Planner, Critic, Executor</div>", unsafe_allow_html=True)
         _agent_summary_cards(latest_result, goal, event_context)
         left, right = st.columns([1.05, 1])
@@ -1013,6 +1105,8 @@ def main():
                 ]
             )
             st.caption(final_action_text)
+            if latest_result.get("autonomy", {}).get("replan_triggered"):
+                st.warning("Autonomy monitor triggered a replan because current KPI pressure exceeded the goal threshold.")
             with st.expander("Open raw planner / critic / executor payload"):
                 st.json(
                     {
@@ -1020,6 +1114,7 @@ def main():
                         "critic_output": latest_result.get("critic_output", {}),
                         "execution_output": latest_result.get("execution_output", {}),
                         "policy_baseline": latest_result.get("policy_action", {}),
+                        "autonomy": latest_result.get("autonomy", {}),
                     }
                 )
 
@@ -1028,7 +1123,7 @@ def main():
             with st.expander("Open recent agent cycle history", expanded=False):
                 st.dataframe(_styled_cycle_frame(cycle_df.tail(6)), width="stretch", hide_index=True)
 
-    with tab4:
+    with tab5:
         st.markdown("<div class='section-kicker'>Persistent Learning View</div>", unsafe_allow_html=True)
         _memory_summary_cards(metrics)
         _render_key_value_groups(
@@ -1039,6 +1134,7 @@ def main():
                         {"label": "Average free slots", "value": metrics.get("avg_free_slots", 0)},
                         {"label": "Average allocation success", "value": f"{metrics.get('allocation_success_pct', 0)}%"},
                         {"label": "Learning status", "value": "Adaptive reward + Q-learning"},
+                        {"label": "Recent failures tracked", "value": len(metrics.get("learning_profile", {}).get("recent_failures", []))},
                     ],
                 },
                 {
@@ -1053,13 +1149,27 @@ def main():
                 },
             ]
         )
+        if operational_signals:
+            _render_key_value_groups(
+                [
+                    {
+                        "title": "Synthetic Sensor Signals",
+                        "items": [
+                            {"label": "Weather", "value": operational_signals.get("weather", "Clear")},
+                            {"label": "Queue length", "value": operational_signals.get("queue_length", 0)},
+                            {"label": "Blocked zone", "value": operational_signals.get("blocked_zone", "-") or "-"},
+                            {"label": "Patrol mode", "value": operational_signals.get("patrol_mode", "Normal")},
+                        ],
+                    }
+                ]
+            )
 
         trace_frame = _trace_frame(trace)
         if not trace_frame.empty:
             with st.expander("Open memory trace log", expanded=False):
                 st.dataframe(trace_frame.tail(8), width="stretch", hide_index=True)
 
-    with tab5:
+    with tab6:
         st.markdown("<div class='section-kicker'>Proactive User Notifications</div>", unsafe_allow_html=True)
         st.markdown(
             "<div class='section-copy'>This simulates how the platform would notify drivers before congestion becomes severe, even without live campus sensor feeds.</div>",
@@ -1073,8 +1183,9 @@ def main():
             with st.expander("Open delivery audit log", expanded=False):
                 st.dataframe(dispatch_frame, width="stretch", hide_index=True)
 
-    with tab6:
+    with tab7:
         st.markdown("<div class='section-kicker'>Parking Operations Assistant</div>", unsafe_allow_html=True)
+        _render_assistant_briefing(assistant_briefing)
         suggestion_cols = st.columns(4)
         suggestions = [
             "Which zone is best right now?",

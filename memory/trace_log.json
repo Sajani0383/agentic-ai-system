@@ -1,0 +1,4483 @@
+{
+  "max_traces": 500,
+  "saved_at": "2026-04-12T07:09:32.380306",
+  "traces": [
+    {
+      "time": "2026-04-11T02:33:44.653403",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 21.2,
+        "risk_probability": 0.212,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:44.654365",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Stadium",
+          "vehicles": 7,
+          "reason": "To mitigate high demand pressure (100) at Library and utilize ample free slots (55) at Stadium, which is the priority zone, thereby improving overall flow and reducing potential search time. This deviation from the default 'recommended_zone' is justified by the pattern of recent failures during Exam Rush with previous redirect targets, and the direct alignment with the active goal.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Stadium for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:47.949435",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 17.02,
+        "risk_probability": 0.17,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:47.949928",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.92,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:51.115314",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 49.33,
+        "risk_probability": 0.493,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:51.115828",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 2,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.63,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:54.026909",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 32.01,
+        "risk_probability": 0.32,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:54.027727",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.8,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:57.143239",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 55.13,
+        "risk_probability": 0.551,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:33:57.144220",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 1,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.58,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 1,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 1 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:01.437117",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 24.98,
+        "risk_probability": 0.25,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:01.437934",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:05.499336",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 22.6,
+        "risk_probability": 0.226,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:05.500168",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:09.706857",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 32.63,
+        "risk_probability": 0.326,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:09.708049",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.76,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:13.948037",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 17.78,
+        "risk_probability": 0.178,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:13.948963",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.92,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:18.413158",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 25.46,
+        "risk_probability": 0.255,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T02:34:18.414067",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:48:39.565360",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 14.1,
+        "risk_probability": 0.141,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:48:39.567250",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 8,
+          "reason": "Demand smoothing recommends shifting demand from Library, the focus zone during Exam Rush with high demand pressure, to the recommended Hostel Hub to mitigate high incoming pressure and maintain goal targets.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 8,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 8 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:48:42.584308",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 51.74,
+        "risk_probability": 0.517,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:48:42.585625",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 1,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.65,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 1,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 1 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:12.400964",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 26.3,
+        "risk_probability": 0.263,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:12.403192",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:16.406926",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 14.74,
+        "risk_probability": 0.147,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:16.407837",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:20.109959",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 14.01,
+        "risk_probability": 0.14,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:20.111989",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:23.644134",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 32.51,
+        "risk_probability": 0.325,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:23.646508",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.82,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:27.422428",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 28.2,
+        "risk_probability": 0.282,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:27.424342",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.85,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:30.852190",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 22.39,
+        "risk_probability": 0.224,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:30.853367",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.91,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:34.397197",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 23.33,
+        "risk_probability": 0.233,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:34.399037",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.9,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:38.074431",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 18.8,
+        "risk_probability": 0.188,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:38.076894",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.93,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:41.676709",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 17.47,
+        "risk_probability": 0.175,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:41.679109",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:45.258385",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 37.94,
+        "risk_probability": 0.379,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:45.261061",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 2,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.76,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:48.970190",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 10.43,
+        "risk_probability": 0.104,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:48.971486",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:52.414591",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 10.67,
+        "risk_probability": 0.107,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:52.415898",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:56.213711",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 21.21,
+        "risk_probability": 0.212,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:56.215178",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.93,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:59.829262",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 11.46,
+        "risk_probability": 0.115,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:49:59.832071",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:03.458367",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 33.98,
+        "risk_probability": 0.34,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:03.460792",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 2,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.76,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:07.000261",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 17.35,
+        "risk_probability": 0.174,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:07.001782",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.92,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:10.608785",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 24.21,
+        "risk_probability": 0.242,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:10.613008",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.89,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:14.088315",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 23.18,
+        "risk_probability": 0.232,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-11T05:50:14.090759",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.84,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:58.282013",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 11.62,
+        "risk_probability": 0.116,
+        "notes": [
+          "Redirect supports the active Adaptive overflow routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:58.283776",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Adaptive overflow routing recommends shifting demand from Academic Block into Library during Auto Schedule.",
+          "confidence": 0.91,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.815895",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 11.74,
+        "risk_probability": 0.117,
+        "notes": [
+          "Redirect supports the active Adaptive overflow routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.817461",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Adaptive overflow routing recommends shifting demand from Academic Block into Library during Auto Schedule.",
+          "confidence": 0.91,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.886072",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 11.46,
+        "risk_probability": 0.115,
+        "notes": [
+          "Redirect supports the active Adaptive overflow routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.887699",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Adaptive overflow routing recommends shifting demand from Academic Block into Library during Auto Schedule.",
+          "confidence": 0.92,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.967119",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 11.65,
+        "risk_probability": 0.117,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.968550",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Balanced utilisation recommends shifting demand from Academic Block into Library during Normal Day.",
+          "confidence": 0.91,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:46:59.998892",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 20.13,
+        "risk_probability": 0.201,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.000368",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 12,
+          "reason": "Balanced utilisation recommends shifting demand from Academic Block into Library during Normal Day.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 12,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 12 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.037600",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.71,
+        "risk_probability": 0.077,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.039153",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 10,
+          "reason": "Balanced utilisation recommends shifting demand from Academic Block into Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 10,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 10 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.081497",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 8.03,
+        "risk_probability": 0.08,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.083082",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 9,
+          "reason": "Balanced utilisation recommends shifting demand from Academic Block into Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.122811",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 13.17,
+        "risk_probability": 0.132,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.124419",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 14,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.158337",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 53.08,
+        "risk_probability": 0.531,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.160076",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 2,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.194796",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 11.03,
+        "risk_probability": 0.11,
+        "notes": [
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.196620",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 12,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.94,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 12,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 12 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.239644",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 20.64,
+        "risk_probability": 0.206,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.241859",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Hostel Hub",
+          "vehicles": 11,
+          "reason": "Demand smoothing recommends shifting demand from Library into Hostel Hub during Exam Rush.",
+          "confidence": 0.84,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 11,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Hostel Hub for 11 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.283126",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 15.05,
+        "risk_probability": 0.15,
+        "notes": [
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.284901",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Hostel Hub",
+          "vehicles": 14,
+          "reason": "Event-priority routing recommends shifting demand from Stadium into Hostel Hub during Sports Event.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Hostel Hub for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.317742",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 56.17,
+        "risk_probability": 0.562,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.319465",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Hostel Hub",
+          "vehicles": 2,
+          "reason": "Event-priority routing recommends shifting demand from Stadium into Hostel Hub during Sports Event.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Hostel Hub for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.353379",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 38.1,
+        "risk_probability": 0.381,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.355231",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Hostel Hub",
+          "vehicles": 4,
+          "reason": "Event-priority routing recommends shifting demand from Stadium into Hostel Hub during Sports Event.",
+          "confidence": 0.69,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Hostel Hub for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.399948",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 13.8,
+        "risk_probability": 0.138,
+        "notes": [
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.401818",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Hostel Hub",
+          "vehicles": 11,
+          "reason": "Event-priority routing recommends shifting demand from Stadium into Hostel Hub during Sports Event.",
+          "confidence": 0.94,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 11,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Hostel Hub for 11 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.444551",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 13.94,
+        "risk_probability": 0.139,
+        "notes": [
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.446795",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Protective rerouting recommends shifting demand from Academic Block into Library during Emergency Spillover.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.477594",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 52.23,
+        "risk_probability": 0.522,
+        "notes": [
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.482290",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 2,
+          "reason": "Protective rerouting recommends shifting demand from Academic Block into Library during Emergency Spillover.",
+          "confidence": 0.56,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.516276",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 23.29,
+        "risk_probability": 0.233,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.518131",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 12,
+          "reason": "Protective rerouting recommends shifting demand from Academic Block into Library during Emergency Spillover.",
+          "confidence": 0.86,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 12,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 12 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.558345",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 13.16,
+        "risk_probability": 0.132,
+        "notes": [
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.560348",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 9,
+          "reason": "Protective rerouting recommends shifting demand from Academic Block into Library during Emergency Spillover.",
+          "confidence": 0.94,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.601684",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 12.45,
+        "risk_probability": 0.124,
+        "notes": [
+          "Redirect supports the active Adaptive overflow routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.603627",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Adaptive overflow routing recommends shifting demand from Academic Block into Library during Auto Schedule.",
+          "confidence": 0.89,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.670175",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 12.91,
+        "risk_probability": 0.129,
+        "notes": [
+          "Redirect supports the active Adaptive overflow routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:47:00.672191",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Academic Block",
+          "to": "Library",
+          "vehicles": 14,
+          "reason": "Adaptive overflow routing recommends shifting demand from Academic Block into Library during Auto Schedule.",
+          "confidence": 0.88,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 14,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Academic Block to Library for 14 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:03.306225",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:03.308680",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:03.849487",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:03.851827",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:03.929705",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:03.932020",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.018137",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.020254",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.071187",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 19.95,
+        "risk_probability": 0.199,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.073694",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 5,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.130672",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.39,
+        "risk_probability": 0.074,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.133072",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 4,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.192639",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.33,
+        "risk_probability": 0.073,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.194865",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 4,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.255827",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.258236",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.309495",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 68.66,
+        "risk_probability": 0.687,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.311844",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 9,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.365715",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 28.18,
+        "risk_probability": 0.282,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.368075",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 1,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.73,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 1,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 1 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.425650",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 37.62,
+        "risk_probability": 0.376,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.428040",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.491636",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.494031",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.544661",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 42.67,
+        "risk_probability": 0.427,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.547456",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 11,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Innovation Lab during Sports Event.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 11,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 11 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.602219",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 52.05,
+        "risk_probability": 0.52,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.604788",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Stadium",
+          "vehicles": 3,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Stadium during Sports Event.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Stadium for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.662002",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.26,
+        "risk_probability": 0.273,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.664774",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Academic Block",
+          "vehicles": 5,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Academic Block during Sports Event.",
+          "confidence": 0.77,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Academic Block for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.728362",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.731300",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.783117",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 40.08,
+        "risk_probability": 0.401,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.785822",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Stadium",
+          "vehicles": 11,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Stadium during Emergency Spillover.",
+          "confidence": 0.65,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 11,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Stadium for 11 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.837824",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 60.07,
+        "risk_probability": 0.601,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.840743",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 6,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Innovation Lab during Emergency Spillover.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.900478",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.83,
+        "risk_probability": 0.278,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.903207",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 3,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Innovation Lab during Emergency Spillover.",
+          "confidence": 0.75,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.963523",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:04.966301",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:05.031765",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:05.034652",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:22.398528",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:22.401684",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:22.873348",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:22.876176",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:22.950704",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:22.953514",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.043340",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.046103",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.112200",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 19.95,
+        "risk_probability": 0.199,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.115285",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 4,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.182665",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.29,
+        "risk_probability": 0.073,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.185692",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 3,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.258715",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.08,
+        "risk_probability": 0.071,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.261607",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 4,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.337969",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.341261",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.404778",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 68.66,
+        "risk_probability": 0.687,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.408062",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 7,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.476142",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 28.11,
+        "risk_probability": 0.281,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.479099",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 2,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.73,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.557529",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 37.7,
+        "risk_probability": 0.377,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.560603",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 5,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.638663",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.641772",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.705515",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 42.67,
+        "risk_probability": 0.427,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.708840",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 9,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Innovation Lab during Sports Event.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.784101",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 51.96,
+        "risk_probability": 0.52,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.787297",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Stadium",
+          "vehicles": 5,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Stadium during Sports Event.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Stadium for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.859892",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 28.03,
+        "risk_probability": 0.28,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.863014",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 4,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Innovation Lab during Sports Event.",
+          "confidence": 0.76,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.947396",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:23.953481",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.016979",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 40.08,
+        "risk_probability": 0.401,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.020269",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Stadium",
+          "vehicles": 9,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Stadium during Emergency Spillover.",
+          "confidence": 0.65,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Stadium for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.091027",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 59.97,
+        "risk_probability": 0.6,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.094328",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 8,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Innovation Lab during Emergency Spillover.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 8,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 8 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.174253",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.96,
+        "risk_probability": 0.28,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.177492",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 1,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Innovation Lab during Emergency Spillover.",
+          "confidence": 0.74,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 1,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 1 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.250063",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.253410",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.324458",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T06:58:24.327769",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:29.572671",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Stadium",
+          "total_free_slots": 334
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.184215",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.187648",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.631866",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Library",
+          "total_free_slots": 392
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.660113",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.663519",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.708203",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Stadium",
+          "total_free_slots": 336
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.735781",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.739114",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.797896",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 397
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.837936",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.841380",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.887503",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 347
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.920320",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 19.95,
+        "risk_probability": 0.199,
+        "notes": [
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.923900",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 4,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.83,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:30.971626",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 327
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.004297",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.29,
+        "risk_probability": 0.073,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.007849",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 3,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.064278",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Hostel Hub",
+          "most_crowded": "Stadium",
+          "total_free_slots": 317
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.098111",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 7.08,
+        "risk_probability": 0.071,
+        "notes": [
+          "Redirect supports the active Balanced utilisation strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.101717",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Stadium",
+          "to": "Library",
+          "vehicles": 3,
+          "reason": "Balanced utilisation recommends shifting incoming demand away from Stadium toward Library during Normal Day.",
+          "confidence": 0.95,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Stadium to Library for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.158002",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 349
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.189854",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.193389",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.237505",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 305
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.275350",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 68.66,
+        "risk_probability": 0.687,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.279060",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 6,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 6,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 6 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.327455",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 262
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.368599",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 28.08,
+        "risk_probability": 0.281,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.376285",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 3,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.73,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 3,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 3 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.428155",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Library",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 246
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.458980",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 37.76,
+        "risk_probability": 0.378,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Demand smoothing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.462693",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Library",
+          "vehicles": 4,
+          "reason": "Demand smoothing recommends shifting incoming demand away from Hostel Hub toward Library during Exam Rush.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Library for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.522569",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 317
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.554736",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.561376",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.615217",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 290
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.647578",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 42.67,
+        "risk_probability": 0.427,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.651562",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 9,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Innovation Lab during Sports Event.",
+          "confidence": 0.64,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.702324",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Stadium",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 275
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.734389",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 51.96,
+        "risk_probability": 0.52,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.738304",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Stadium",
+          "vehicles": 5,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Stadium during Sports Event.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 5,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Stadium for 5 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.797073",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Hostel Hub",
+          "total_free_slots": 254
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.833671",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 28.03,
+        "risk_probability": 0.28,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Event-priority routing strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.837644",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Hostel Hub",
+          "to": "Innovation Lab",
+          "vehicles": 4,
+          "reason": "Event-priority routing recommends shifting incoming demand away from Hostel Hub toward Innovation Lab during Sports Event.",
+          "confidence": 0.76,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 4,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Hostel Hub to Innovation Lab for 4 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.898247",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Stadium",
+          "most_crowded": "Library",
+          "total_free_slots": 340
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.930396",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.934303",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:31.982101",
+      "level": "INFO",
+      "step": 1,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Stadium",
+          "most_crowded": "Library",
+          "total_free_slots": 307
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.013730",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 40.08,
+        "risk_probability": 0.401,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.026431",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Stadium",
+          "vehicles": 9,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Stadium during Emergency Spillover.",
+          "confidence": 0.65,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 9,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Stadium for 9 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.078499",
+      "level": "INFO",
+      "step": 2,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Library",
+          "total_free_slots": 273
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.110256",
+      "level": "WARNING",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "medium",
+        "risk_score": 59.97,
+        "risk_probability": 0.6,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "A blocked zone affects the proposed route.",
+          "Queue pressure is elevated, so the critic is applying stricter routing checks.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.114297",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 7,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Innovation Lab during Emergency Spillover.",
+          "confidence": 0.55,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 7,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 7 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.168364",
+      "level": "INFO",
+      "step": 3,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Library",
+          "total_free_slots": 258
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.201595",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": true,
+        "risk_level": "low",
+        "risk_score": 27.86,
+        "risk_probability": 0.279,
+        "notes": [
+          "High-severity event flow should prioritize the official focus zone.",
+          "Redirect supports the active Protective rerouting strategy."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.205804",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "redirect",
+          "from": "Library",
+          "to": "Innovation Lab",
+          "vehicles": 2,
+          "reason": "Protective rerouting recommends shifting incoming demand away from Library toward Innovation Lab during Emergency Spillover.",
+          "confidence": 0.74,
+          "execution_adjusted": false
+        },
+        "requested_vehicles": 2,
+        "executed_vehicles": 0,
+        "note": "Executor prepared redirect from Library to Innovation Lab for 2 vehicles."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.277695",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Stadium",
+          "total_free_slots": 397
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.307164",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.311345",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.346474",
+      "level": "INFO",
+      "step": 0,
+      "event": "monitoring_observation",
+      "data": {
+        "status": "ok",
+        "source_type": "ParkingEnvironment",
+        "zones": 5,
+        "summary": {
+          "best_zone": "Innovation Lab",
+          "most_crowded": "Academic Block",
+          "total_free_slots": 412
+        }
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.376255",
+      "level": "INFO",
+      "step": "-",
+      "event": "critic_review",
+      "data": {
+        "approved": false,
+        "risk_level": "low",
+        "risk_score": 12,
+        "risk_probability": 0.12,
+        "notes": [
+          "No redirect required because the planner did not propose a transfer."
+        ]
+      }
+    },
+    {
+      "time": "2026-04-12T07:09:32.380281",
+      "level": "INFO",
+      "step": "-",
+      "event": "executor_execution",
+      "data": {
+        "success": true,
+        "applied": false,
+        "final_action": {
+          "action": "none"
+        },
+        "requested_vehicles": 0,
+        "executed_vehicles": 0,
+        "note": "Critic did not approve execution."
+      }
+    }
+  ]
+}

@@ -18,14 +18,26 @@ foreach ($file in @($apiOut, $apiErr, $uiOut, $uiErr)) {
     }
 }
 
-$api = Start-Process python `
+$pythonCommand = $null
+foreach ($candidate in @("python", "python3", "py")) {
+    if (Get-Command $candidate -ErrorAction SilentlyContinue) {
+        $pythonCommand = $candidate
+        break
+    }
+}
+
+if (-not $pythonCommand) {
+    throw "Python was not found. Install Python 3 or add python/python3 to PATH."
+}
+
+$api = Start-Process $pythonCommand `
     -ArgumentList "-m", "uvicorn", "adk.agent_api:app", "--host", "127.0.0.1", "--port", "8000" `
     -WorkingDirectory $projectRoot `
     -RedirectStandardOutput $apiOut `
     -RedirectStandardError $apiErr `
     -PassThru
 
-$ui = Start-Process python `
+$ui = Start-Process $pythonCommand `
     -ArgumentList "-m", "streamlit", "run", "ui/adk_dashboard.py", "--server.headless", "true", "--server.address", "127.0.0.1", "--server.port", "8501" `
     -WorkingDirectory $projectRoot `
     -RedirectStandardOutput $uiOut `
@@ -67,6 +79,7 @@ if ($apiReady) {
 
 Write-Output "API PID: $($api.Id)"
 Write-Output "UI PID: $($ui.Id)"
+Write-Output "Python command: $pythonCommand"
 Write-Output "API URL: http://127.0.0.1:8000/health"
 Write-Output "UI URL: http://127.0.0.1:8501"
 Write-Output "API Ready: $apiReady"

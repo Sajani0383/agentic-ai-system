@@ -19,6 +19,7 @@ class AgentMemory:
             "scenario_profiles": {},
             "route_profiles": {},
             "recent_rewards": [],
+            "recent_failures": [],
             "q_table": [],
         }
         self._load()
@@ -78,6 +79,23 @@ class AgentMemory:
     def update_learning_signal(self, scenario_mode, action, reward_score, kpis=None):
         self.learning_state.setdefault("recent_rewards", []).append(round(reward_score, 2))
         self.learning_state["recent_rewards"] = self.learning_state["recent_rewards"][-50:]
+        failure_window = self.learning_state.setdefault("recent_failures", [])
+        if kpis:
+            failure_window.append(
+                {
+                    "scenario": scenario_mode,
+                    "search_time": round(kpis.get("estimated_search_time_min", 0.0), 2),
+                    "queue_length": int(kpis.get("queue_length", 0)),
+                    "resilience_score": round(kpis.get("resilience_score", 0.0), 2),
+                    "action": (action or {}).get("action", "none"),
+                    "failed": bool(
+                        reward_score < 0
+                        or kpis.get("estimated_search_time_min", 0.0) > 4.8
+                        or kpis.get("queue_length", 0) >= 4
+                    ),
+                }
+            )
+            self.learning_state["recent_failures"] = failure_window[-30:]
 
         reward_window = self.learning_state["recent_rewards"]
         if reward_window:
@@ -162,6 +180,7 @@ class AgentMemory:
             ),
             "scenario_profile": deepcopy(scenario_profiles.get(scenario_mode, {})) if scenario_mode else {},
             "route_profile": deepcopy(route_profiles.get(route_key, {})) if route_key else {},
+            "recent_failures": deepcopy(self.learning_state.get("recent_failures", [])[-5:]),
         }
 
     def set_q_table(self, q_table):
@@ -254,8 +273,9 @@ class AgentMemory:
             "global_transfer_bias": 1.0,
             "scenario_profiles": {},
             "route_profiles": {},
-                "recent_rewards": [],
-                "q_table": [],
+            "recent_rewards": [],
+            "recent_failures": [],
+            "q_table": [],
         }
         if persist:
             self._save()

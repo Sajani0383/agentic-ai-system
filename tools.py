@@ -90,6 +90,9 @@ def build_runtime_tools(environment, memory):
     def get_event_context():
         return environment.get_event_context()
 
+    def get_operational_signals():
+        return environment.get_operational_signals()
+
     def get_scenario_mode():
         return environment.get_scenario_mode()
 
@@ -97,7 +100,10 @@ def build_runtime_tools(environment, memory):
         state = environment.get_state()
         if from_zone not in state or to_zone not in state:
             return 0
-        available = state[from_zone]["occupied"]
+        available = max(
+            state[from_zone]["entry"],
+            max(0, 12 - state[from_zone]["free_slots"]),
+        )
         free_capacity = state[to_zone]["free_slots"]
         return max(0, min(requested, available, free_capacity))
 
@@ -127,6 +133,7 @@ def build_runtime_tools(environment, memory):
         "get_memory_metrics": get_memory_metrics,
         "get_learning_profile": get_learning_profile,
         "get_event_context": get_event_context,
+        "get_operational_signals": get_operational_signals,
         "get_scenario_mode": get_scenario_mode,
         "estimate_transfer_capacity": estimate_transfer_capacity,
         "build_zone_pressure_report": build_zone_pressure_report,

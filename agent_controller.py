@@ -8,7 +8,7 @@ from agents.planner_agent import PlannerAgent
 from agents.policy_agent import PolicyAgent
 from agents.reward_agent import RewardAgent
 from environment.parking_environment import ParkingEnvironment
-from llm_reasoning import get_llm_decision, summarize_state
+from llm_reasoning import get_operational_reasoning, summarize_state
 from logs.logger import SimulationLogger
 from tools import build_runtime_tools
 
@@ -38,8 +38,17 @@ class AgentController:
 
     def step(self):
         state = self.monitoring_agent.observe(self.environment)
+        monitoring_report = self.monitoring_agent.get_last_observation()
         event_context = self.environment.get_event_context()
-        demand = self.demand_agent.predict(state)
+        operational_signals = self.environment.get_operational_signals()
+        demand = self.demand_agent.predict(
+            state,
+            event_context=event_context,
+            operational_signals=operational_signals,
+            simulated_hour=getattr(self.environment, "simulated_hour", None),
+            historical_states=self.environment.get_trend(),
+        )
+        demand_report = self.demand_agent.get_last_report()
         insight = self.bayesian_agent.infer(state)
         memory_metrics = self.memory.get_metrics()
         tools = build_runtime_tools(self.environment, self.memory)
@@ -74,9 +83,17 @@ class AgentController:
         kpis = transition.get("kpis", {})
         notifications = transition.get("notifications", [])
         reward_score = self.reward_agent.evaluate(state, new_state)
+        self.demand_agent.update_from_feedback(demand, kpis=kpis)
         self.policy_agent.update(state, action, reward_score, new_state)
         self.memory.set_q_table(self.policy_agent.export_q_table())
         summary = summarize_state(new_state)
+        replan_triggered = self._should_replan(kpis, goal=self.memory.get_active_goal())
+        autonomy = self._build_autonomy_status(
+            transition=transition,
+            planner_output=planner_output,
+            critic_output=critic_output,
+            replan_triggered=replan_triggered,
+        )
         self.memory.update_learning_signal(
             self.environment.get_scenario_mode(),
             action,
@@ -101,8 +118,11 @@ class AgentController:
             "execution_output": execution_output,
             "policy_baseline": policy_action,
             "event_context": transition.get("event_context", event_context),
+            "operational_signals": transition.get("dynamic_signals", operational_signals),
             "notifications": notifications,
             "kpis": kpis,
+            "autonomy": autonomy,
+            "demand_report": demand_report,
             "reward": {
                 "environment_reward": environment_reward,
                 "reward_score": reward_score,
@@ -113,13 +133,13 @@ class AgentController:
         agent_interactions = [
             {
                 "agent": "MonitoringAgent",
-                "message": "Observed the live parking state from the environment.",
-                "payload": state,
+                "message": "Observed, validated, and normalized the live parking state from the environment.",
+                "payload": monitoring_report,
             },
             {
                 "agent": "DemandAgent",
-                "message": "Estimated zone demand pressure from occupancy and flow.",
-                "payload": demand,
+                "message": "Forecasted demand using flow, scarcity, trend, time, event context, and uncertainty.",
+                "payload": demand_report,
             },
             {
                 "agent": "EventContext",
@@ -160,9 +180,10 @@ class AgentController:
                 },
             },
         ]
+        reasoning = get_operational_reasoning(new_state)
 
         result = {
-            "mode": mode,
+            "mode": "replan_loop" if replan_triggered else mode,
             "action": action or {"action": "none"},
             "policy_action": policy_action,
             "planner_output": planner_output,
@@ -171,16 +192,21 @@ class AgentController:
             "goal": self.memory.get_active_goal(),
             "strategy": planner_output.get("strategy", "Balanced utilisation"),
             "event_context": transition.get("event_context", event_context),
+            "operational_signals": transition.get("dynamic_signals", operational_signals),
             "notifications": notifications,
             "kpis": kpis,
             "demand": demand,
+            "demand_report": demand_report,
             "insight": insight,
             "environment_reward": environment_reward,
             "reward_score": reward_score,
+            "autonomy": autonomy,
             "state": new_state,
+            "monitoring_report": monitoring_report,
             "metrics": self.memory.get_metrics(),
             "summary": summary,
-            "reasoning": get_llm_decision(new_state),
+            "reasoning": reasoning["text"],
+            "reasoning_source": reasoning["source"],
             "transition": transition,
             "agent_interactions": agent_interactions,
             "step_number": transition.get("step", len(self.memory.history)),
@@ -190,3 +216,23 @@ class AgentController:
             self.logger.log_step(result)
 
         return result
+
+    def _should_replan(self, kpis, goal):
+        target_search_time = goal.get("target_search_time_min", 4.0) if goal else 4.0
+        return bool(
+            kpis.get("estimated_search_time_min", 0) > target_search_time
+            or kpis.get("queue_length", 0) >= 4
+            or kpis.get("resilience_score", 100) < 60
+        )
+
+    def _build_autonomy_status(self, transition, planner_output, critic_output, replan_triggered):
+        kpis = transition.get("kpis", {})
+        signals = transition.get("dynamic_signals", {})
+        return {
+            "replan_triggered": replan_triggered,
+            "projection_horizon_steps": planner_output.get("goal", {}).get("horizon_steps", 0),
+            "blocked_zone": signals.get("blocked_zone"),
+            "queue_length": signals.get("queue_length", 0),
+            "resilience_score": kpis.get("resilience_score", 0),
+            "critic_risk": critic_output.get("risk_level", "low"),
+        }

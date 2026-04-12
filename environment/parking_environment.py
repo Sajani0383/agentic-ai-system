@@ -6,7 +6,7 @@ from ml.predict import predict_demand
 
 
 class ParkingEnvironment:
-    def __init__(self, zones=None):
+    def __init__(self, zones=None, seed=None):
         self.default_zones = [
             "Academic Block",
             "Library",
@@ -14,6 +14,8 @@ class ParkingEnvironment:
             "Hostel Hub",
             "Stadium",
         ]
+        self.seed = seed
+        self.rng = random.Random(seed)
         self.zones = zones or list(self.default_zones)
         self.zone_map = {zone: index for index, zone in enumerate(self.zones)}
         self.history = []
@@ -21,6 +23,7 @@ class ParkingEnvironment:
         self.day_index = 0
         self.simulated_hour = 8
         self.last_transition = {}
+        self.active_dynamic_signals = {}
         self.scenario_mode = "Auto Schedule"
         self.event_catalog = self._build_event_catalog()
         self.reset()
@@ -29,10 +32,11 @@ class ParkingEnvironment:
         self.step_count = 0
         self.day_index = 0
         self.simulated_hour = 8
+        self.active_dynamic_signals = {}
         self.state = {
             zone: {
-                "total_slots": random.randint(90, 140),
-                "occupied": random.randint(25, 55),
+                "total_slots": self.rng.randint(90, 140),
+                "occupied": self.rng.randint(25, 55),
                 "entry": 0,
                 "exit": 0,
             }
@@ -56,41 +60,74 @@ class ParkingEnvironment:
         self.step_count += 1
         self._advance_time()
         event_context = self.get_event_context()
+        dynamic_signals = self._build_dynamic_signals(event_context)
+        self.active_dynamic_signals = dynamic_signals
 
-        transfer_report = {"moved": 0, "from": None, "to": None, "requested": 0}
-        if action:
-            transfer_report = self.apply_action(action)
-
-        total_denied_entries = 0
+        zone_flow_plan = {}
         for zone in self.zones:
             zone_id = self.zone_map[zone]
             base_demand = max(0, predict_demand(self.simulated_hour, self.day_index + 1, zone_id, 0))
             event_multiplier = event_context["zone_multipliers"].get(zone, 1.0)
             time_multiplier = self._time_multiplier(zone)
-            demand = int(base_demand * event_multiplier * time_multiplier)
+            signal_multiplier = self._dynamic_signal_multiplier(zone, dynamic_signals, event_context)
+            demand = int(base_demand * event_multiplier * time_multiplier * signal_multiplier)
 
             total = self.state[zone]["total_slots"]
             occupied = self.state[zone]["occupied"]
             occupancy_ratio = occupied / total if total else 0
-            free_capacity = max(0, total - occupied)
 
             if occupancy_ratio > 0.88:
-                raw_entry = int(demand * random.uniform(0.08, 0.16))
+                raw_entry = int(demand * self.rng.uniform(0.08, 0.16))
             elif occupancy_ratio > 0.72:
-                raw_entry = int(demand * random.uniform(0.14, 0.24))
+                raw_entry = int(demand * self.rng.uniform(0.14, 0.24))
             else:
-                raw_entry = int(demand * random.uniform(0.20, 0.36))
+                raw_entry = int(demand * self.rng.uniform(0.20, 0.36))
 
             event_exit_bias = 0.02 if zone == event_context["focus_zone"] else 0.0
             if occupancy_ratio > 0.78:
-                exit_count = int(occupied * random.uniform(0.18, 0.30 + event_exit_bias))
+                exit_count = int(occupied * self.rng.uniform(0.18, 0.30 + event_exit_bias))
             else:
-                exit_count = int(occupied * random.uniform(0.08, 0.16 + event_exit_bias))
+                exit_count = int(occupied * self.rng.uniform(0.08, 0.16 + event_exit_bias))
 
-            entry = min(max(0, raw_entry), max(0, free_capacity + exit_count))
+            if dynamic_signals.get("blocked_zone") == zone:
+                raw_entry = int(raw_entry * 0.18)
+                exit_count = min(occupied, int(exit_count * 1.25) + 2)
+            if dynamic_signals.get("vip_reserve_zone") == zone:
+                raw_entry = max(0, raw_entry - dynamic_signals.get("vip_reserved_slots", 0))
+            if dynamic_signals.get("weather") == "Rain Surge" and zone in {
+                event_context["focus_zone"],
+                event_context["recommended_zone"],
+            }:
+                raw_entry = int(raw_entry * 1.08)
+
+            zone_flow_plan[zone] = {
+                "raw_entry": max(0, raw_entry),
+                "exit_count": min(max(0, exit_count), occupied),
+                "occupied": occupied,
+                "total_slots": total,
+            }
+
+        transfer_report = self._plan_redirect(action, zone_flow_plan)
+        if transfer_report["moved"] > 0:
+            source_zone = transfer_report["from"]
+            destination_zone = transfer_report["to"]
+            zone_flow_plan[source_zone]["raw_entry"] = max(
+                0,
+                zone_flow_plan[source_zone]["raw_entry"] - transfer_report["moved"],
+            )
+            zone_flow_plan[destination_zone]["raw_entry"] += transfer_report["moved"]
+
+        total_denied_entries = 0
+        for zone in self.zones:
+            zone_plan = zone_flow_plan[zone]
+            total = self.state[zone]["total_slots"]
+            occupied = self.state[zone]["occupied"]
+            free_capacity = max(0, total - occupied)
+            raw_entry = zone_plan["raw_entry"]
+            exit_count = zone_plan["exit_count"]
+            entry = min(raw_entry, max(0, free_capacity + exit_count))
             denied_entries = max(0, raw_entry - entry)
             total_denied_entries += denied_entries
-            exit_count = min(max(0, exit_count), occupied)
 
             self.state[zone]["entry"] = max(0, entry)
             self.state[zone]["exit"] = max(0, exit_count)
@@ -99,8 +136,20 @@ class ParkingEnvironment:
 
         new_state = self.get_state()
         reward = self._calculate_reward(previous_state, new_state, action)
-        notifications = self._build_notifications(new_state, event_context, transfer_report, total_denied_entries)
-        kpis = self._build_kpis(previous_state, new_state, transfer_report, total_denied_entries)
+        notifications = self._build_notifications(
+            new_state,
+            event_context,
+            transfer_report,
+            total_denied_entries,
+            dynamic_signals,
+        )
+        kpis = self._build_kpis(
+            previous_state,
+            new_state,
+            transfer_report,
+            total_denied_entries,
+            dynamic_signals,
+        )
         self.last_transition = self._build_transition_report(
             previous_state,
             new_state,
@@ -111,6 +160,7 @@ class ParkingEnvironment:
             notifications,
             kpis,
             total_denied_entries,
+            dynamic_signals,
         )
 
         self.history.append(new_state)
@@ -154,16 +204,44 @@ class ParkingEnvironment:
         if from_zone not in self.state or to_zone not in self.state or from_zone == to_zone:
             return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles}
 
-        available_to_move = min(vehicles, self.state[from_zone]["occupied"])
+        source_redirect_capacity = max(
+            self.state[from_zone]["entry"],
+            max(0, 12 - self.get_state()[from_zone]["free_slots"]),
+        )
         free_capacity = self.state[to_zone]["total_slots"] - self.state[to_zone]["occupied"]
-        transfer = max(0, min(available_to_move, free_capacity))
+        transfer = max(0, min(vehicles, source_redirect_capacity, free_capacity))
+        return {
+            "moved": transfer,
+            "from": from_zone,
+            "to": to_zone,
+            "requested": vehicles,
+            "mode": "incoming_reroute",
+        }
 
-        if transfer == 0:
-            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles}
+    def _plan_redirect(self, action, zone_flow_plan):
+        if not action or action.get("action") != "redirect":
+            return {"moved": 0, "from": None, "to": None, "requested": 0, "mode": "incoming_reroute"}
 
-        self.state[from_zone]["occupied"] -= transfer
-        self.state[to_zone]["occupied"] += transfer
-        return {"moved": transfer, "from": from_zone, "to": to_zone, "requested": vehicles}
+        from_zone = action.get("from")
+        to_zone = action.get("to")
+        requested = max(0, int(action.get("vehicles", 0) or 0))
+        if from_zone not in zone_flow_plan or to_zone not in zone_flow_plan or from_zone == to_zone:
+            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": requested, "mode": "incoming_reroute"}
+
+        source_plan = zone_flow_plan[from_zone]
+        destination_plan = zone_flow_plan[to_zone]
+        destination_capacity = max(
+            0,
+            (destination_plan["total_slots"] - destination_plan["occupied"]) + destination_plan["exit_count"],
+        )
+        moved = max(0, min(requested, source_plan["raw_entry"], destination_capacity))
+        return {
+            "moved": moved,
+            "from": from_zone,
+            "to": to_zone,
+            "requested": requested,
+            "mode": "incoming_reroute",
+        }
 
     def get_state(self):
         return {
@@ -183,6 +261,9 @@ class ParkingEnvironment:
     def get_last_transition(self):
         return self.last_transition
 
+    def get_operational_signals(self):
+        return deepcopy(self.active_dynamic_signals)
+
     def export_snapshot(self):
         return {
             "zones": deepcopy(self.zones),
@@ -193,6 +274,8 @@ class ParkingEnvironment:
             "day_index": self.day_index,
             "simulated_hour": self.simulated_hour,
             "scenario_mode": self.scenario_mode,
+            "seed": self.seed,
+            "active_dynamic_signals": deepcopy(self.active_dynamic_signals),
         }
 
     def restore_default_layout(self):
@@ -210,6 +293,7 @@ class ParkingEnvironment:
         self.day_index = snapshot.get("day_index", 0)
         self.simulated_hour = snapshot.get("simulated_hour", 8)
         self.scenario_mode = snapshot.get("scenario_mode", "Auto Schedule")
+        self.active_dynamic_signals = deepcopy(snapshot.get("active_dynamic_signals", {}))
         self.last_transition = deepcopy(
             snapshot.get(
                 "last_transition",
@@ -267,7 +351,57 @@ class ParkingEnvironment:
             "Emergency Spillover": {"name": "Emergency Spillover", "severity": "critical", "description": "A sudden closure or blockage forces fast redistribution across the network.", "focus_zone": "Academic Block", "recommended_zone": "Library", "allocation_strategy": "Protective rerouting", "zone_multipliers": {"Academic Block": 1.6, "Library": 1.25, "Innovation Lab": 1.15, "Hostel Hub": 1.0, "Stadium": 0.9}, "user_advisory": "The system should notify drivers immediately and reroute them away from the affected zone."},
         }
 
-    def _build_notifications(self, state, event_context, transfer_report, denied_entries):
+    def _build_dynamic_signals(self, event_context):
+        weather = "Clear"
+        if self.simulated_hour in {8, 9, 17, 18} and self.rng.random() < 0.32:
+            weather = "Rain Surge"
+
+        queue_length = max(
+            0,
+            int(
+                self.rng.randint(0, 3)
+                + (2 if event_context.get("severity") in {"high", "critical"} else 0)
+                + (1 if weather == "Rain Surge" else 0)
+            ),
+        )
+        blocked_zone = None
+        if event_context.get("severity") in {"high", "critical"} and self.rng.random() < 0.22:
+            blocked_zone = event_context.get("focus_zone")
+        elif self.rng.random() < 0.08:
+            blocked_zone = self.zones[self.step_count % len(self.zones)]
+
+        vip_reserve_zone = None
+        vip_reserved_slots = 0
+        if self.rng.random() < 0.18:
+            vip_reserve_zone = event_context.get("recommended_zone")
+            vip_reserved_slots = self.rng.randint(2, 6)
+
+        patrol_mode = "Enhanced" if event_context.get("severity") in {"high", "critical"} else "Normal"
+        if queue_length >= 5:
+            patrol_mode = "Escalated"
+
+        return {
+            "weather": weather,
+            "queue_length": queue_length,
+            "blocked_zone": blocked_zone,
+            "vip_reserve_zone": vip_reserve_zone,
+            "vip_reserved_slots": vip_reserved_slots,
+            "patrol_mode": patrol_mode,
+        }
+
+    def _dynamic_signal_multiplier(self, zone, dynamic_signals, event_context):
+        multiplier = 1.0
+        if dynamic_signals.get("weather") == "Rain Surge":
+            multiplier += 0.12
+        if dynamic_signals.get("queue_length", 0) >= 4 and zone == event_context.get("recommended_zone"):
+            multiplier += 0.18
+        if dynamic_signals.get("blocked_zone") == zone:
+            multiplier *= 0.55
+        if dynamic_signals.get("vip_reserve_zone") == zone:
+            multiplier *= 0.9
+        return max(0.35, multiplier)
+
+    def _build_notifications(self, state, event_context, transfer_report, denied_entries, dynamic_signals):
         notifications = [
             {
                 "level": "info",
@@ -301,13 +435,44 @@ class ParkingEnvironment:
                     "message": f"{transfer_report['moved']} vehicles were reallocated from {transfer_report['from']} to {transfer_report['to']}.",
                 }
             )
+        if dynamic_signals.get("queue_length", 0) >= 4:
+            notifications.append(
+                {
+                    "level": "warning",
+                    "title": "Entry queue building",
+                    "message": f"Simulated gate queue reached {dynamic_signals['queue_length']} vehicles. Pre-arrival guidance should intensify.",
+                }
+            )
+        if dynamic_signals.get("blocked_zone"):
+            notifications.append(
+                {
+                    "level": "error",
+                    "title": f"Temporary disruption at {dynamic_signals['blocked_zone']}",
+                    "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+                }
+            )
+        if dynamic_signals.get("vip_reserved_slots", 0) > 0:
+            notifications.append(
+                {
+                    "level": "info",
+                    "title": "Reserved parking window active",
+                    "message": f"{dynamic_signals['vip_reserved_slots']} slots are being held in {dynamic_signals['vip_reserve_zone']} for a simulated priority cohort.",
+                }
+            )
         return notifications
 
-    def _build_kpis(self, previous_state, new_state, transfer_report, denied_entries):
+    def _build_kpis(self, previous_state, new_state, transfer_report, denied_entries, dynamic_signals):
         total_capacity = sum(zone["total_slots"] for zone in new_state.values())
         total_occupied = sum(zone["occupied"] for zone in new_state.values())
         utilisation = round((total_occupied / total_capacity) * 100, 2) if total_capacity else 0.0
-        search_time = round(1.8 + denied_entries * 0.12 + max(0, utilisation - 72) * 0.08, 2)
+        search_time = round(
+            1.8
+            + denied_entries * 0.12
+            + max(0, utilisation - 72) * 0.08
+            + dynamic_signals.get("queue_length", 0) * 0.3
+            + (0.4 if dynamic_signals.get("blocked_zone") else 0.0),
+            2,
+        )
         requested = transfer_report.get("requested", 0)
         moved = transfer_report.get("moved", 0)
         allocation_success = round((moved / requested) * 100, 2) if requested else 100.0
@@ -319,6 +484,11 @@ class ParkingEnvironment:
             "allocation_success_pct": allocation_success,
             "congestion_hotspots": sum(1 for zone in new_state.values() if zone["free_slots"] < 10),
             "balance_index": balance_index,
+            "queue_length": dynamic_signals.get("queue_length", 0),
+            "resilience_score": round(
+                max(0.0, 100.0 - search_time * 8 - denied_entries * 1.5 - dynamic_signals.get("queue_length", 0) * 4),
+                2,
+            ),
         }
 
     def _calculate_reward(self, previous_state, new_state, action):
@@ -342,6 +512,7 @@ class ParkingEnvironment:
         notifications,
         kpis,
         denied_entries,
+        dynamic_signals,
     ):
         zone_reports = []
         total_entries = 0
@@ -385,6 +556,7 @@ class ParkingEnvironment:
             },
             "zones": zone_reports,
             "event_context": event_context,
+            "dynamic_signals": dynamic_signals,
             "notifications": notifications,
             "kpis": kpis,
         }

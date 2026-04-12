@@ -22,20 +22,24 @@ class PlannerAgent:
         strategy = event_context.get("allocation_strategy", "Balanced utilisation")
         focus_zone = event_context.get("focus_zone", most_crowded)
         recommended_zone = event_context.get("recommended_zone", best_zone)
+        source_zone = most_crowded
+        destination_zone = recommended_zone if recommended_zone != source_zone else best_zone
+        if destination_zone not in state or destination_zone == source_zone:
+            destination_zone = best_zone
         learning_profile = tools["get_learning_profile"](
             scenario_mode=scenario_mode,
-            from_zone=focus_zone,
-            to_zone=recommended_zone,
+            from_zone=source_zone,
+            to_zone=destination_zone,
         )
         tool_calls.append("get_learning_profile")
-        safe_transfer_capacity = tools["estimate_transfer_capacity"](focus_zone, recommended_zone, 14)
+        safe_transfer_capacity = tools["estimate_transfer_capacity"](source_zone, destination_zone, 14)
         tool_calls.append("estimate_transfer_capacity")
 
         fallback_goal = goal_status or {
             "objective": "Reduce parking search time and keep congested zones to one or fewer over the next 5 steps.",
             "target_congested_zones": 1,
             "horizon_steps": 5,
-            "priority_zone": focus_zone,
+            "priority_zone": source_zone,
             "target_search_time_min": 4.0,
         }
 
@@ -45,7 +49,7 @@ class PlannerAgent:
         learned_bias = max(0.5, min(1.5, (scenario_bias + route_bias + global_bias) / 3))
         base_requested = max(
             0,
-            min(14, max(0, 14 - state[focus_zone]["free_slots"]) + int(demand.get(focus_zone, 0) / 7)),
+            min(14, max(0, 14 - state[source_zone]["free_slots"]) + int(demand.get(source_zone, 0) / 7)),
         )
         requested_vehicles = max(0, min(safe_transfer_capacity, int(round(base_requested * learned_bias))))
         fallback_plan = {
@@ -69,18 +73,18 @@ class PlannerAgent:
                 "safe_transfer_capacity": safe_transfer_capacity,
             },
             "proposed_action": {
-                "action": "redirect" if requested_vehicles > 0 and focus_zone != recommended_zone else "none",
-                "from": focus_zone,
-                "to": recommended_zone,
+                "action": "redirect" if requested_vehicles > 0 and source_zone != destination_zone else "none",
+                "from": source_zone,
+                "to": destination_zone,
                 "vehicles": requested_vehicles,
                 "reason": (
-                    f"{strategy} recommends shifting demand from {focus_zone} into {recommended_zone} during {event_context.get('name')}."
+                    f"{strategy} recommends shifting incoming demand away from {source_zone} toward {destination_zone} during {event_context.get('name')}."
                 ),
                 "confidence": round(max(0.65, insight.get("confidence", 0.7)), 2),
             },
             "rationale": (
-                f"Planner sees {len(congested_zones)} congested zones, the active event is "
-                f"{event_context.get('name')}, and the learned transfer bias is {round(learned_bias, 2)}."
+                f"Planner sees {len(congested_zones)} congested zones, the live hotspot is {source_zone}, "
+                f"the event focus is {focus_zone}, and the learned transfer bias is {round(learned_bias, 2)}."
             ),
         }
 
