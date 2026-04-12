@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+import asyncio
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -21,9 +22,15 @@ from agents.demand_agent import DemandAgent
 from agents.executor_agent import ExecutorAgent
 from agents.monitoring_agent import MonitoringAgent
 from agents.planner_agent import PlannerAgent
+from agents.policy_agent import PolicyAgent
+from agents.reward_agent import RewardAgent
 from agent_controller import AgentController
 from agent_memory import AgentMemory
+from communication.message_bus import MessageBus
 from environment.parking_environment import ParkingEnvironment
+from logs.logger import SimulationLogger
+from ml import predict as demand_predictor
+from ml import train_model as train_model_module
 from services.parking_runtime import ParkingRuntimeService
 
 
@@ -285,6 +292,159 @@ class SimulationRuntimeTests(unittest.TestCase):
         self.assertGreaterEqual(after["B"]["occupied"], before["B"]["occupied"])
         self.assertEqual(before["A"]["occupied"], 92)
 
+    def test_environment_exposes_modular_summary_and_config(self):
+        environment = ParkingEnvironment(seed=5, config={"history_limit": 20, "queue_warning_threshold": 3})
+
+        summary = environment.get_environment_summary()
+
+        self.assertEqual(summary["environment_type"], "dynamic event-driven stochastic parking simulation")
+        self.assertEqual(summary["config"]["history_limit"], 20)
+        self.assertEqual(len(summary["step_breakdown"]), 5)
+
+    def test_environment_transition_includes_environment_score_and_breakdown(self):
+        environment = ParkingEnvironment(seed=3)
+
+        _state, environment_score = environment.step({"action": "none"})
+        transition = environment.get_last_transition()
+
+        self.assertEqual(transition["environment_score"], environment_score)
+        self.assertIn("step_breakdown", transition)
+        self.assertEqual(len(transition["step_breakdown"]), 5)
+
+    def test_environment_validates_invalid_redirect_zone(self):
+        environment = ParkingEnvironment(seed=2)
+
+        with self.assertRaises(ValueError):
+            environment.step({"action": "redirect", "from": "Unknown", "to": "Library", "vehicles": 2})
+
+    def test_policy_agent_handles_empty_state_and_logs_noop(self):
+        logger = TraceLogger(
+            max_traces=10,
+            storage_path=os.path.join(self.temp_dir.name, "policy_trace.json"),
+        )
+        agent = PolicyAgent(["A", "B"], logger=logger)
+
+        decision = agent.decide({}, {}, {})
+
+        self.assertEqual(decision["action"], "none")
+        self.assertIn("empty or invalid state", decision["reason"])
+        self.assertEqual(logger.get_by_event("policy_decision")[0]["level"], "INFO")
+
+    def test_policy_agent_builds_rl_informed_decision_with_confidence(self):
+        logger = TraceLogger(
+            max_traces=10,
+            storage_path=os.path.join(self.temp_dir.name, "policy_rl_trace.json"),
+        )
+        agent = PolicyAgent(["A", "B", "C"], logger=logger)
+        state = {
+            "A": {"total_slots": 100, "occupied": 45, "free_slots": 55, "entry": 1, "exit": 3},
+            "B": {"total_slots": 100, "occupied": 95, "free_slots": 5, "entry": 8, "exit": 1},
+            "C": {"total_slots": 100, "occupied": 30, "free_slots": 70, "entry": 1, "exit": 4},
+        }
+        demand = {"A": 12, "B": 80, "C": 10}
+        insight = {"uncertainty": {"entropy": 0.6}}
+        agent.q_agent.epsilon = 0.0
+        state_index = agent.q_agent.get_state(agent._build_observation(state, demand, insight, {"focus_zone": "B"}))
+        agent.q_agent.q_table[state_index][agent.zones.index("C")] = 2.5
+
+        decision = agent.decide(state, demand, insight, event_context={"focus_zone": "B", "recommended_zone": "C"})
+
+        self.assertEqual(decision["action"], "redirect")
+        self.assertEqual(decision["from"], "B")
+        self.assertEqual(decision["to"], "C")
+        self.assertIn("rl_state_index", decision)
+        self.assertIn("exploration_rate", decision)
+        self.assertGreater(decision["confidence"], 0.3)
+
+    def test_policy_agent_updates_q_table_with_failure_penalty(self):
+        logger = TraceLogger(
+            max_traces=10,
+            storage_path=os.path.join(self.temp_dir.name, "policy_learning_trace.json"),
+        )
+        agent = PolicyAgent(["A", "B"], logger=logger)
+        old_state = {
+            "A": {"total_slots": 100, "occupied": 94, "free_slots": 6, "entry": 7, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 25, "free_slots": 75, "entry": 1, "exit": 3},
+        }
+        new_state = {
+            "A": {"total_slots": 100, "occupied": 95, "free_slots": 5, "entry": 8, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 24, "free_slots": 76, "entry": 1, "exit": 4},
+        }
+        action = {"action": "redirect", "from": "A", "to": "B", "vehicles": 4}
+        old_index = agent.q_agent.get_state(agent._build_observation(old_state, {"A": 60, "B": 10}, {"uncertainty": {"entropy": 0.8}}, {}))
+        action_index = agent.zones.index("B")
+        before = agent.q_agent.q_table[old_index][action_index]
+
+        agent.update(
+            old_state,
+            action,
+            reward=1.0,
+            new_state=new_state,
+            demand={"A": 60, "B": 10},
+            insight={"uncertainty": {"entropy": 0.8}},
+            execution_feedback={"success": False, "blocked_action": action},
+        )
+
+        after = agent.q_agent.q_table[old_index][action_index]
+        self.assertNotEqual(before, after)
+        self.assertEqual(logger.get_by_event("policy_learning_update")[0]["level"], "INFO")
+
+    def test_policy_agent_tolerates_zone_mismatch(self):
+        agent = PolicyAgent(["A", "B", "C"])
+        state = {
+            "A": {"total_slots": 100, "occupied": 92, "free_slots": 8, "entry": 6, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 35, "free_slots": 65, "entry": 2, "exit": 3},
+        }
+        demand = {"A": 50, "B": 10}
+
+        decision = agent.decide(state, demand, {"uncertainty": {"entropy": 0.4}})
+
+        self.assertIn(decision["action"], {"redirect", "none"})
+        if decision["action"] == "redirect":
+            self.assertIn(decision["to"], state)
+
+    def test_reward_agent_rewards_demand_aware_improvement(self):
+        agent = RewardAgent()
+        old_state = {
+            "A": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 8, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 45, "free_slots": 55, "entry": 2, "exit": 3},
+        }
+        new_state = {
+            "A": {"total_slots": 100, "occupied": 88, "free_slots": 12, "entry": 4, "exit": 6},
+            "B": {"total_slots": 100, "occupied": 48, "free_slots": 52, "entry": 3, "exit": 2},
+        }
+
+        reward = agent.evaluate(
+            old_state,
+            new_state,
+            action={"action": "redirect", "from": "A", "to": "B", "vehicles": 4},
+            demand={"A": 80, "B": 15},
+            event_context={"focus_zone": "A", "recommended_zone": "B"},
+            kpis={"queue_length": 2, "estimated_search_time_min": 3.0, "allocation_success_pct": 100.0, "congestion_hotspots": 0},
+            transition={"transfer_detail": {"moved": 4, "requested": 4}},
+        )
+
+        self.assertGreater(reward, 0)
+
+    def test_reward_agent_penalizes_unnecessary_failed_redirect(self):
+        agent = RewardAgent()
+        state = {
+            "A": {"total_slots": 100, "occupied": 60, "free_slots": 40, "entry": 1, "exit": 2},
+            "B": {"total_slots": 100, "occupied": 58, "free_slots": 42, "entry": 1, "exit": 1},
+        }
+
+        reward = agent.evaluate(
+            state,
+            state,
+            action={"action": "redirect", "from": "A", "to": "B", "vehicles": 3},
+            demand={"A": 8, "B": 7},
+            event_context={},
+            kpis={"queue_length": 0, "estimated_search_time_min": 2.1, "allocation_success_pct": 0.0, "congestion_hotspots": 0},
+            transition={"transfer_detail": {"moved": 0, "requested": 3}},
+        )
+
+        self.assertLess(reward, 0)
+
     def test_planner_prefers_live_hotspot_over_event_focus_for_redirect_source(self):
         planner = PlannerAgent()
         state = {
@@ -533,6 +693,182 @@ class SimulationRuntimeTests(unittest.TestCase):
         self.assertIn("agentic", first)
         self.assertIn("baseline", first)
         self.assertIn("delta_search_time", first)
+
+    def test_message_bus_structures_messages_and_supports_unsubscribe(self):
+        bus = MessageBus(max_messages=3)
+
+        class Receiver:
+            def __init__(self):
+                self.received = []
+
+            def receive(self, topic, message):
+                self.received.append((topic, message))
+
+        receiver = Receiver()
+        bus.subscribe("planning", receiver)
+        result = bus.publish("planning", {"goal": "rebalance"}, sender="PlannerAgent", message_type="plan", priority="high")
+
+        self.assertTrue(result["published"])
+        self.assertEqual(len(receiver.received), 1)
+        delivered = receiver.received[0][1]
+        self.assertEqual(delivered["sender"], "PlannerAgent")
+        self.assertEqual(delivered["type"], "plan")
+        self.assertEqual(delivered["priority"], "high")
+        self.assertIn("timestamp", delivered)
+        self.assertTrue(bus.unsubscribe("planning", receiver))
+
+    def test_message_bus_isolates_delivery_errors_and_bounds_history(self):
+        bus = MessageBus(max_messages=2)
+
+        class GoodReceiver:
+            def __init__(self):
+                self.count = 0
+
+            def receive(self, topic, message):
+                self.count += 1
+
+        class BadReceiver:
+            def receive(self, topic, message):
+                raise RuntimeError("boom")
+
+        good = GoodReceiver()
+        bad = BadReceiver()
+        bus.subscribe("system", good)
+        bus.subscribe("system", bad)
+        bus.publish("system", "one")
+        bus.publish("system", "two")
+        bus.publish("system", "three")
+
+        self.assertEqual(good.count, 3)
+        self.assertEqual(len(bus.get_messages()), 2)
+        self.assertEqual(bus.get_delivery_errors(limit=1)[0]["error"], "boom")
+
+    def test_message_bus_validates_agents_and_supports_selective_delivery(self):
+        bus = MessageBus()
+
+        class Receiver:
+            def __init__(self, name):
+                self.name = name
+                self.received = []
+
+            def receive(self, topic, message):
+                self.received.append(message)
+
+        alpha = Receiver("alpha")
+        beta = Receiver("beta")
+        bus.subscribe("reward", alpha)
+        bus.subscribe("reward", beta)
+
+        with self.assertRaises(TypeError):
+            bus.subscribe("reward", object())
+
+        bus.publish("reward", {"score": 1.2}, target_agents=["beta"])
+        self.assertEqual(len(alpha.received), 0)
+        self.assertEqual(len(beta.received), 1)
+
+    def test_message_bus_publish_async_supports_async_receivers(self):
+        bus = MessageBus()
+
+        class AsyncReceiver:
+            def __init__(self):
+                self.received = []
+
+            async def receive(self, topic, message):
+                self.received.append((topic, message["sender"]))
+
+        receiver = AsyncReceiver()
+        bus.subscribe("policy", receiver)
+
+        result = asyncio.run(bus.publish_async("policy", {"action": "hold"}, sender="PolicyAgent"))
+
+        self.assertTrue(result["published"])
+        self.assertEqual(receiver.received[0], ("policy", "PolicyAgent"))
+
+    def test_simulation_logger_batches_rows_and_writes_structured_csv(self):
+        log_dir = os.path.join(self.temp_dir.name, "simulation_logs")
+        logger = SimulationLogger(log_dir=log_dir, batch_size=2, max_in_memory=10, max_file_rows=20)
+
+        first = logger.log_step({"step_number": 1, "mode": "agentic_loop", "action": {"action": "none"}})
+        self.assertIn("timestamp", first)
+        self.assertFalse(os.path.exists(logger.log_file))
+
+        logger.log_step({"step_number": 2, "mode": "goal_hold", "action": {"action": "redirect", "to": "B"}})
+        self.assertTrue(os.path.exists(logger.log_file))
+
+        with open(logger.log_file, "r", encoding="utf-8") as file:
+            contents = file.read()
+        self.assertIn("timestamp", contents)
+        self.assertIn("log_type", contents)
+        self.assertIn("goal_hold", contents)
+
+    def test_simulation_logger_flush_status_and_row_limit(self):
+        log_dir = os.path.join(self.temp_dir.name, "simulation_logs_limited")
+        logger = SimulationLogger(log_dir=log_dir, batch_size=10, max_in_memory=5, max_file_rows=3)
+
+        for step in range(5):
+            logger.log_event({"step_number": step + 1, "status": "ok", "error": ""}, log_type="event")
+
+        self.assertEqual(logger.get_status()["buffered_records"], 5)
+        self.assertTrue(logger.flush())
+
+        with open(logger.log_file, "r", encoding="utf-8") as file:
+            rows = file.readlines()
+        self.assertEqual(len(rows), 4)
+        self.assertLessEqual(len(logger.get_logs()), 5)
+
+    def test_predict_demand_details_validates_inputs(self):
+        with self.assertRaises(ValueError):
+            demand_predictor.predict_demand_details(25, 2, 0, 0)
+        with self.assertRaises(ValueError):
+            demand_predictor.predict_demand_details(10, 9, 0, 0)
+
+    def test_predict_demand_details_reports_fallback_metadata(self):
+        with patch("ml.predict._load_model", return_value=None):
+            details = demand_predictor.predict_demand_details(9, 2, 1, 0)
+
+        self.assertIn("prediction", details)
+        self.assertIn("confidence", details)
+        self.assertTrue(details["fallback_used"])
+        self.assertEqual(details["mode"], "fallback")
+
+    def test_predict_demand_batch_supports_multiple_records(self):
+        with patch("ml.predict._load_model", return_value=None):
+            results = demand_predictor.predict_demand_batch(
+                [
+                    {"hour": 8, "day": 1, "zone_id": 0, "vehicle_type": 0},
+                    {"hour": 18, "day": 6, "zone_id": 2, "vehicle_type": 1},
+                ]
+            )
+
+        self.assertEqual(len(results), 2)
+        self.assertTrue(all("prediction" in item and "mode" in item for item in results))
+
+    def test_train_model_loader_creates_day_of_week_features(self):
+        df = train_model_module._load_dataset()
+
+        self.assertIn("day_of_week", df.columns)
+        self.assertIn("is_weekend", df.columns)
+        self.assertIn("net_flow", df.columns)
+        self.assertIn("occupancy_ratio", df.columns)
+
+    def test_train_model_returns_metrics_and_versioned_outputs(self):
+        model_dir = os.path.join(self.temp_dir.name, "models")
+        model_path = os.path.join(model_dir, "demand_model.pkl")
+        metrics_path = os.path.join(model_dir, "demand_model_metrics.json")
+        versioned_model_path = os.path.join(model_dir, "versioned.pkl")
+
+        with patch.object(train_model_module, "model_dir", model_dir), \
+            patch.object(train_model_module, "model_path", model_path), \
+            patch.object(train_model_module, "metrics_path", metrics_path), \
+            patch.object(train_model_module, "versioned_model_path", versioned_model_path):
+            metadata = train_model_module.train_model()
+
+        self.assertIn("metrics", metadata)
+        self.assertIn("mae", metadata["metrics"])
+        self.assertIn("rmse", metadata["metrics"])
+        self.assertIn("r2", metadata["metrics"])
+        self.assertTrue(os.path.exists(model_path))
+        self.assertTrue(os.path.exists(metrics_path))
 
 
 if __name__ == "__main__":

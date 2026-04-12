@@ -73,7 +73,12 @@ class AgentController:
             tools,
         )
         execution_output = self.executor_agent.execute(critic_output, self.environment)
-        policy_action = self.policy_agent.decide(state, demand, insight) or {"action": "none"}
+        policy_action = self.policy_agent.decide(
+            state,
+            demand,
+            insight,
+            event_context=event_context,
+        ) or {"action": "none"}
 
         action = execution_output.get("final_action", {"action": "none"})
         mode = "agentic_loop" if action.get("action") == "redirect" else "goal_hold"
@@ -82,9 +87,25 @@ class AgentController:
         transition = self.environment.get_last_transition()
         kpis = transition.get("kpis", {})
         notifications = transition.get("notifications", [])
-        reward_score = self.reward_agent.evaluate(state, new_state)
+        reward_score = self.reward_agent.evaluate(
+            state,
+            new_state,
+            action=action,
+            demand=demand,
+            event_context=transition.get("event_context", event_context),
+            kpis=kpis,
+            transition=transition,
+        )
         self.demand_agent.update_from_feedback(demand, kpis=kpis)
-        self.policy_agent.update(state, action, reward_score, new_state)
+        self.policy_agent.update(
+            state,
+            action,
+            reward_score,
+            new_state,
+            demand=demand,
+            insight=insight,
+            execution_feedback=execution_output,
+        )
         self.memory.set_q_table(self.policy_agent.export_q_table())
         summary = summarize_state(new_state)
         replan_triggered = self._should_replan(kpis, goal=self.memory.get_active_goal())

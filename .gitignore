@@ -3,3 +3,5 @@ __pycache__/
 .env
 parking_env/
 logs/*.log
+.DS_Store
+simulation_logs.csv

@@ -92,6 +92,18 @@ This project is complete as a simulation even without real hardware, live feeds,
 - planner and critic continue through tool-driven local reasoning if no LLM key is available
 - notifications are delivered through a mock API feed so the dashboard still demonstrates proactive action
 
+## Environment Model
+
+The parking environment is intentionally simulation-first. For viva or presentation, you can explain each step in five phases:
+
+1. advance simulated time and load the current event profile
+2. build operational signals such as weather, queues, reserved slots, and temporary disruptions
+3. estimate zone-level entry and exit flow from demand, time, and event pressure
+4. reroute incoming arrivals when the agents issue a redirect action
+5. update occupancy, KPIs, notifications, and the transition report
+
+The environment is now configurable through an internal config map, validates redirect actions and zone state, and exposes a simple environment summary for explanation-friendly walkthroughs.
+
 ## Optional LLM Mode
 
 If you add a valid Gemini key in `.env`, the planner and critic will prefer live model reasoning:
