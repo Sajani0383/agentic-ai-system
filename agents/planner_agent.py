@@ -7,12 +7,12 @@ class PlannerAgent:
     DEFAULTS = {
         "base_horizon_steps": 3,
         "max_horizon_steps": 5,
-        "base_congestion_threshold": 10,
-        "base_transfer_cap": 14,
+        "base_congestion_threshold": 12,
+        "base_transfer_cap": 18,
         "target_search_time_min": 4.0,
     }
 
-    def plan(self, state, demand, insight, memory_metrics, tools):
+    def plan(self, state, demand, insight, memory_metrics, tools, reasoning_budget=None):
         tool_calls = []
         tool_observations = {}
 
@@ -42,23 +42,65 @@ class PlannerAgent:
         )
         tool_observations["pressure_report"] = pressure_report
 
-        analysis = self._build_analysis(state, demand, insight, event_context, operational_signals, recent_cycles, best_zone)
-        source_zone = analysis["most_crowded"]
-        destination_zone = analysis["recommended_destination"]
-
+        # 1. Fetch Learning Profile EARLY (includes blocked_routes)
         learning_profile = self._call_tool(
             tools,
             "get_learning_profile",
             default={},
             keyword_args={
                 "scenario_mode": scenario_mode,
-                "from_zone": source_zone,
-                "to_zone": destination_zone,
             },
             tool_calls=tool_calls,
         )
         tool_observations["learning_profile"] = learning_profile
+        blocked_routes = learning_profile.get("blocked_routes", [])
+        consolidated_insights = learning_profile.get("consolidated_insights", [])
 
+        # 2. Pass learning_profile to analysis for hard filtering
+        analysis_pre = self._build_analysis(state, demand, insight, event_context, operational_signals, recent_cycles, best_zone, learning_profile)
+        source_zone = analysis_pre["most_crowded"]
+        destination_zone = analysis_pre["recommended_destination"]
+
+        # Add recently failed zones to avoidance pool
+        recently_failed_zones = []
+        for f in learning_profile.get("recent_failures", []):
+            if f.get("failed") and f.get("to"):
+                recently_failed_zones.append(f["to"])
+        recently_failed_zones = list(set(recently_failed_zones))
+
+        # 3. Decision Filtering: If the primary route is blocked OR the destination is recently failed
+        route_key = f"{source_zone}->{destination_zone}"
+        learning_override = False
+        if route_key in blocked_routes or destination_zone in recently_failed_zones:
+            other_zones = [z for z in state if z != source_zone and z != destination_zone and z not in recently_failed_zones]
+            if not other_zones:
+                # If everything failed, at least avoid officially blocked ones
+                other_zones = [z for z in state if z != source_zone and z != destination_zone and f"{source_zone}->{z}" not in blocked_routes]
+            
+            if other_zones:
+                alt_destination = max(other_zones, key=lambda z: state[z]["free_slots"])
+                if f"{source_zone}->{alt_destination}" not in blocked_routes:
+                    destination_zone = alt_destination
+                    analysis_pre["recommended_destination"] = destination_zone
+                    analysis_pre["memory_avoidance_triggered"] = True
+                    analysis_pre["avoided_route"] = route_key
+                    learning_override = True
+
+        # 4. Pattern-Based VETO: Check consolidated insights for explicit destination warnings
+        for insight_text in consolidated_insights:
+            if f"to {destination_zone}" in insight_text or destination_zone in insight_text:
+                other_zones = [z for z in state if z != source_zone and z != destination_zone and z not in recently_failed_zones]
+                if other_zones:
+                    alt = max(other_zones, key=lambda z: state[z]["free_slots"])
+                    destination_zone = alt
+                    analysis_pre["recommended_destination"] = destination_zone
+                    analysis_pre["memory_pattern_veto"] = True
+                    analysis_pre["veto_reason"] = insight_text
+                    learning_override = True
+                    break
+
+        analysis = analysis_pre
+        analysis["learning_override_active"] = learning_override
         adaptive_limits = self._build_adaptive_limits(state, demand, event_context, operational_signals, insight, learning_profile)
         safe_transfer_capacity = self._call_tool(
             tools,
@@ -68,7 +110,7 @@ class PlannerAgent:
             adaptive_limits["max_transfer"],
             default=min(
                 adaptive_limits["max_transfer"],
-                state.get(source_zone, {}).get("entry", 0),
+                max(1, int(demand.get(source_zone, 30) / 5)),
                 state.get(destination_zone, {}).get("free_slots", 0),
             ) if source_zone in state and destination_zone in state else 0,
             tool_calls=tool_calls,
@@ -108,15 +150,22 @@ class PlannerAgent:
             tools,
             adaptive_limits,
             tool_calls,
+            learning_profile,
         )
-        scoring = self._score_plan(primary_action, analysis, temporal_reasoning, insight, safe_transfer_capacity, adaptive_limits)
+        scoring = self._score_plan(primary_action, analysis, temporal_reasoning, insight, safe_transfer_capacity, adaptive_limits, learning_profile)
         action_sequence = self._build_action_sequence(primary_action, alternative_actions, goal, temporal_reasoning)
         planner_feedback = self._build_learning_feedback(primary_action, scoring, temporal_reasoning, learning_profile)
+
+        dynamic_strategy = event_context.get("allocation_strategy", "Balanced utilisation")
+        if learning_profile.get("recent_reward_avg", 0.0) < -0.3:
+            dynamic_strategy = "Emergency Capacity Recovery"
+        elif learning_profile.get("last_reward", 0.0) < -0.1:
+            dynamic_strategy = "Corrective Risk Mitigation"
 
         fallback_plan = {
             "goal": goal,
             "analysis": analysis,
-            "strategy": event_context.get("allocation_strategy", "Balanced utilisation"),
+            "strategy": dynamic_strategy,
             "tool_calls": tool_calls,
             "tool_observations": tool_observations,
             "adaptive_limits": adaptive_limits,
@@ -134,8 +183,10 @@ class PlannerAgent:
             "planner_feedback": planner_feedback,
             "llm_advisory_used": False,
             "rationale": (
-                f"Planner selected {source_zone} as the live hotspot, targeted {destination_zone} as the safest relief zone, "
-                f"and projected pressure trend '{temporal_reasoning['pressure_trend']}' over {goal['horizon_steps']} steps."
+                f"I have identified {source_zone} as the primary network pressure point during the current {event_context.get('name', 'simulation')} window. "
+                f"To prevent queue escalation, I am proactively routing incoming vehicles to {destination_zone}, which offers the highest safety buffer. "
+                f"My projections suggest pressure will remain '{temporal_reasoning['pressure_trend']}' over the next {goal['horizon_steps']} steps, "
+                f"making this redirect essential for maintaining campus mobility."
             ),
         }
 
@@ -181,17 +232,31 @@ class PlannerAgent:
   "rationale": "string"
 }
 """
-        llm_advisory = ask_llm_for_structured_json(
-            "PlannerAgent",
-            context,
-            schema_text,
-            fallback_plan,
-            system_instruction=(
-                "You are an advisory planner. Use the deterministic analysis as the primary anchor. "
-                "You may refine wording, propose a safer smaller redirect, or suggest better alternatives, "
-                "but do not exceed safe_transfer_capacity or change the source/destination away from observed conditions without a strong reason."
-            ),
-        )
+        llm_advisory = fallback_plan
+        llm_gate = reasoning_budget or {}
+        llm_strategy = llm_gate.get("planner_llm_strategy", "deterministic")
+        llm_requested = bool(llm_gate.get("allow_planner_llm") and llm_strategy == "gemini")
+        if llm_strategy == "gemini" and llm_requested:
+            llm_advisory = ask_llm_for_structured_json(
+                "PlannerAgent",
+                context,
+                schema_text,
+                fallback_plan,
+                system_instruction=(
+                    "You are an advisory planner. Analyze the deterministic analysis. "
+                    "If the current performance is suboptimal or risk is acceptable, you MUST OVERRIDE the deterministic planner "
+                    "by proposing a completely different 'from', 'to', or 'vehicles' parameters to change the plan. "
+                    "Do not exceed safe_transfer_capacity."
+                ),
+                force=llm_gate.get("force_llm", False),
+            )
+        elif llm_strategy == "cached":
+            llm_advisory = llm_gate.get("cached_planner_advisory", fallback_plan)
+        elif llm_strategy == "local_simulated":
+            llm_advisory = llm_gate.get("local_simulated_advisory", fallback_plan)
+        elif llm_strategy == "demo_simulated":
+            llm_advisory = llm_gate.get("local_simulated_advisory", fallback_plan)
+
         final_plan = self._merge_llm_advisory(fallback_plan, llm_advisory, safe_transfer_capacity)
         final_plan.setdefault("tool_calls", tool_calls)
         final_plan.setdefault("tool_observations", tool_observations)
@@ -201,19 +266,55 @@ class PlannerAgent:
         final_plan.setdefault("scoring", scoring)
         final_plan.setdefault("temporal_reasoning", temporal_reasoning)
         final_plan.setdefault("planner_feedback", planner_feedback)
+        final_plan["llm_requested"] = llm_requested
+        final_plan["forced_live_attempt"] = bool(llm_gate.get("force_llm", False) and llm_strategy == "gemini")
+        if llm_strategy == "cached":
+            final_plan["decision_mode"] = "cached_llm_advisory"
+            final_plan["llm_source"] = "cached"
+            final_plan["llm_advisory_used"] = True
+        elif llm_strategy == "local_simulated":
+            final_plan["decision_mode"] = "autonomous_edge_optimization"
+            final_plan["llm_source"] = "local_simulated"
+            final_plan["llm_advisory_used"] = False
+        elif llm_strategy == "demo_simulated":
+            final_plan["decision_mode"] = "demo_simulated_gemini"
+            final_plan["llm_source"] = "demo_simulated"
+            final_plan["llm_advisory_used"] = True
+        elif llm_strategy == "gemini" and llm_requested:
+            final_plan["decision_mode"] = "autonomous_localized_fallback"
+            final_plan["llm_source"] = "gemini_failed_fallback"
+            final_plan["llm_advisory_used"] = False
+        elif final_plan.get("llm_advisory_used"):
+            final_plan["decision_mode"] = "distributed_cloud_briefing"
+            final_plan["llm_source"] = "gemini"
+        else:
+            final_plan["decision_mode"] = "autonomous_heuristic"
+            final_plan["llm_source"] = "deterministic"
+        final_plan["reasoning_budget"] = {
+            "planner": llm_gate.get("planner_reason", "Deterministic planner path was sufficient."),
+            "budget_level": llm_gate.get("budget_level", "local_only"),
+        }
         return final_plan
 
-    def _build_analysis(self, state, demand, insight, event_context, operational_signals, recent_cycles, best_zone):
+    def _build_analysis(self, state, demand, insight, event_context, operational_signals, recent_cycles, best_zone, learning_profile=None):
         most_crowded = min(state, key=lambda zone: state[zone]["free_slots"])
         congestion_threshold = self._dynamic_congestion_threshold(state, operational_signals)
         congested_zones = [
             zone for zone, data in state.items() if data["free_slots"] <= congestion_threshold
         ]
+        
+        blocked_routes = (learning_profile or {}).get("blocked_routes", [])
+        
         recommended_zone = event_context.get("recommended_zone", best_zone)
-        destination = recommended_zone if recommended_zone in state and recommended_zone != most_crowded else best_zone
-        if destination == most_crowded:
+        # Avoid recommended_zone if it's the source or blocked
+        if recommended_zone == most_crowded or f"{most_crowded}->{recommended_zone}" in blocked_routes:
+            recommended_zone = best_zone
+
+        destination = recommended_zone if recommended_zone in state and recommended_zone != most_crowded and f"{most_crowded}->{recommended_zone}" not in blocked_routes else best_zone
+        
+        if destination == most_crowded or f"{most_crowded}->{destination}" in blocked_routes:
             destination = max(
-                (zone for zone in state if zone != most_crowded),
+                (zone for zone in state if zone != most_crowded and f"{most_crowded}->{zone}" not in blocked_routes),
                 key=lambda zone: state[zone]["free_slots"],
                 default=most_crowded,
             )
@@ -314,7 +415,7 @@ class PlannerAgent:
         projected_escalation = 1.1 if temporal_reasoning["projected_queue_peak"] >= 4 else 1.0
         route_bias = learning_profile.get("route_profile", {}).get("success_bias", 1.0)
         requested = int(round(base_requested * learned_bias * route_bias * uncertainty_discount * projected_escalation))
-        vehicles = max(0, min(safe_transfer_capacity, requested, destination_free))
+        vehicles = max(0, min(safe_transfer_capacity, requested, state.get(destination_zone, {}).get("free_slots", 0)))
         confidence = max(
             0.45,
             min(
@@ -322,16 +423,91 @@ class PlannerAgent:
                 float(insight.get("confidence", 0.7)) * uncertainty_discount + (0.06 if vehicles > 0 else -0.08),
             ),
         )
-        action_type = "redirect" if vehicles > 0 and source_zone != destination_zone else "none"
+
+        # Removed stability gating: it caused confidence starvation and blocked valid actions.
+
+        # Learning Integration: Check for recent failures and reward drift
+        recent_reward_avg = learning_profile.get("recent_reward_avg", 0.0)
+        last_reward = learning_profile.get("last_reward", 0.0)
+        recent_failures = learning_profile.get("recent_failures", [])
+        failure_count = sum(1 for f in recent_failures if f.get("from") == source_zone and f.get("to") == destination_zone)
+        
+        # Determine Learning Prefix
+        learning_applied = False
+        reason_prefix = ""
+        if failure_count > 0:
+            penalty = 0.15 * failure_count
+            vehicles = max(0, int(vehicles * (1.0 - penalty)))
+            confidence = max(0.4, confidence - 0.2)
+            reason_prefix = f"🧠 Learning Applied: Reduced volume due to {failure_count} failures on this route. "
+            learning_applied = True
+        elif recent_reward_avg < -0.2:
+            vehicles = max(1, int(vehicles * 0.7))
+            reason_prefix = f"🧠 Learning Applied: Throttling traffic due to negative reward drift ({recent_reward_avg}). "
+            learning_applied = True
+
+        # Action Type Determination (Expansion)
+        is_redirect = vehicles > 0 and source_zone != destination_zone and confidence >= 0.45
+        
+        # ── Step 4: "Do Nothing" (HOLD) Intelligence ──
+        # If system is stable but last reward was bad, or avg reward is very bad, force a HOLD.
+        is_stable = temporal_reasoning.get("pressure_trend") == "stable"
+        force_hold = False
+        if is_stable and last_reward < -0.4:
+            force_hold = True
+            reason_prefix = "🧠 Learning Applied: Hold strategy enforced. System is stable but previous action underperformed. "
+        elif recent_reward_avg < -0.8:
+            force_hold = True
+            reason_prefix = "🧠 Learning Applied: Emergency Hold. Severe reward dip detected; halting all redirects to stabilize. "
+
+        # Predictive Pre-Routing (PRE_ALLOCATE)
+        # Act immediately if the trend shows increasing pressure
+        is_pre_allocate = False
+        projected_source_free = temporal_reasoning.get("projected_free_slots", {}).get(source_zone, source_free)
+        if not is_redirect and not force_hold and temporal_reasoning.get("pressure_trend") in {"escalating", "elevated"} and source_zone != destination_zone:
+            # Aggressive predictive move
+            vehicles = max(1, min(12, int(demand.get(source_zone, 8) / 3)))
+            vehicles = max(0, min(safe_transfer_capacity, vehicles, state.get(destination_zone, {}).get("free_slots", 0)))
+            if vehicles > 0:
+                is_pre_allocate = True
+                is_redirect = True
+                confidence = max(0.4, confidence - 0.05) # Slightly lower confidence for predictive moves
+
+        # Confidence Gating
+        if confidence < 0.55 and vehicles > 0 and not force_hold:
+            vehicles = max(1, vehicles // 2)
+            reason_prefix += f"Low confidence ({confidence:.2f}): reducing transfer volume for safety. "
+
+        if is_redirect and not force_hold:
+            action_type = "redirect"
+            action_reason = (
+                f"{reason_prefix}Proactive relief: Moving {vehicles} arrivals from {source_zone} to {destination_zone} "
+                f"to prevent {temporal_reasoning['pressure_trend']} congestion."
+            )
+        elif is_pre_allocate and not force_hold:
+            action_type = "redirect" # Environment only understands 'redirect'
+            action_reason = (
+                f"{reason_prefix}PRE-ALLOCATE: Source {source_zone} projected to hit critical levels ({projected_source_free} slots left) "
+                f"in 2 cycles. Routing {vehicles} early to {destination_zone}."
+            )
+        else:
+            action_type = "none"
+            if force_hold:
+                action_reason = reason_prefix
+            else:
+                action_reason = (
+                    f"{reason_prefix}Monitoring: All zones within stable operating bounds. "
+                    f"Projected {source_zone} free slots: {projected_source_free}."
+                )
+
         return {
             "action": action_type,
+            "is_pre_allocate": is_pre_allocate,
+            "learning_applied": learning_applied or force_hold,
             "from": source_zone,
             "to": destination_zone,
             "vehicles": vehicles,
-            "reason": (
-                f"{event_context.get('allocation_strategy', 'Balanced utilisation')} prioritizes relieving {source_zone} "
-                f"toward {destination_zone} under projected {temporal_reasoning['pressure_trend']} pressure."
-            ),
+            "reason": action_reason,
             "confidence": round(confidence, 3),
         }
 
@@ -346,11 +522,13 @@ class PlannerAgent:
         tools,
         adaptive_limits,
         tool_calls,
+        learning_profile=None,
     ):
         blocked_zone = operational_signals.get("blocked_zone")
+        blocked_routes = (learning_profile or {}).get("blocked_routes", [])
         candidates = [
             zone for zone in state
-            if zone != source_zone and zone != blocked_zone
+            if zone != source_zone and zone != blocked_zone and f"{source_zone}->{zone}" not in blocked_routes
         ]
         candidates.sort(
             key=lambda zone: (
@@ -394,7 +572,7 @@ class PlannerAgent:
             alternatives.append({"action": "none", "from": source_zone, "to": destination_zone, "vehicles": 0, "reason": "No safe backup route is available."})
         return alternatives
 
-    def _score_plan(self, action, analysis, temporal_reasoning, insight, safe_transfer_capacity, adaptive_limits):
+    def _score_plan(self, action, analysis, temporal_reasoning, insight, safe_transfer_capacity, adaptive_limits, learning_profile=None):
         vehicles = max(0, int(action.get("vehicles", 0) or 0))
         capacity_score = min(1.0, vehicles / max(1, safe_transfer_capacity)) if safe_transfer_capacity else 0.0
         hotspot_relief = min(
@@ -403,16 +581,23 @@ class PlannerAgent:
         )
         projected_pressure = temporal_reasoning["projected_queue_peak"] / 6
         uncertainty = min(1.0, float(insight.get("uncertainty", {}).get("entropy", 0.0)) / 3)
+        
+        # Calculate Learning Penalty
+        failure_penalty = 0.0
+        if learning_profile and action.get("from") and action.get("to"):
+            route_key = f"{action.get('from')}->{action.get('to')}"
+            failure_penalty = self._get_failure_penalty(route_key, learning_profile)
+
         benefit_score = round(
             min(1.0, 0.45 * capacity_score + 0.35 * hotspot_relief + 0.20 * min(1.0, projected_pressure + 0.2)),
             3,
         )
         risk_probability = round(
-            min(0.99, 0.20 + uncertainty * 0.35 + max(0, analysis["queue_length"] - 2) * 0.06),
+            min(0.99, 0.20 + uncertainty * 0.35 + max(0, analysis["queue_length"] - 2) * 0.06 + failure_penalty),
             3,
         )
-        efficiency_score = round(max(0.0, min(1.0, benefit_score - risk_probability * 0.35 + 0.15)), 3)
-        confidence = round(max(0.35, min(0.95, action.get("confidence", 0.65) - risk_probability * 0.12)), 3)
+        efficiency_score = round(max(0.0, min(1.0, benefit_score - risk_probability * 0.35 + 0.15 - (failure_penalty * 0.5))), 3)
+        confidence = round(max(0.35, min(0.95, action.get("confidence", 0.65) - risk_probability * 0.12 - failure_penalty)), 3)
         return {
             "benefit_score": benefit_score,
             "risk_probability": risk_probability,
@@ -444,17 +629,28 @@ class PlannerAgent:
         )
         source_zone = min(state, key=lambda zone: state[zone]["free_slots"])
         projected_hotspot_pressure = min(100, int(round(demand.get(source_zone, 0) * (1 + adaptive_limits["uncertainty_penalty"]))))
+        
+        # Predictive projection: how many slots will be free in 2 steps?
+        projected_free_slots = {}
+        for zone, data in state.items():
+            current_free = data.get("free_slots", 0)
+            inflow = demand.get(zone, 0)
+            expected_change = int(inflow * 2.2) # Weighting inflow for 2 steps
+            projected_free_slots[zone] = max(0, current_free - expected_change)
+
         if projected_queue_peak >= 5 or projected_hotspot_pressure >= 75:
             pressure_trend = "escalating"
         elif projected_queue_peak <= 2 and pressure_now <= 1:
             pressure_trend = "stable"
         else:
             pressure_trend = "elevated"
+            
         return {
             "pressure_trend": pressure_trend,
             "projected_queue_peak": projected_queue_peak,
             "recent_average_queue": avg_recent_queue,
             "projected_hotspot_pressure": projected_hotspot_pressure,
+            "projected_free_slots": projected_free_slots,
             "forecast_horizon_steps": adaptive_limits["horizon_steps"],
             "time_factor": "event_peak" if event_context.get("severity") in {"high", "critical"} else "normal_window",
             "bayesian_entropy": round(float(insight.get("uncertainty", {}).get("entropy", 0.0)), 3),
@@ -486,6 +682,22 @@ class PlannerAgent:
         )
         return sequence
 
+    def _get_failure_penalty(self, route_key, learning_profile):
+        """Calculate a numerical penalty score based on route-specific learning history."""
+        if route_key in learning_profile.get("blocked_routes", []):
+            return 0.55  # Critical penalty for formally blocked routes
+
+        consecutive_failures = learning_profile.get("route_consecutive_failures", {}).get(route_key, 0)
+        
+        if consecutive_failures > 5:
+            return 0.35
+        elif consecutive_failures > 2:
+            return 0.18
+        elif consecutive_failures > 0:
+            return 0.08
+            
+        return 0.0
+
     def _build_learning_feedback(self, action, scoring, temporal_reasoning, learning_profile):
         return {
             "route": f"{action.get('from')}->{action.get('to')}" if action.get("from") and action.get("to") else None,
@@ -501,8 +713,15 @@ class PlannerAgent:
             return fallback_plan
 
         merged = deepcopy(fallback_plan)
+        fallback_action = merged["proposed_action"]
         llm_action = llm_advisory.get("proposed_action", {})
-        if self._is_safe_llm_action(merged["proposed_action"], llm_action, safe_transfer_capacity):
+        if self._is_safe_llm_action(fallback_action, llm_action, safe_transfer_capacity):
+            # Check if LLM ACTUALLY changed the action vs baseline
+            if (llm_action.get("action") != fallback_action.get("action") or
+                llm_action.get("from") != fallback_action.get("from") or
+                llm_action.get("to") != fallback_action.get("to") or
+                llm_action.get("vehicles") != fallback_action.get("vehicles")):
+                merged["llm_influence"] = True
             merged["proposed_action"] = llm_action
             merged["llm_advisory_used"] = True
         if isinstance(llm_advisory.get("alternative_actions"), list) and llm_advisory["alternative_actions"]:
@@ -512,20 +731,22 @@ class PlannerAgent:
             merged["strategy"] = llm_advisory["strategy"].strip()
         if isinstance(llm_advisory.get("rationale"), str) and llm_advisory["rationale"].strip():
             merged["rationale"] = llm_advisory["rationale"].strip()
+            merged["llm_summary"] = merged["rationale"]
         return merged
 
     def _is_safe_llm_action(self, fallback_action, llm_action, safe_transfer_capacity):
         if not isinstance(llm_action, dict):
             return False
         if fallback_action.get("action") == "none":
+            # Allow LLM to actively initiate a redirect even when fallback is none
+            if llm_action.get("action") == "redirect" and 0 < int(llm_action.get("vehicles", 0) or 0) <= safe_transfer_capacity:
+                return True
             return llm_action.get("action") == "none"
         if llm_action.get("action") == "none":
             return True
         return (
             llm_action.get("action") == "redirect"
-            and llm_action.get("from") == fallback_action.get("from")
-            and llm_action.get("to") == fallback_action.get("to")
-            and 0 <= int(llm_action.get("vehicles", 0) or 0) <= int(min(safe_transfer_capacity, fallback_action.get("vehicles", 0) or 0))
+            and 0 < int(llm_action.get("vehicles", 0) or 0) <= safe_transfer_capacity
         )
 
     def _dynamic_congestion_threshold(self, state, operational_signals):

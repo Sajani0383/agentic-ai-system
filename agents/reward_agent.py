@@ -1,14 +1,14 @@
 class RewardAgent:
     DEFAULTS = {
         "base_congestion_ratio": 0.12,
-        "movement_cost_per_vehicle": 0.06,
-        "unnecessary_action_penalty": 0.45,
+        "movement_cost_per_vehicle": 0.01,
+        "unnecessary_action_penalty": 0.10,
         "event_focus_bonus": 0.35,
         "recommended_zone_bonus": 0.18,
         "queue_penalty_weight": 0.08,
         "search_time_penalty_weight": 0.12,
         "delayed_reward_weight": 0.18,
-        "stagnation_penalty": 0.08,
+        "stagnation_penalty": 0.15,
     }
 
     def evaluate(
@@ -61,7 +61,42 @@ class RewardAgent:
         if requested > moved and action_type == "redirect":
             reward -= min(0.4, (requested - moved) / max(1, requested))
 
-        return round(reward, 3)
+        reward = round(reward, 3)
+        
+        # Build narrative impact for explainability
+        impact = {
+            "score": reward,
+            "direction": "positive" if reward > 0.1 else "negative" if reward < -0.1 else "neutral",
+            "explanation": self._build_explanation(congestion_gain, demand_relief, unnecessary_penalty, movement_cost, queue_penalty)
+        }
+        
+        return {
+            "agentic_reward_score": reward,
+            "reward_impact": impact,
+            "metrics": {
+                "congestion_gain": round(congestion_gain, 3),
+                "demand_relief": round(demand_relief, 3),
+                "balance_gain": round(balance_gain, 3),
+                "unnecessary_penalty": round(unnecessary_penalty, 3),
+            }
+        }
+
+    def _build_explanation(self, congestion_gain, demand_relief, unnecessary_penalty, movement_cost, queue_penalty):
+        reasons = []
+        if congestion_gain > 0.2:
+            reasons.append("The action successfully reduced network-wide congestion pressure.")
+        if demand_relief > 0.15:
+            reasons.append("Arrival demand was effectively distributed toward higher-capacity zones.")
+        if unnecessary_penalty > 0:
+            reasons.append("A penalty was applied for an intervention that yielded no measurable network benefit.")
+        if movement_cost > 0.3:
+            reasons.append("High coordination cost detected due to a large volume of redirected vehicles.")
+        if queue_penalty > 0.2:
+            reasons.append("System performance was degraded by persistent entry queue pressure.")
+            
+        if not reasons:
+            return "The agent maintained current routing as the network remains within stable operating parameters."
+        return " ".join(reasons)
 
     def _state_metrics(self, state, demand, event_context):
         if not state:

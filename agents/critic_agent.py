@@ -9,7 +9,7 @@ class CriticAgent:
         self.logger = logger or trace_logger
         self.route_risk_memory = {}
 
-    def review(self, plan, state, demand, insight, tools):
+    def review(self, plan, state, demand, insight, tools, reasoning_budget=None):
         proposed_action = plan.get("proposed_action", {"action": "none"})
         tool_calls = list(plan.get("tool_calls", []))
         event_context = self._call_tool(
@@ -54,18 +54,27 @@ class CriticAgent:
             learning_profile,
             tool_calls,
         )
-        llm_review = self._ask_llm_for_review(
-            deterministic_review,
-            plan,
-            state,
-            demand,
-            insight,
-            event_context,
-            operational_signals,
-            learning_profile,
-            scenario_mode,
-        )
+        llm_gate = reasoning_budget or {}
+        llm_requested = bool(llm_gate.get("allow_critic_llm"))
+        llm_review = deterministic_review
+        if llm_requested:
+            llm_review = self._ask_llm_for_review(
+                deterministic_review,
+                plan,
+                state,
+                demand,
+                insight,
+                event_context,
+                operational_signals,
+                learning_profile,
+                scenario_mode,
+            )
         review = self._merge_llm_review(deterministic_review, llm_review)
+        review["llm_requested"] = llm_requested
+        review["reasoning_budget"] = {
+            "critic": llm_gate.get("critic_reason", "Deterministic critic checks were sufficient."),
+            "budget_level": llm_gate.get("budget_level", "local_only"),
+        }
         self._update_critic_memory(review)
         self._log_review(review)
         return review
@@ -97,21 +106,54 @@ class CriticAgent:
         )
         revised_action = dict(action)
         safe_transfer = scoring["observations"].get("safe_transfer", 0)
+        from_zone = action.get("from")
+        to_zone = action.get("to")
+
+        # ── Negligible Benefit Veto ──
+        source_data = state.get(from_zone, {})
+        dest_data = state.get(to_zone, {})
+        source_free_pct = (source_data.get("free_slots", 0) / source_data.get("total_slots", 24)) * 100 if from_zone in state else 0
+        dest_free_pct = (dest_data.get("free_slots", 0) / dest_data.get("total_slots", 24)) * 100 if to_zone in state else 0
+
+        is_negligible = bool(scoring.get("risk_factors", {}).get("low_utility_penalty", 0) > 0)
+        queue_length_val = operational_signals.get("queue_length", 0)
+        if queue_length_val > 2:
+            is_negligible = False
+
+        if action.get("action") == "redirect" and not is_negligible:
+            # Secondary check for relative distribution stability
+            if source_free_pct > 35 and dest_free_pct > 80:
+                is_negligible = True
+                if queue_length_val <= 2:
+                    notes.append(f"VETO: Negligible benefit. {from_zone} is already {source_free_pct:.0f}% free. Redirection to {to_zone} is unnecessary movement.")
+                else:
+                    is_negligible = False
+
+        # Allow safe micro-actions to explore and act
+        if action.get("action") == "redirect" and int(action.get("vehicles", 0)) == 1 and scoring.get("risk_score", 0) < 60:
+            if is_negligible:
+                is_negligible = False
+                notes.append("Micro-action approved: low risk single vehicle transfer allowed despite utility threshold.")
 
         if action.get("action") != "redirect":
-            notes.append("No redirect required because the planner did not propose a transfer.")
+            crowded = min(state, key=lambda z: state[z].get("free_slots", 0)) if state else "Unknown"
+            free_slots = state.get(crowded, {}).get("free_slots", 0) if state else 0
+            notes.append(f"Monitoring Phase: {crowded} currently has {free_slots} free slots. System is in holding state while levels are stable.")
+            revised_action = {"action": "none"}
+        elif is_negligible:
+            # notes.append("Critic Veto: Action offers negligible network utility.") # Already added in _score_action
             revised_action = {"action": "none"}
         elif scoring["invalid_path"]:
-            notes.append("Redirect path is invalid, so execution is blocked.")
+            notes.append("Safety Alert: Redirect path is invalid. Protocol requires valid source and destination zones.")
             revised_action = {"action": "none"}
         elif safe_transfer <= 0:
-            notes.append("Destination has no safe capacity for the requested transfer.")
+            notes.append("Safety Alert: Destination zone is at capacity. Redirect blocked to prevent local overflow.")
             revised_action = {"action": "none"}
         else:
             requested = int(action.get("vehicles", 0))
             if safe_transfer < requested:
                 notes.append(
-                    f"Transfer reduced from {requested} to {safe_transfer} to stay within safe capacity limits."
+                    f"Operational Adjustment: Transfer reduced from {requested} to {safe_transfer} vehicles to ensure destination stability."
                 )
                 revised_action["vehicles"] = safe_transfer
             revised_action["confidence"] = round(
@@ -120,11 +162,25 @@ class CriticAgent:
             )
 
         notes.extend(scoring["notes"])
-        approved = bool(revised_action.get("action") == "redirect" and scoring["risk_score"] < 70)
+        
+        # ── Approval Logic: Softened Thresholds & Partial Approval ──
+        # Risk levels: Low (<30), Medium (30-65), High (65-85), Critical (>85)
+        risk_score = scoring["risk_score"]
+        
+        approved = False
+        if revised_action.get("action") == "redirect" and not is_negligible:
+            if risk_score < 80:
+                approved = True
+                notes.insert(0, f"Action Verified: The proposed redirect from {action.get('from')} to {action.get('to')} is tactically sound and supports the '{plan.get('strategy', 'allocation')}' mission.")
+            elif risk_score < 95:
+                approved = True
+                partial_vehicles = max(1, int(revised_action.get("vehicles", 1)) // 2)
+                revised_action["vehicles"] = partial_vehicles
+                notes.insert(0, f"Critic Mitigation: High risk detected ({risk_score}), mitigating by reducing transfer volume to {partial_vehicles}.")
+        
         if not approved and revised_action.get("action") == "redirect":
+            notes.insert(0, f"Safety Override: Critical risk ({risk_score}). Reverting to system baseline.")
             revised_action = {"action": "none"}
-        if approved:
-            notes.append(f"Redirect supports the active {plan.get('strategy', 'allocation')} strategy.")
 
         alternative_actions = self._suggest_alternatives(
             action,
@@ -213,9 +269,16 @@ class CriticAgent:
         risk_factors["capacity_risk"] = round((1 - capacity_ratio) * 30, 2)
 
         source_pressure = demand.get(from_zone, 0)
-        if source_pressure < 5 and state[from_zone]["free_slots"] > 12:
-            risk_factors["weak_source_pressure"] = 18
-            notes.append("Source pressure is modest, so the redirect has limited operational benefit.")
+        source_free = state[from_zone]["free_slots"]
+        total_hotspots = sum(1 for z, d in state.items() if d["free_slots"] <= 10)
+        
+        # Effectiveness Check: Is this redirect actually helpful?
+        if total_hotspots == 0 and source_free > 15:
+            risk_factors["low_utility_penalty"] = 45
+            notes.append("Operational Warning: The system is currently stable. This redirect offers negligible network utility and may introduce unnecessary churn.")
+        elif source_pressure < 4 and source_free > 12:
+            risk_factors["weak_source_pressure"] = 20
+            notes.append("Operational Note: Source pressure is too low to justify a proactive redirect at this scale.")
 
         destination_free_ratio = state[to_zone]["free_slots"] / max(1, state[to_zone]["total_slots"])
         if destination_free_ratio < 0.12:
@@ -310,6 +373,7 @@ class CriticAgent:
                     "You are an advisory critic. Do not override deterministic safety checks. "
                     "You may add notes or make a redirect stricter, but never approve a high-risk deterministic rejection."
                 ),
+                force=reasoning_budget.get("force_llm", False),
             )
         except Exception:
             return deterministic_review

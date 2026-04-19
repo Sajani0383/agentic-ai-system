@@ -26,7 +26,7 @@ class ParkingEnvironment:
         "rain_multiplier": 1.08,
         "blocked_entry_multiplier": 0.18,
         "blocked_exit_multiplier": 1.25,
-        "queue_warning_threshold": 4,
+        "queue_warning_threshold": 3,
         "congestion_alert_threshold": 12,
         "congestion_hotspot_threshold": 10,
         "search_time_base": 1.8,
@@ -180,14 +180,19 @@ class ParkingEnvironment:
 
     def apply_action(self, action):
         if action.get("action") != "redirect":
-            return {"moved": 0, "from": None, "to": None, "requested": 0}
+            return {"moved": 0, "from": None, "to": None, "requested": 0, "status": "success"}
 
         from_zone = action.get("from")
         to_zone = action.get("to")
         vehicles = int(action.get("vehicles", 0))
 
         if from_zone not in self.state or to_zone not in self.state or from_zone == to_zone:
-            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles}
+            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles, "status": "invalid"}
+
+        # Simulated realism: 15% chance of a real-world execution block
+        if self.rng.random() < 0.15:
+            reason = self.rng.choice(["Network latency timeout", "Security barrier unresponsive", "Dynamic signage offline"])
+            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles, "status": "failed", "reason": reason}
 
         source_redirect_capacity = max(
             self.state[from_zone]["entry"],
@@ -201,6 +206,7 @@ class ParkingEnvironment:
             "to": to_zone,
             "requested": vehicles,
             "mode": "incoming_reroute",
+            "status": "success"
         }
 
     def explain_step_model(self):
@@ -633,13 +639,18 @@ class ParkingEnvironment:
 
     def _plan_redirect(self, action, zone_flow_plan):
         if not action or action.get("action") != "redirect":
-            return {"moved": 0, "from": None, "to": None, "requested": 0, "mode": "incoming_reroute"}
+            return {"moved": 0, "from": None, "to": None, "requested": 0, "mode": "incoming_reroute", "status": "success"}
 
         from_zone = action.get("from")
         to_zone = action.get("to")
         requested = max(0, int(action.get("vehicles", 0) or 0))
         if from_zone not in zone_flow_plan or to_zone not in zone_flow_plan or from_zone == to_zone:
-            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": requested, "mode": "incoming_reroute"}
+            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": requested, "mode": "incoming_reroute", "status": "invalid"}
+
+        # Simulated realism: 15% chance of a real-world execution block during high intensity simulations
+        if self.rng.random() < 0.15:
+            reason = self.rng.choice(["Network latency timeout", "Security barrier unresponsive", "Dynamic signage offline"])
+            return {"moved": 0, "from": from_zone, "to": to_zone, "requested": requested, "mode": "incoming_reroute", "status": "failed", "failure_reason": reason}
 
         source_plan = zone_flow_plan[from_zone]
         destination_plan = zone_flow_plan[to_zone]
@@ -654,6 +665,7 @@ class ParkingEnvironment:
             "to": to_zone,
             "requested": requested,
             "mode": "incoming_reroute",
+            "status": "success"
         }
 
     def _validate_zones(self, zones):

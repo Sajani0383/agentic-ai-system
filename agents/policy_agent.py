@@ -16,16 +16,15 @@ class PolicyAgent:
     def load_q_table(self, q_table):
         if self.q_agent is None or not q_table:
             return
-        q_array = np.array(q_table)
-        if q_array.shape == self.q_agent.q_table.shape:
-            self.q_agent.q_table = q_array
+        if isinstance(q_table, dict):
+            self.q_agent.q_table = {k: np.array(v) for k, v in q_table.items()}
 
     def export_q_table(self):
         if self.q_agent is None:
-            return []
-        return self.q_agent.q_table.tolist()
+            return {}
+        return {k: v.tolist() for k, v in self.q_agent.q_table.items()}
 
-    def decide(self, state, demand, insight, event_context=None):
+    def decide(self, state, demand, insight, event_context=None, learning_profile=None):
         step = "-"
         if not isinstance(state, dict) or not state:
             decision = self._noop_decision("PolicyAgent received an empty or invalid state.")
@@ -49,7 +48,29 @@ class PolicyAgent:
         )
         observation = self._build_observation(state_view, demand, insight, event_context)
         rl_state_index = self.q_agent.get_state(observation) if self.q_agent is not None else 0
-        rl_action_index = self.q_agent.choose_action(rl_state_index, explore=True) if self.q_agent is not None else None
+        source_index = self.zones.index(source_zone) if source_zone in self.zones else None
+        invalid_actions = [source_index] if source_index is not None else []
+        
+        rl_action_index = None
+        decision_mode = "AUTONOMOUS_POLICY"
+        
+        # ── Step A: Recovery Loop Logic ──
+        # If reward is crashing, shift behavior to safety/stabilization
+        learning_applied = False
+        if learning_profile:
+            recent_reward = learning_profile.get("recent_reward_avg", 0.0)
+            if recent_reward < -0.4:
+                decision_mode = "ADAPTIVE_STABILIZATION"
+                # Force a reduction in exploration to focus on known safer patterns
+                if self.q_agent:
+                    self.q_agent.epsilon = max(0.05, self.q_agent.epsilon * 0.5)
+                learning_applied = True
+
+        if self.q_agent is not None:
+            rl_action_index, choose_mode = self.q_agent.choose_action(rl_state_index, explore=True, invalid_actions=invalid_actions)
+            if decision_mode != "ADAPTIVE_STABILIZATION":
+                decision_mode = choose_mode
+            
         rl_zone = self._zone_for_index(rl_action_index, active_zones)
         fallback_zone = max(
             (zone for zone in state_view if zone != source_zone),
@@ -72,7 +93,11 @@ class PolicyAgent:
         route_certainty = self.q_agent.action_confidence(rl_state_index) if self.q_agent is not None else 0.6
         uncertainty_penalty = min(0.18, float(insight.get("uncertainty", {}).get("entropy", 0.0)) / 10)
         confidence = round(max(0.3, min(0.95, route_certainty - uncertainty_penalty)), 3)
-        hold_threshold = source_data["free_slots"] >= 14 and pressure < 8 and source_data["entry"] <= source_data["exit"] + 1
+        
+        # ── Step B: Safety Overrides ──
+        # If in recovery mode, higher hold probability
+        hold_bonus = 3 if decision_mode == "ADAPTIVE_STABILIZATION" else 0
+        hold_threshold = source_data["free_slots"] >= (14 - hold_bonus) and pressure < (8 - hold_bonus) and source_data["entry"] <= source_data["exit"] + 1
 
         if hold_threshold:
             decision = {
@@ -87,6 +112,7 @@ class PolicyAgent:
                 "policy_source": "hybrid_rl_rule_policy",
                 "rl_state_index": rl_state_index,
                 "rl_destination": destination_zone,
+                "exploration_mode": decision_mode,
                 "exploration_rate": round(self.q_agent.epsilon, 3) if self.q_agent is not None else 0.0,
             }
             self._record_decision(step, decision)
@@ -105,12 +131,14 @@ class PolicyAgent:
             "policy_source": "hybrid_rl_rule_policy",
             "rl_state_index": rl_state_index,
             "rl_destination": destination_zone,
+            "exploration_mode": decision_mode,
             "exploration_rate": round(self.q_agent.epsilon, 3) if self.q_agent is not None else 0.0,
+            "learning_applied": learning_applied,
         }
         self._record_decision(step, decision)
         return decision
 
-    def update(self, old_state, action, reward, new_state, demand=None, insight=None, execution_feedback=None):
+    def update(self, old_state, action, reward, new_state, demand=None, insight=None, execution_feedback=None, agent_memory=None):
         if self.q_agent is None or not isinstance(old_state, dict) or not old_state or not isinstance(new_state, dict) or not new_state:
             return
 
@@ -137,12 +165,16 @@ class PolicyAgent:
         action_index = self.zones.index(action_zone)
         if execution_feedback and not execution_feedback.get("success", True):
             reward = min(reward - 1.0, -1.0)
-        self.q_agent.update(state_index, action_index, reward, next_state_index)
+            
+        done = False # A true terminal check can be added here
+        self.q_agent.update(state_index, action_index, reward, next_state_index, done=done)
+        self.q_agent.remember(state_index, action_index, reward, next_state_index, done)
+        self.q_agent.replay()
         self.logger.log(
             "-",
             "policy_learning_update",
             {
-                "state_index": state_index,
+                "learning_profile": agent_memory.get_learning_profile() if agent_memory else {},
                 "next_state_index": next_state_index,
                 "action_zone": action_zone,
                 "reward": round(reward, 3),

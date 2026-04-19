@@ -1,0 +1,119 @@
+/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8502
+  Network URL: http://192.168.29.2:8502
+  External URL: http://49.43.250.84:8502
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
+2026-04-18 10:31:42 [INFO] root - Starting up SRM Agentic Parking Command Center Dashboard...
+/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+2026-04-18 10:31:43 [ERROR] root - Dashboard failed to launch or crashed unexpectedly: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+Traceback (most recent call last):
+  File "/Users/sajanig/Desktop/Agentic-AI-/dashboard.py", line 35, in bootstrap
+    main()
+  File "/Users/sajanig/Desktop/Agentic-AI-/ui/adk_dashboard.py", line 781, in main
+    st.plotly_chart(kpi_chart, use_container_width=True, config={"displayModeBar": False})
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/plotly_chart.py", line 565, in plotly_chart
+    plotly_chart_proto.id = compute_and_register_element_id(
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 150, in _register_element_id
+    raise StreamlitDuplicateElementId(element_type)
+streamlit.errors.StreamlitDuplicateElementId: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+2026-04-18 10:32:19 [INFO] root - Starting up SRM Agentic Parking Command Center Dashboard...
+2026-04-18 10:32:20 [ERROR] root - Dashboard failed to launch or crashed unexpectedly: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+Traceback (most recent call last):
+  File "/Users/sajanig/Desktop/Agentic-AI-/dashboard.py", line 35, in bootstrap
+    main()
+  File "/Users/sajanig/Desktop/Agentic-AI-/ui/adk_dashboard.py", line 781, in main
+    st.plotly_chart(kpi_chart, use_container_width=True, config={"displayModeBar": False})
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/plotly_chart.py", line 565, in plotly_chart
+    plotly_chart_proto.id = compute_and_register_element_id(
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 150, in _register_element_id
+    raise StreamlitDuplicateElementId(element_type)
+streamlit.errors.StreamlitDuplicateElementId: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+2026-04-18 10:39:27 [INFO] root - Starting up SRM Agentic Parking Command Center Dashboard...
+2026-04-18 10:39:27 [INFO] root - Starting up SRM Agentic Parking Command Center Dashboard...
+2026-04-18 10:39:28 [ERROR] root - Dashboard failed to launch or crashed unexpectedly: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+Traceback (most recent call last):
+  File "/Users/sajanig/Desktop/Agentic-AI-/dashboard.py", line 35, in bootstrap
+    main()
+  File "/Users/sajanig/Desktop/Agentic-AI-/ui/adk_dashboard.py", line 781, in main
+    st.plotly_chart(kpi_chart, use_container_width=True, config={"displayModeBar": False})
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/plotly_chart.py", line 565, in plotly_chart
+    plotly_chart_proto.id = compute_and_register_element_id(
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 150, in _register_element_id
+    raise StreamlitDuplicateElementId(element_type)
+streamlit.errors.StreamlitDuplicateElementId: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+2026-04-18 10:39:28 [ERROR] root - Dashboard failed to launch or crashed unexpectedly: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+Traceback (most recent call last):
+  File "/Users/sajanig/Desktop/Agentic-AI-/dashboard.py", line 35, in bootstrap
+    main()
+  File "/Users/sajanig/Desktop/Agentic-AI-/ui/adk_dashboard.py", line 781, in main
+    st.plotly_chart(kpi_chart, use_container_width=True, config={"displayModeBar": False})
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/plotly_chart.py", line 565, in plotly_chart
+    plotly_chart_proto.id = compute_and_register_element_id(
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 265, in compute_and_register_element_id
+    _register_element_id(ctx, element_type, element_id)
+  File "/Users/sajanig/Desktop/Agentic-AI-/.venv/lib/python3.9/site-packages/streamlit/elements/lib/utils.py", line 150, in _register_element_id
+    raise StreamlitDuplicateElementId(element_type)
+streamlit.errors.StreamlitDuplicateElementId: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+
+CRITICAL ERROR: Dashboard failed: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+
+
+CRITICAL ERROR: Dashboard failed: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+
+
+CRITICAL ERROR: Dashboard failed: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+
+
+CRITICAL ERROR: Dashboard failed: There are multiple `plotly_chart` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `plotly_chart` element.
+
+  Stopping...

@@ -3,7 +3,6 @@ from environment.parking_environment import ParkingEnvironment
 from llm_reasoning import create_llm_agent
 from tools import get_tools
 
-
 def run_simulation(steps=10):
     print("SMART PARKING AGENTIC AI SYSTEM")
 
@@ -12,7 +11,7 @@ def run_simulation(steps=10):
 
     print("Parking Zones:", environment.zones)
 
-    tools = get_tools(environment, controller.memory)
+    tools = get_tools(environment)  # uses internal NullHistory (AgentMemory lacks get_trend)
     llm_agent = create_llm_agent(tools)
     overview = llm_agent.invoke(
         "Find the best parking zone based on availability, demand and congestion."
