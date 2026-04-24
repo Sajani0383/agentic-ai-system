@@ -1,17 +1,33 @@
 import json
 import logging
+from copy import deepcopy
 
-from llm.client import get_llm, get_llm_status
+from llm.client import (
+    ENV_EXAMPLE_PATH,
+    ENV_PATH,
+    _is_connectivity_llm_error,
+    _is_quota_llm_error,
+    get_llm,
+    get_llm_status,
+)
 from llm.prompts import PLANNER_PROMPT_TEMPLATE, STRUCTURED_COPILOT_TEMPLATE, CHAT_AGENT_TEMPLATE
-from llm.parser import extract_json_payload, validate_action_schema
+from llm.parser import extract_json_payload, normalize_action_schema, validate_action_schema
 from llm.fallback import summarize_state, build_advanced_fallback
 from llm.chat import get_local_chat_response
 
 # Preserved solely for backward-compatible interface contracts
 LAST_LLM_ERROR = ""
 
+def _with_llm_runtime(fallback, **runtime):
+    payload = deepcopy(fallback) if isinstance(fallback, dict) else fallback
+    if isinstance(payload, dict):
+        payload["_llm_runtime"] = runtime
+    return payload
+
 def build_fallback_action(state):
     return build_advanced_fallback(state)
+
+_build_fallback_action = build_fallback_action
 
 def get_operational_reasoning(state):
     summary = summarize_state(state)
@@ -52,64 +68,160 @@ def ask_llm_for_json_decision(state, demand, insight, memory_metrics, force=Fals
 
     try:
         response = llm.invoke(prompt).content.strip()
-        decision = extract_json_payload(response)
+        decision = normalize_action_schema(extract_json_payload(response))
         if not validate_action_schema(decision):
             return fallback
         return decision
     except Exception as e:
-        logging.error(f"Fallback trigged due to exception in json reasoning sequence: {e}")
+        logging.warning(f"Fallback trigged due to exception in json reasoning sequence: {e}")
         return fallback
 
 def _compact_context(context):
     """Prunes large context dictionaries to ensure reliability on constrained budgets."""
     if not isinstance(context, dict):
         return context
-    
-    compact = {}
-    prune_keys = {"recent_cycles", "recent_states", "history", "tool_observations", "tool_calls"}
-    
-    for k, v in context.items():
-        if k in prune_keys:
-            if isinstance(v, list):
-                compact[k] = v[-2:] if v else [] # Only keep last 2 items
-            else:
-                continue
-        elif isinstance(v, dict) and len(str(v)) > 2000:
-            # Recursively compact or truncate
-            compact[k] = {sk: sv for sk, sv in v.items() if len(str(sv)) < 500}
-        else:
-            compact[k] = v
-            
+
+    state = context.get("state", {})
+    demand = context.get("demand", {})
+    insight = context.get("insight", {})
+    event_context = context.get("event_context", {})
+    operational_signals = context.get("operational_signals", {})
+    learning_profile = context.get("learning_profile", {})
+    recent_cycles = context.get("recent_cycles", [])
+
+    top_blocks = []
+    if isinstance(state, dict) and state:
+        ranked = sorted(
+            state.items(),
+            key=lambda item: (
+                item[1].get("free_slots", 0),
+                -item[1].get("occupied", 0),
+            ),
+        )
+        for zone, zone_state in ranked[:3]:
+            top_blocks.append(
+                {
+                    "name": zone,
+                    "free_slots": int(zone_state.get("free_slots", 0) or 0),
+                    "occupied": int(zone_state.get("occupied", 0) or 0),
+                    "capacity": int(
+                        zone_state.get("total_slots", zone_state.get("capacity", 0)) or 0
+                    ),
+                    "demand": int(demand.get(zone, 0) or 0),
+                }
+            )
+
+    total_free_slots = sum(
+        int(zone_state.get("free_slots", 0) or 0)
+        for zone_state in state.values()
+    ) if isinstance(state, dict) else 0
+
+    compact = {
+        "top_blocks": top_blocks,
+        "queue": int(operational_signals.get("queue_length", 0) or 0),
+        "entropy": round(float(insight.get("uncertainty", {}).get("entropy", 0.0) or 0.0), 3),
+        "free_slots": total_free_slots,
+        "event": {
+            "name": event_context.get("name", "Normal Flow"),
+            "severity": event_context.get("severity", "low"),
+            "focus_zone": event_context.get("focus_zone", ""),
+        },
+        "learning": {
+            "recent_reward_avg": round(float(learning_profile.get("recent_reward_avg", 0.0) or 0.0), 3),
+            "blocked_routes": list((learning_profile.get("blocked_routes") or [])[:4]),
+            "latest_insight": learning_profile.get("latest_learning_insight", ""),
+        },
+        "recent_outcome": {},
+    }
+    if isinstance(recent_cycles, list) and recent_cycles:
+        last_cycle = recent_cycles[-1] if isinstance(recent_cycles[-1], dict) else {}
+        compact["recent_outcome"] = {
+            "reward": round(float(last_cycle.get("reward", {}).get("agentic_reward_score", 0.0) or 0.0), 3),
+            "action": last_cycle.get("execution_output", {}).get("final_action", {}).get("action", "none"),
+        }
     return compact
+
+def _normalize_structured_payload(payload, fallback):
+    if not isinstance(payload, dict):
+        return payload
+    normalized = deepcopy(payload)
+    fallback_action = deepcopy(fallback.get("proposed_action", {})) if isinstance(fallback, dict) else {}
+
+    if "proposed_action" not in normalized and any(key in normalized for key in ("action", "from", "to", "vehicles")):
+        normalized["proposed_action"] = {
+            "action": normalized.get("action"),
+            "from": normalized.get("from"),
+            "to": normalized.get("to"),
+            "vehicles": normalized.get("vehicles"),
+            "reason": normalized.get("reason", ""),
+            "confidence": normalized.get("confidence", fallback_action.get("confidence", 0.0)),
+        }
+
+    if isinstance(normalized.get("proposed_action"), dict):
+        normalized["proposed_action"] = normalize_action_schema(normalized["proposed_action"])
+        normalized["proposed_action"].setdefault("reason", normalized.get("rationale", "") or fallback_action.get("reason", ""))
+        normalized["proposed_action"].setdefault("confidence", fallback_action.get("confidence", 0.0))
+
+    alt = normalized.get("alternative_actions")
+    if isinstance(alt, dict):
+        normalized["alternative_actions"] = [normalize_action_schema(alt)]
+    elif isinstance(alt, list):
+        normalized["alternative_actions"] = [
+            normalize_action_schema(item) if isinstance(item, dict) else item
+            for item in alt
+        ]
+    return normalized
 
 def ask_llm_for_structured_json(agent_name, context, schema_text, fallback, system_instruction=None, force=False):
     llm = get_llm(force=force)
     if llm is None:
-        return fallback
-
-    # 1. Attempt with standard context
-    # 2. If it fails or is too large, attempt with compact context
-    
-    contexts_to_try = [context, _compact_context(context)]
-    
-    for i, ctx in enumerate(contexts_to_try):
-        prompt = STRUCTURED_COPILOT_TEMPLATE.format(
-            agent_name=agent_name,
-            system_instruction=system_instruction or "Use the provided context carefully and return valid JSON only.",
-            context=json.dumps(ctx, indent=2),
-            schema_text=schema_text
+        status = get_llm_status(ignore_backoff=force)
+        return _with_llm_runtime(
+            fallback,
+            requested=True,
+            used=False,
+            fallback_used=True,
+            fallback_reason=status.get("message", "Gemini unavailable; local fallback used."),
+            error=status.get("last_error", ""),
+            source="local_fallback",
         )
 
-        try:
-            response = llm.invoke(prompt).content.strip()
-            payload = extract_json_payload(response)
-            if isinstance(payload, dict):
-                return payload
-        except Exception as e:
-            logging.warning(f"LLM attempt {i+1} for {agent_name} failed: {e}")
-            if i == 0: continue # Try compact
+    compact_context = _compact_context(context)
+    prompt = STRUCTURED_COPILOT_TEMPLATE.format(
+        agent_name=agent_name,
+        system_instruction=system_instruction or "Use the provided context carefully and return valid JSON only.",
+        context=json.dumps(compact_context, indent=2),
+        schema_text=schema_text
+    )
+
+    try:
+        response = llm.invoke(prompt).content.strip()
+        payload = _normalize_structured_payload(extract_json_payload(response), fallback)
+        if isinstance(payload, dict):
+            payload["_llm_runtime"] = {
+                "requested": True,
+                "used": True,
+                "fallback_used": False,
+                "fallback_reason": "",
+                "error": "",
+                "source": "gemini",
+            }
+            return payload
+    except Exception as e:
+        logging.warning(f"LLM attempt 1 for {agent_name} failed: {e}")
+        if 'response' in locals():
+            logging.warning(f"{agent_name} raw LLM output snippet: {response[:400]}")
             
-    return fallback
+    status = get_llm_status(ignore_backoff=True)
+    return _with_llm_runtime(
+        fallback,
+        requested=True,
+        used=False,
+        fallback_used=True,
+        fallback_reason="Gemini request failed; deterministic/local fallback completed the decision.",
+        error=status.get("last_error", ""),
+        source="gemini_failed_fallback",
+    )
 
 def get_operational_briefing(state, latest_result, event_context, learning_profile, use_llm=True):
     summary = summarize_state(state)

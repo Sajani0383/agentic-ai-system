@@ -24,7 +24,7 @@ def get_local_chat_response(state, query):
     if "which zone is full" in query_lower or "fully occupied" in query_lower:
         fullest = max(state, key=lambda zone: state[zone]["occupied"] / max(1, state[zone]["total_slots"]))
         fullness = round((state[fullest]["occupied"] / max(1, state[fullest]["total_slots"])) * 100, 1)
-        return f"Based on the latest telemetry, {fullest} is experiencing the most pressure right now at {fullness}% occupancy. There are only {state[fullest]['free_slots']} slots remaining before it reaches full capacity."
+        return f"{fullest} is the closest to full at {fullness}% occupancy. There are only {state[fullest]['free_slots']} slots remaining before it reaches full capacity."
 
     if "current event" in query_lower or "what event" in query_lower:
         return "I can see the event context in the runtime state. If you ask me about the active event alongside the latest allocation, I can give you a combined operational assessment."

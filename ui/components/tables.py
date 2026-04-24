@@ -1,8 +1,11 @@
 def styled_state_frame(state_frame):
     if state_frame.empty:
         return state_frame
-    return state_frame.style.format({
+    frame = state_frame.rename(columns={"Zone": "SRM Block"})
+    return frame.style.format({
         "Capacity": "{:.0f}",
+        "Car Slots": "{:.0f}",
+        "Bike Slots": "{:.0f}",
         "Occupied": "{:.0f}",
         "Free": "{:.0f}",
         "Entries": "{:.0f}",
@@ -13,7 +16,8 @@ def styled_state_frame(state_frame):
 def styled_transition_frame(frame):
     if frame.empty:
         return frame
-    return frame.style.format({
+    renamed = frame.rename(columns={"Zone": "SRM Block"})
+    return renamed.style.format({
         "Before": "{:.0f}", "After": "{:.0f}", "Entries": "{:.0f}", "Exits": "{:.0f}", "Net Change": "{:+.0f}"
     }).background_gradient(subset=["Net Change"], cmap="RdYlGn")
 

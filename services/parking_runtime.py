@@ -1,3 +1,4 @@
+import warnings
 import json
 import os
 import tempfile
@@ -5,6 +6,20 @@ import asyncio
 from copy import deepcopy
 from threading import RLock
 from datetime import datetime
+
+warnings.filterwarnings(
+    "ignore",
+    message=r".*urllib3 v2 only supports OpenSSL 1\.1\.1\+.*",
+)
+warnings.filterwarnings(
+    "ignore",
+    category=FutureWarning,
+    module=r"google\.auth|google\.oauth2",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*@model_validator.*mode='after'.*",
+)
 
 from adk.trace_logger import trace_logger
 from agent_controller import AgentController
@@ -267,14 +282,19 @@ class ParkingRuntimeService:
         self.environment = environment or ParkingEnvironment()
         self.memory = memory or AgentMemory()
         self.llm_mode = "auto"
-        self.controller = controller or AgentController(environment=self.environment, memory=self.memory)
-        self.controller.set_llm_mode(self.llm_mode)
+        provided_controller = controller
         self.notification_service = notification_service or MockNotificationService()
         
         resolved_storage = storage_path or os.path.join(base_dir, "memory", "runtime_state.json")
         self.persistence = PersistenceManager(resolved_storage)
         
         self.latest_result, self.trace_log, self.latest_benchmark, self.latest_briefing = self.persistence.load(self.environment, self.memory)
+        if not set(self.environment.zones).issubset(set(self.environment.zone_capacity_profile)):
+            self.environment.restore_default_layout()
+            self.latest_result = {}
+            self.latest_briefing = {}
+        self.controller = provided_controller or AgentController(environment=self.environment, memory=self.memory)
+        self.controller.set_llm_mode(self.llm_mode)
 
     def _build_reasoning_snapshot(self, latest_result):
         llm_status = get_llm_status()
@@ -311,6 +331,16 @@ class ParkingRuntimeService:
             critic = cycle.get("critic_output", {})
             if planner.get("llm_advisory_used") or critic.get("llm_advisory_used") or planner.get("llm_requested") or critic.get("llm_requested"):
                 action = planner.get("proposed_action", {})
+                local_action = planner.get("local_decision_snapshot", {})
+                llm_action = planner.get("llm_decision_snapshot", {})
+                final_action = planner.get("final_decision_snapshot", action)
+                def _action_text(payload):
+                    if payload.get("action") == "redirect":
+                        return (
+                            f"Redirect {payload.get('vehicles', 0)} vehicles from "
+                            f"{payload.get('from', '-')} to {payload.get('to', '-')}."
+                        )
+                    return "No redirect recommended."
                 if action.get("action") == "redirect":
                     action_text = (
                         f"Redirect {action.get('vehicles', 0)} vehicles from "
@@ -325,6 +355,10 @@ class ParkingRuntimeService:
                     "rationale": planner.get("rationale") or (critic.get("critic_notes") or ["No LLM rationale stored."])[0],
                     "action": action,
                     "action_text": action_text,
+                    "local_action_text": _action_text(local_action),
+                    "llm_action_text": _action_text(llm_action),
+                    "final_action_text": _action_text(final_action),
+                    "influence_label": "Modified" if planner.get("llm_influence") else "Confirmed",
                     "requested": bool(planner.get("llm_requested") or critic.get("llm_requested")),
                 }
         return {}
@@ -339,12 +373,16 @@ class ParkingRuntimeService:
             "cache_used": 0,
             "simulated_gemini": 0,
             "local_reasoning": 0,
+            "last_gemini_step": None,
+            "llm_modified_steps": 0,
+            "budget_limit": 18,
         }
         for cycle in cycles:
             planner = cycle.get("planner_output", {})
             source = planner.get("llm_source", "deterministic")
             if planner.get("llm_requested"):
                 summary["gemini_attempts"] += 1
+                summary["last_gemini_step"] = cycle.get("step")
             if planner.get("forced_live_attempt"):
                 summary.setdefault("forced_live_attempts", 0)
                 summary["forced_live_attempts"] += 1
@@ -358,6 +396,12 @@ class ParkingRuntimeService:
                 summary["simulated_gemini"] += 1
             else:
                 summary["local_reasoning"] += 1
+            if planner.get("llm_influence"):
+                summary["llm_modified_steps"] += 1
+        total_steps = max(1, summary["total_steps"])
+        summary["llm_influence_pct"] = round((summary["llm_modified_steps"] / total_steps) * 100, 1)
+        summary["remaining_budget"] = max(0, summary["budget_limit"] - summary["gemini_attempts"])
+        summary["budget_guard_active"] = summary["gemini_attempts"] >= summary["budget_limit"]
         return summary
 
     def _build_agent_loop_snapshot(self, latest_result):
@@ -588,17 +632,39 @@ class ParkingRuntimeService:
 
     def get_runtime_snapshot(self):
         state = self.environment.get_state()
-        latest_transition = self.latest_result.get("transition", self.environment.get_last_transition())
-        reasoning_summary = self._build_reasoning_snapshot(self.latest_result)
-        agent_loop = self._build_agent_loop_snapshot(self.latest_result)
-        memory_summary = self._build_memory_snapshot(self.latest_result)
+        latest_result = deepcopy(self.latest_result) if isinstance(self.latest_result, dict) else {}
+        latest_result["state"] = deepcopy(state)
+        latest_transition = latest_result.get("transition") or self.environment.get_last_transition() or {}
+        latest_transition = deepcopy(latest_transition)
+        latest_transition.setdefault("event_context", self.environment.get_event_context())
+        latest_transition.setdefault("kpis", {})
+        latest_transition.setdefault("notifications", [])
+        latest_transition.setdefault("zones", [])
+        latest_result["transition"] = deepcopy(latest_transition)
+        latest_result.setdefault("event_context", deepcopy(latest_transition.get("event_context", self.environment.get_event_context())))
+        latest_result.setdefault("kpis", deepcopy(latest_transition.get("kpis", {})))
+        latest_result.setdefault("agent_interactions", [])
+        latest_result.setdefault("planner_output", {})
+        latest_result.setdefault("critic_output", {})
+        latest_result.setdefault("execution_output", {})
+        latest_result.setdefault("reasoning_budget", {})
+        latest_result.setdefault("decision_provenance", {})
+        recent_states = self.memory.get_recent_states(limit=10)
+        if not recent_states:
+            recent_states = [deepcopy(state)]
+        elif recent_states[-1] != state:
+            recent_states = [*recent_states[-9:], deepcopy(state)]
+        recent_cycles = self.memory.get_recent_cycles(limit=10)
+        reasoning_summary = self._build_reasoning_snapshot(latest_result)
+        agent_loop = self._build_agent_loop_snapshot(latest_result)
+        memory_summary = self._build_memory_snapshot(latest_result)
         notification_summary = self._build_notification_snapshot(latest_transition)
-        benchmark_summary = self._build_benchmark_snapshot(self.latest_result)
+        benchmark_summary = self._build_benchmark_snapshot(latest_result)
         last_llm_decision = self._build_last_llm_decision_snapshot()
         llm_usage_summary = self._build_llm_usage_summary()
         return {
             "state": state,
-            "latest_result": deepcopy(self.latest_result),
+            "latest_result": latest_result,
             "latest_transition": deepcopy(latest_transition),
             "metrics": self.memory.get_metrics(),
             "goal": self.memory.get_active_goal(),
@@ -610,8 +676,8 @@ class ParkingRuntimeService:
             "notifications": deepcopy(notification_summary.get("items", [])),
             "notification_dispatch": deepcopy(notification_summary.get("dispatch", [])),
             "kpis": deepcopy(latest_transition.get("kpis", {})),
-            "recent_cycles": self.memory.get_recent_cycles(limit=10),
-            "recent_states": self.memory.get_recent_states(limit=10),
+            "recent_cycles": recent_cycles,
+            "recent_states": recent_states,
             "trace": deepcopy(self.trace_log[-20:]),
             "benchmark": deepcopy(self.latest_benchmark),
             "benchmark_summary": benchmark_summary,
@@ -624,10 +690,10 @@ class ParkingRuntimeService:
             "assistant_briefing": deepcopy(
                 self.latest_briefing or get_operational_briefing(
                     state,
-                    self.latest_result,
+                    latest_result,
                     latest_transition.get("event_context", self.environment.get_event_context()),
                     self.memory.get_learning_profile(scenario_mode=self.environment.get_scenario_mode()),
-                    use_llm=self.latest_result.get("reasoning_budget", {}).get("allow_briefing_llm", False),
+                    use_llm=latest_result.get("reasoning_budget", {}).get("allow_briefing_llm", False),
                 )
             ),
         }

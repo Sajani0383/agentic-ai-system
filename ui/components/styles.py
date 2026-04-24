@@ -265,6 +265,15 @@ def inject_styles():
             background: rgba(77,163,255,0.12);
             border-color: rgba(77,163,255,0.35);
         }}
+        .stTabs [data-baseweb="tab-panel"] {{
+            padding-top: 1rem;
+            min-height: 0 !important;
+        }}
+        .stTabs [data-baseweb="tab-panel"][hidden] {{
+            display: none !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }}
         @media (max-width: 1000px) {{
             .hero-title {{ font-size: 2.4rem; }}
             .signal-grid {{ grid-template-columns: 1fr; }}

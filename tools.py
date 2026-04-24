@@ -126,6 +126,56 @@ def build_runtime_tools(environment, memory):
     def get_zone_status(zone_name):
         return environment.get_state().get(zone_name, {})
 
+    def build_belief_state(state, demand, insight=None):
+        insight = insight or {}
+        learning = memory.get_learning_profile()
+        blocked_routes = set(learning.get("blocked_routes", []))
+        zones = {}
+        for zone, data in state.items():
+            free_slots = int(data.get("free_slots", 0) or 0)
+            demand_pressure = float(demand.get(zone, 0) or 0)
+            posterior = insight.get("posteriors", {}).get(zone)
+            if posterior is None:
+                posterior = insight.get("normalized_posteriors", {}).get(zone, 0.0)
+            zones[zone] = {
+                "risk": round(max(0.0, min(1.0, (12 - free_slots) / 12 + demand_pressure / 120 + float(posterior or 0.0) * 0.25)), 3),
+                "free_slots": free_slots,
+                "demand_pressure": demand_pressure,
+                "trusted_destination": free_slots >= 4,
+            }
+        return {
+            "zones": zones,
+            "blocked_routes": sorted(blocked_routes),
+            "reward_trend": learning.get("recent_reward_avg", 0.0),
+            "none_block_active": learning.get("none_block_active", False),
+        }
+
+    def route_risk_check(from_zone, to_zone):
+        learning = memory.get_learning_profile(from_zone=from_zone, to_zone=to_zone)
+        route_key = f"{from_zone}->{to_zone}"
+        return {
+            "route": route_key,
+            "blocked": route_key in learning.get("blocked_routes", []),
+            "consecutive_failures": learning.get("route_consecutive_failures", {}).get(route_key, 0),
+            "route_profile": learning.get("route_profile", {}),
+        }
+
+    def reward_trend_analysis():
+        learning = memory.get_learning_profile()
+        avg_reward = float(learning.get("recent_reward_avg", 0.0) or 0.0)
+        if avg_reward < -0.2:
+            direction = "negative"
+        elif avg_reward > 0.15:
+            direction = "positive"
+        else:
+            direction = "stable"
+        return {
+            "direction": direction,
+            "recent_reward_avg": avg_reward,
+            "last_reward": learning.get("last_reward", 0.0),
+            "recommended_transfer_bias": learning.get("global_transfer_bias", 1.0),
+        }
+
     return {
         "get_state_snapshot": get_state_snapshot,
         "get_goal_status": get_goal_status,
@@ -139,4 +189,7 @@ def build_runtime_tools(environment, memory):
         "build_zone_pressure_report": build_zone_pressure_report,
         "suggest_best_zone": suggest_best_zone,
         "get_zone_status": get_zone_status,
+        "build_belief_state": build_belief_state,
+        "route_risk_check": route_risk_check,
+        "reward_trend_analysis": reward_trend_analysis,
     }

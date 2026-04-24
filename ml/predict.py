@@ -50,17 +50,6 @@ def _load_model():
         )
         return None
 
-
-@lru_cache(maxsize=1)
-def _load_model_metadata():
-    if not os.path.exists(metrics_path):
-        return {}
-    try:
-        with open(metrics_path, "r", encoding="utf-8") as file:
-            return json.load(file)
-    except Exception:
-        return {}
-
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", InconsistentVersionWarning)
@@ -76,12 +65,23 @@ def _load_model_metadata():
     except Exception as exc:
         _set_prediction_status(
             model_loaded=False,
-            model_available=False,
+            model_available=True,
             model_version="load_failed",
             last_error=f"{type(exc).__name__}: {exc}",
             last_mode="fallback",
         )
         return None
+
+
+@lru_cache(maxsize=1)
+def _load_model_metadata():
+    if not os.path.exists(metrics_path):
+        return {}
+    try:
+        with open(metrics_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except Exception:
+        return {}
 
 
 def _validate_inputs(hour, day, zone_id, vehicle_type=0):

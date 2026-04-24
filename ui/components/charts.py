@@ -10,7 +10,8 @@ def build_zone_chart(state_frame):
         x="Zone",
         y=["Occupied", "Free"],
         barmode="group",
-        title="Current Occupancy vs Free Capacity",
+        title="SRM Block Occupancy vs Free Capacity",
+        labels={"Zone": "SRM Block", "value": "Slots", "variable": "Metric"},
         color_discrete_sequence=["#8dc8ff", "#1f74cc"],
     )
     fig.update_layout(
@@ -30,8 +31,9 @@ def build_utilisation_chart(state_frame):
         x="Utilisation %",
         y="Zone",
         orientation="h",
-        title="Congestion Priority by Zone",
+        title="SRM Block Congestion Priority",
         color="Utilisation %",
+        labels={"Zone": "SRM Block"},
         color_continuous_scale=["#4bd38a", "#d8c86e", "#ff746c"],
     )
     fig.update_layout(
@@ -89,21 +91,28 @@ def build_kpi_chart(recent_states):
         return None
     rows = []
     redirect_steps = []
-    for item in recent_states:
-        kpis = item.get("kpis", {})
-        step = item.get("step", 0)
+    for index, item in enumerate(recent_states):
+        if not isinstance(item, dict):
+            continue
+        kpis = item.get("kpis", {}) if isinstance(item.get("kpis", {}), dict) else {}
+        step = item.get("step", index)
         rows.append(
             {
                 "step": step,
-                "Search Time": kpis.get("estimated_search_time_min", 0),
-                "Congestion Zones": kpis.get("congestion_hotspots", 0),
+                "Search Time": float(kpis.get("estimated_search_time_min", 0) or 0),
+                "SRM Block Hotspots": float(kpis.get("congestion_hotspots", 0) or 0),
             }
         )
-        action = item.get("action", {}) or item.get("transition", {}).get("applied_action", {})
+        transition = item.get("transition", {}) if isinstance(item.get("transition", {}), dict) else {}
+        action = item.get("action", {}) or transition.get("applied_action", {})
         if action.get("action") == "redirect":
             redirect_steps.append(step)
+    if not rows:
+        return None
 
     frame = pd.DataFrame(rows).melt(id_vars="step", var_name="metric", value_name="value")
+    if frame.empty:
+        return None
     fig = px.line(
         frame,
         x="step",
@@ -162,7 +171,7 @@ def build_latest_baseline_chart(baseline_comparison):
     rows = []
     metric_map = [
         ("Search Time", "estimated_search_time_min"),
-        ("Congestion Zones", "congestion_hotspots"),
+        ("SRM Block Hotspots", "congestion_hotspots"),
     ]
     for label, key in metric_map:
         rows.append({"Metric": label, "Mode": "Agent", "Value": agent.get(key, 0)})

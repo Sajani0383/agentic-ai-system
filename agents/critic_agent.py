@@ -69,8 +69,13 @@ class CriticAgent:
                 learning_profile,
                 scenario_mode,
             )
+        llm_runtime = llm_review.get("_llm_runtime", {}) if isinstance(llm_review, dict) else {}
         review = self._merge_llm_review(deterministic_review, llm_review)
         review["llm_requested"] = llm_requested
+        review["llm_runtime"] = llm_runtime
+        review["llm_fallback_used"] = bool(llm_runtime.get("fallback_used"))
+        review["llm_error"] = llm_runtime.get("error", "")
+        review["llm_fallback_reason"] = llm_runtime.get("fallback_reason", "")
         review["reasoning_budget"] = {
             "critic": llm_gate.get("critic_reason", "Deterministic critic checks were sufficient."),
             "budget_level": llm_gate.get("budget_level", "local_only"),
@@ -108,6 +113,11 @@ class CriticAgent:
         safe_transfer = scoring["observations"].get("safe_transfer", 0)
         from_zone = action.get("from")
         to_zone = action.get("to")
+        reward_trend = float(learning_profile.get("recent_reward_avg", 0.0) or 0.0)
+        queue_length_val = operational_signals.get("queue_length", 0)
+        expected_gain = float(action.get("expected_gain", scoring.get("expected_gain", 0.0)) or 0.0)
+        route_key = f"{from_zone}->{to_zone}"
+        route_blocked = route_key in learning_profile.get("blocked_routes", [])
 
         # ── Negligible Benefit Veto ──
         source_data = state.get(from_zone, {})
@@ -116,21 +126,23 @@ class CriticAgent:
         dest_free_pct = (dest_data.get("free_slots", 0) / dest_data.get("total_slots", 24)) * 100 if to_zone in state else 0
 
         is_negligible = bool(scoring.get("risk_factors", {}).get("low_utility_penalty", 0) > 0)
-        queue_length_val = operational_signals.get("queue_length", 0)
-        if queue_length_val > 2:
+        if queue_length_val > 2 or reward_trend < -0.3:
             is_negligible = False
+        if action.get("action") == "redirect" and expected_gain <= 0:
+            is_negligible = True
+            notes.append("VETO: Expected gain is zero or negative, so execution would add churn without relief.")
 
         if action.get("action") == "redirect" and not is_negligible:
             # Secondary check for relative distribution stability
             if source_free_pct > 35 and dest_free_pct > 80:
                 is_negligible = True
-                if queue_length_val <= 2:
+                if queue_length_val <= 2 and reward_trend >= -0.3:
                     notes.append(f"VETO: Negligible benefit. {from_zone} is already {source_free_pct:.0f}% free. Redirection to {to_zone} is unnecessary movement.")
                 else:
                     is_negligible = False
 
         # Allow safe micro-actions to explore and act
-        if action.get("action") == "redirect" and int(action.get("vehicles", 0)) == 1 and scoring.get("risk_score", 0) < 60:
+        if action.get("action") == "redirect" and int(action.get("vehicles", 0)) <= 2 and scoring.get("risk_score", 0) < 70 and expected_gain > 0:
             if is_negligible:
                 is_negligible = False
                 notes.append("Micro-action approved: low risk single vehicle transfer allowed despite utility threshold.")
@@ -140,9 +152,19 @@ class CriticAgent:
             free_slots = state.get(crowded, {}).get("free_slots", 0) if state else 0
             notes.append(f"Monitoring Phase: {crowded} currently has {free_slots} free slots. System is in holding state while levels are stable.")
             revised_action = {"action": "none"}
-        elif is_negligible:
-            # notes.append("Critic Veto: Action offers negligible network utility.") # Already added in _score_action
+        elif route_blocked:
+            notes.append(f"Safety Alert: Route {route_key} is temporarily blocked by memory after repeated failures.")
             revised_action = {"action": "none"}
+        elif is_negligible:
+            reduced_vehicles = max(1, min(2, safe_transfer, int(action.get("vehicles", 1) or 1)))
+            if queue_length_val >= 2 or reward_trend < -0.1:
+                notes.append(
+                    f"Critic Recovery: utility is limited, but system pressure is active; approving a reduced micro-action of {reduced_vehicles} vehicle(s)."
+                )
+                revised_action["vehicles"] = reduced_vehicles
+                revised_action["confidence"] = round(max(0.5, float(revised_action.get("confidence", 0.55) or 0.55)), 2)
+            else:
+                revised_action = {"action": "none"}
         elif scoring["invalid_path"]:
             notes.append("Safety Alert: Redirect path is invalid. Protocol requires valid source and destination zones.")
             revised_action = {"action": "none"}
@@ -168,19 +190,28 @@ class CriticAgent:
         risk_score = scoring["risk_score"]
         
         approved = False
-        if revised_action.get("action") == "redirect" and not is_negligible:
-            if risk_score < 80:
-                approved = True
-                notes.insert(0, f"Action Verified: The proposed redirect from {action.get('from')} to {action.get('to')} is tactically sound and supports the '{plan.get('strategy', 'allocation')}' mission.")
-            elif risk_score < 95:
-                approved = True
-                partial_vehicles = max(1, int(revised_action.get("vehicles", 1)) // 2)
+        hard_unsafe = bool(route_blocked or scoring["invalid_path"] or safe_transfer <= 0 or scoring.get("risk_factors", {}).get("blocked_zone"))
+        if revised_action.get("action") == "redirect" and not is_negligible and not hard_unsafe:
+            approved = True
+            if risk_score >= 80:
+                partial_vehicles = max(1, min(2, int(revised_action.get("vehicles", 1) or 1)))
                 revised_action["vehicles"] = partial_vehicles
-                notes.insert(0, f"Critic Mitigation: High risk detected ({risk_score}), mitigating by reducing transfer volume to {partial_vehicles}.")
+                notes.insert(0, f"Critic Mitigation: High risk detected ({risk_score}), approving reduced micro-action of {partial_vehicles}.")
+            elif 40 <= risk_score < 80 and reward_trend < -0.3:
+                reduced = max(1, min(2, int(revised_action.get("vehicles", 1))))
+                if reduced < int(revised_action.get("vehicles", 1)):
+                    revised_action["vehicles"] = reduced
+                    notes.insert(0, f"Critic Recovery: Moderate risk with negative reward trend, approving reduced micro-action of {reduced} vehicle(s).")
+            notes.insert(0, f"Action Verified: The proposed redirect from {action.get('from')} to {action.get('to')} is tactically sound and supports the '{plan.get('strategy', 'allocation')}' mission.")
         
         if not approved and revised_action.get("action") == "redirect":
-            notes.insert(0, f"Safety Override: Critical risk ({risk_score}). Reverting to system baseline.")
-            revised_action = {"action": "none"}
+            if not hard_unsafe and risk_score < 90 and (queue_length_val >= 2 or reward_trend < -0.1):
+                approved = True
+                revised_action["vehicles"] = max(1, min(2, int(revised_action.get("vehicles", 1) or 1)))
+                notes.insert(0, f"Critic Replan Assist: Pressure is active, so a reduced micro-action of {revised_action['vehicles']} vehicle(s) remains executable.")
+            else:
+                notes.insert(0, f"Safety Override: Critical risk ({risk_score}). Reverting to system baseline.")
+                revised_action = {"action": "none"}
 
         alternative_actions = self._suggest_alternatives(
             action,
@@ -298,6 +329,10 @@ class CriticAgent:
             notes.append("Queue pressure is elevated, so the critic is applying stricter routing checks.")
 
         route_reward = learning_profile.get("route_profile", {}).get("avg_reward", 0.0)
+        route_key = f"{from_zone}->{to_zone}"
+        if route_key in learning_profile.get("blocked_routes", []):
+            risk_factors["blocked_route"] = 100
+            notes.append("Route is temporarily blocked by memory after repeated failures.")
         if route_reward < -2.5:
             risk_factors["poor_route_history"] = 24
             notes.append("Historical route performance is poor for this transfer.")
@@ -316,6 +351,19 @@ class CriticAgent:
             risk_factors["time_window_pressure"] = time_penalty
 
         risk_score = round(max(0, min(100, sum(risk_factors.values()))), 2)
+        expected_gain = action.get("expected_gain")
+        if expected_gain is None:
+            expected_gain = max(
+                0.0,
+                min(requested, safe_transfer) * 0.25
+                + max(0, 12 - source_free) * 0.08
+                + max(0, source_pressure - demand.get(to_zone, 0)) * 0.02,
+            )
+        expected_gain = float(expected_gain or 0.0)
+        if expected_gain <= 0 and action.get("action") == "redirect":
+            risk_factors["no_expected_gain"] = 60
+            notes.append("Expected gain is not positive.")
+            risk_score = round(max(risk_score, 70), 2)
         return {
             "risk_score": risk_score,
             "risk_probability": self._score_to_probability(risk_score),
@@ -323,6 +371,7 @@ class CriticAgent:
             "invalid_path": False,
             "observations": {"safe_transfer": safe_transfer},
             "notes": notes,
+            "expected_gain": expected_gain,
         }
 
     def _ask_llm_for_review(
@@ -373,7 +422,7 @@ class CriticAgent:
                     "You are an advisory critic. Do not override deterministic safety checks. "
                     "You may add notes or make a redirect stricter, but never approve a high-risk deterministic rejection."
                 ),
-                force=reasoning_budget.get("force_llm", False),
+                force=False,
             )
         except Exception:
             return deterministic_review
@@ -384,6 +433,7 @@ class CriticAgent:
             return deterministic_review
         if llm_review.get("deterministic_review"):
             return deterministic_review
+        llm_review = {key: value for key, value in llm_review.items() if key != "_llm_runtime"}
         if not self._is_valid_llm_review(llm_review):
             deterministic_review["critic_notes"].append("LLM advisory review was ignored because its structure was invalid.")
             return deterministic_review
@@ -402,10 +452,7 @@ class CriticAgent:
 
         llm_action = llm_review.get("revised_action", {})
         if llm_action.get("action") == "none" and merged.get("approved"):
-            merged["approved"] = False
-            merged["risk_level"] = max(merged["risk_level"], "medium", key=self._risk_rank)
-            merged["revised_action"] = {"action": "none"}
-            merged["critic_notes"].append("LLM advisory downgraded the action to no-op.")
+            merged["critic_notes"].append("LLM advisory suggested no-op, but deterministic critic approval retained execution authority.")
         elif self._is_safe_stricter_action(merged.get("revised_action", {}), llm_action):
             merged["revised_action"] = llm_action
             merged["critic_notes"].append("LLM advisory reduced the action within deterministic safety limits.")
@@ -473,8 +520,8 @@ class CriticAgent:
             }
         if scoring["risk_score"] >= 40:
             return {
-                "required": False,
-                "reason": "Medium risk; continue only with reduced capacity and monitoring.",
+                "required": True,
+                "reason": "Medium risk; replan immediately with reduced capacity and monitoring.",
                 "suggested_action": alternatives[0] if alternatives else {"action": "none"},
             }
         return {"required": False, "reason": "Risk is within acceptable bounds.", "suggested_action": None}
@@ -501,7 +548,11 @@ class CriticAgent:
         )
 
     def _log_review(self, review):
-        level = "ERROR" if review.get("risk_level") == "high" else "WARNING" if review.get("risk_level") == "medium" else "INFO"
+        level = (
+            "WARNING"
+            if not review.get("approved") or review.get("risk_level") in {"high", "medium"}
+            else "INFO"
+        )
         self.logger.log(
             review.get("tool_observations", {}).get("event_context", {}).get("step", "-"),
             "critic_review",

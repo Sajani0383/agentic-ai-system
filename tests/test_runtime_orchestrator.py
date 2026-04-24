@@ -80,8 +80,21 @@ class RuntimeOrchestratorTests(unittest.TestCase):
         self.assertIn("reasoning_summary", result)
         self.assertIn("agent_loop_steps", result)
         self.assertIn("memory_summary", result)
+        self.assertIn("decision_provenance", result)
         self.assertIn("budget_level", result["reasoning_budget"])
         self.assertTrue(any(item.get("agent") == "ReasoningBudget" for item in result.get("agent_interactions", [])))
+
+    def test_controller_autonomously_revises_goal_metadata(self):
+        env = ParkingEnvironment(zones=["A", "B"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+
+        result = controller.step()
+        goal = result.get("goal", {})
+        self.assertTrue(goal)
+        self.assertEqual(goal.get("source"), "autonomous_controller")
+        self.assertIn("revision_reason", goal)
+        self.assertGreaterEqual(int(goal.get("revision_count", 0) or 0), 1)
 
     @patch("services.parking_runtime.get_operational_briefing")
     def test_runtime_passes_briefing_budget_flag(self, mock_briefing):
@@ -97,6 +110,7 @@ class RuntimeOrchestratorTests(unittest.TestCase):
         self.assertIn("reasoning_summary", snapshot)
         self.assertIn("agent_loop_steps", snapshot)
         self.assertIn("memory_summary", snapshot)
+        self.assertIn("decision_provenance", snapshot.get("latest_result", {}))
         self.assertIn("notification_summary", snapshot)
         self.assertIn("benchmark_summary", snapshot)
         self.assertIn("last_llm_decision", snapshot)
@@ -106,9 +120,78 @@ class RuntimeOrchestratorTests(unittest.TestCase):
         stepped = runtime.get_runtime_snapshot()
         self.assertTrue(len(stepped["agent_loop_steps"]) >= 5)
         self.assertIn("decision", stepped["reasoning_summary"])
+        self.assertIn("final_authority", stepped["reasoning_summary"])
         self.assertIn("history", stepped["memory_summary"])
+        self.assertIn("goal_history", stepped["memory_summary"])
         self.assertIn("local_reasoning", stepped["llm_usage_summary"])
         self.assertIn("gemini_attempts", stepped["llm_usage_summary"])
+
+    def test_memory_can_persist_llm_route_rules(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        runtime.set_scenario_mode("Exam Rush")
+        runtime.memory.record_llm_rule(
+            "Exam Rush",
+            {
+                "llm_advisory_used": True,
+                "llm_influence": True,
+                "llm_source": "gemini",
+                "llm_summary": "Prefer Tech Park when Library pressure rises.",
+            },
+            {"action": "redirect", "from": "Library", "to": "Tech Park", "vehicles": 2},
+            0.45,
+            {},
+        )
+        snapshot = runtime.get_runtime_snapshot()
+        rules = snapshot["memory_summary"]["learning_profile"].get("llm_memory_rules", [])
+        self.assertTrue(rules)
+        self.assertEqual(rules[0]["route_key"], "Library->Tech Park")
+
+    def test_micro_redirect_prefers_llm_memory_destination(self):
+        env = ParkingEnvironment(zones=["A", "B", "C"])
+        env.state = {
+            "A": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 6, "exit": 1},
+            "B": {"total_slots": 100, "occupied": 35, "free_slots": 65, "entry": 2, "exit": 3},
+            "C": {"total_slots": 100, "occupied": 20, "free_slots": 80, "entry": 1, "exit": 2},
+        }
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        context = {
+            "state": env.state,
+            "demand": {"A": 20, "B": 3, "C": 4},
+            "learning_profile": {
+                "blocked_routes": [],
+                "llm_memory_rules": [
+                    {"scenario": "Exam Rush", "from": "A", "to": "B", "route_key": "A->B", "strength": 0.95, "ttl": 8}
+                ],
+            },
+        }
+        action = controller._build_micro_redirect(context, "test")
+        self.assertEqual(action["to"], "B")
+        self.assertGreaterEqual(action["vehicles"], 2)
+
+    def test_sequence_continuation_uses_follow_up_steps(self):
+        env = ParkingEnvironment(zones=["A", "B"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        mem.log_cycle({"step": 1, "kpis": {"queue_length": 1}, "reward": {"agentic_reward_score": 0.1}})
+        mem.set_goal(
+            {
+                "objective": "Test sequence continuation",
+                "pending_action_sequence": [
+                    {"step": 1, "phase": "stabilize", "action": {"action": "redirect", "from": "A", "to": "B", "vehicles": 2}},
+                    {"step": 2, "phase": "monitor", "action": {"action": "observe"}},
+                    {"step": 3, "phase": "fallback", "action": {"action": "redirect", "from": "A", "to": "B", "vehicles": 1}},
+                ],
+                "pending_sequence_index": 1,
+            }
+        )
+        continued = controller._apply_sequence_continuation(
+            {"proposed_action": {"action": "redirect", "from": "A", "to": "B", "vehicles": 2}},
+            {"goal": mem.get_active_goal(), "operational_signals": {"queue_length": 1}},
+        )
+        self.assertTrue(continued.get("sequence_continuation_applied"))
+        self.assertEqual(continued["proposed_action"]["action"], "none")
+        self.assertEqual(continued.get("sequence_step_executed"), 2)
 
     def test_reset_clears_llm_backoff_state(self):
         STATUS_MANAGER.start_backoff("ConnectError: test", seconds=30, kind="transient")

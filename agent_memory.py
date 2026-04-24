@@ -88,14 +88,21 @@ class AdaptiveLearningProfile:
             "recent_rewards": [],
             "recent_failures": [],
             "blocked_routes": [],
+            "blocked_route_ttl": {},
             "route_consecutive_failures": {},
+            "none_failure_count": 0,
+            "none_block_steps": 0,
+            "plan_patterns": {},
             "consolidated_insights": [],
+            "llm_memory_rules": {},
             "q_table": [],
         }
 
     def update_signal(self, scenario_mode, action, reward_score, kpis=None):
         self.state.setdefault("recent_rewards", []).append(round(reward_score, 2))
         self.state["recent_rewards"] = self.state["recent_rewards"][-50:]
+        self._decay_blocked_routes()
+        self._decay_none_block()
         
         failure_window = self.state.setdefault("recent_failures", [])
         if kpis:
@@ -109,12 +116,36 @@ class AdaptiveLearningProfile:
             })
             self.state["recent_failures"] = failure_window[-30:]
 
+        action_type = (action or {}).get("action", "none")
+        queue_length = int((kpis or {}).get("queue_length", 0))
+        none_failed = action_type == "none" and (reward_score < 0 or queue_length >= 4)
+        if none_failed:
+            self.state["none_failure_count"] = int(self.state.get("none_failure_count", 0)) + 1
+            if self.state["none_failure_count"] >= 2:
+                self.state["none_block_steps"] = max(int(self.state.get("none_block_steps", 0)), 4)
+                self.state["latest_learning_insight"] = (
+                    "Memory: repeated NONE outcomes failed under pressure; blocking hold and forcing a micro redirect."
+                )
+        elif action_type == "redirect" and reward_score > -0.1:
+            self.state["none_failure_count"] = 0
+
         reward_window = self.state["recent_rewards"]
         if reward_window:
             avg_reward = sum(reward_window) / len(reward_window)
             current_bias = float(self.state.get("global_transfer_bias", 1.0))
-            adjusted_bias = current_bias + (0.10 if avg_reward > 0 else -0.10)
-            self.state["global_transfer_bias"] = round(min(2.0, max(0.2, adjusted_bias)), 2)
+            # Stronger reward-to-policy coupling — each update moves bias proportionally
+            if avg_reward < -0.45:
+                delta = -0.40
+            elif avg_reward < -0.3:
+                delta = -0.25   # aggressive downshift on bad streaks
+            elif avg_reward < 0:
+                delta = -0.10
+            elif avg_reward > 0.3:
+                delta = +0.15
+            else:
+                delta = +0.05
+            self.state["global_transfer_bias"] = round(min(2.0, max(0.05, current_bias + delta)), 2)
+            self.state["last_policy_reward"] = round(avg_reward, 3)
 
         scenario_profiles = self.state.setdefault("scenario_profiles", {})
         scenario_key = scenario_mode or "Unknown"
@@ -139,12 +170,15 @@ class AdaptiveLearningProfile:
             route_profile["attempts"] += 1
             attempts = route_profile["attempts"]
             route_profile["avg_reward"] = round(((route_profile["avg_reward"] * (attempts - 1)) + reward_score) / attempts, 2)
-            route_profile["success_bias"] = round(min(1.6, max(0.4, route_profile["success_bias"] + (0.07 if reward_score > 0 else -0.07))), 2)
+            route_profile["success_bias"] = round(min(1.6, max(0.2, route_profile["success_bias"] + (0.09 if reward_score > 0 else -0.12))), 2)
             
             if reward_score < -0.3:
                 # Strong reward shift - dramatically alter global bounds
                 self.state["global_transfer_bias"] = round(max(0.1, float(self.state.get("global_transfer_bias", 1.0)) - 0.5), 2)
                 self.state["latest_learning_insight"] = f"CRITICAL SHIFT: System performance degraded (Reward: {reward_score}). Slashing global transfer bias to {self.state['global_transfer_bias']}x to force policy change."
+                self.state["force_recovery_redirect_next_step"] = True
+                if route_profile["avg_reward"] <= -0.2 or self.state.get("last_policy_reward", 0.0) <= -0.2:
+                    self.add_failure(action.get("from"), action.get("to"), reason=f"Reward collapse ({reward_score}) triggered adaptive route penalty.")
             else:
                 feedback_direction = "reduced" if reward_score > 0 else "increased"
                 self.state["latest_learning_insight"] = f"Previous execution on {route_key} {feedback_direction} search time. Strategy confidence is now {route_profile['success_bias']}x."
@@ -169,25 +203,60 @@ class AdaptiveLearningProfile:
         consec = self.state.setdefault("route_consecutive_failures", {})
         consec[route_key] = consec.get(route_key, 0) + 1
 
-        # Auto-block routes with 1+ consecutive failures
+        # Auto-block routes after repeated failures, then let decay re-open them.
         blocked = self.state.setdefault("blocked_routes", [])
-        if consec[route_key] >= 1 and route_key not in blocked:
+        blocked_ttl = self.state.setdefault("blocked_route_ttl", {})
+        if consec[route_key] >= 2 and route_key not in blocked:
             blocked.append(route_key)
+            blocked_ttl[route_key] = 6
             self.state["latest_learning_insight"] = (
                 f"Memory: Route {route_key} BLOCKED after {consec[route_key]} consecutive failures — "
                 f"system will select alternative destinations."
             )
+        # Decay: track successful steps per route to auto-unblock
+        decay = self.state.setdefault("route_success_since_block", {})
+        decay[route_key] = 0  # reset success counter on new failure
 
     def reset_route_failure_count(self, from_zone, to_zone):
         route_key = f"{from_zone}->{to_zone}"
         self.state.get("route_consecutive_failures", {})[route_key] = 0
+        # Increment success counter: auto-unblock after 10 consecutive successes
+        decay = self.state.setdefault("route_success_since_block", {})
+        decay[route_key] = decay.get(route_key, 0) + 1
         blocked = self.state.get("blocked_routes", [])
-        if route_key in blocked:
+        if route_key in blocked and decay[route_key] >= 4:
             blocked.remove(route_key)
+            self.state.get("blocked_route_ttl", {}).pop(route_key, None)
+            decay[route_key] = 0
+            self.state["latest_learning_insight"] = (
+                f"Memory: Route {route_key} AUTO-UNBLOCKED after recovery checks — restored to candidate pool."
+            )
 
     def get_route_failure_count(self, from_zone, to_zone):
         route_key = f"{from_zone}->{to_zone}"
         return self.state.get("route_consecutive_failures", {}).get(route_key, 0)
+
+    def _decay_blocked_routes(self):
+        blocked = self.state.setdefault("blocked_routes", [])
+        ttl = self.state.setdefault("blocked_route_ttl", {})
+        for route in list(blocked):
+            ttl[route] = int(ttl.get(route, 6)) - 1
+            if ttl[route] <= 0:
+                blocked.remove(route)
+                ttl.pop(route, None)
+                self.state.get("route_consecutive_failures", {})[route] = 0
+                self.state["latest_learning_insight"] = (
+                    f"Memory: Route {route} cooled down and is available for cautious retry."
+                )
+
+    def _decay_none_block(self):
+        remaining = int(self.state.get("none_block_steps", 0) or 0)
+        if remaining <= 0:
+            return
+        self.state["none_block_steps"] = remaining - 1
+        if self.state["none_block_steps"] <= 0:
+            self.state["none_failure_count"] = 0
+            self.state["latest_learning_insight"] = "Memory: NONE hold block cooled down; cautious holds are available again."
 
     def load_from_payload(self, state):
         self.state = deepcopy(state)
@@ -208,19 +277,150 @@ class AdaptiveLearningProfile:
             count = consec_failures.get(r, 0)
             avoid_hints.append(f"{r} (blocked: {count} failures)")
 
+        llm_decisions = self.state.get("llm_decisions", [])
+        llm_rules = self._get_active_llm_rules(scenario_mode=scenario_mode, from_zone=from_zone, to_zone=to_zone)
         return {
             "global_transfer_bias": round(float(self.state.get("global_transfer_bias", 1.0)), 2),
             "recent_reward_avg": round(sum(self.state.get("recent_rewards", []) or [0.0]) / max(1, len(self.state.get("recent_rewards", []))), 2),
             "last_reward": (self.state.get("recent_rewards", []) or [-0.1])[-1],
+            "last_policy_reward": float(self.state.get("last_policy_reward", 0.0)),
             "scenario_profile": deepcopy(scenario_profiles.get(scenario_mode, {})) if scenario_mode else {},
             "route_profile": deepcopy(route_profiles.get(route_key, {})) if route_key else {},
             "recent_failures": deepcopy(self.state.get("recent_failures", [])[-5:]),
             "blocked_routes": blocked_routes[:],
+            "blocked_route_ttl": deepcopy(self.state.get("blocked_route_ttl", {})),
             "route_consecutive_failures": deepcopy(consec_failures),
             "avoid_hints": avoid_hints,
             "consolidated_insights": self.state.get("consolidated_insights", []),
             "latest_learning_insight": self.state.get("latest_learning_insight", "No specific route patterns consolidated yet."),
+            "llm_decisions_count": len(llm_decisions),
+            "last_llm_decision": deepcopy(llm_decisions[-1]) if llm_decisions else {},
+            "llm_memory_rules": llm_rules,
+            "force_hold_next_step": bool(self.state.get("force_hold_next_step", False)),
+            "force_recovery_redirect_next_step": bool(self.state.get("force_recovery_redirect_next_step", False)),
+            "none_failure_count": int(self.state.get("none_failure_count", 0) or 0),
+            "none_block_steps": int(self.state.get("none_block_steps", 0) or 0),
+            "none_block_active": int(self.state.get("none_block_steps", 0) or 0) > 0,
+            "pattern_penalty_rules": dict(self.state.get("pattern_penalty_rules", {})),
+            "plan_patterns": deepcopy(self.state.get("plan_patterns", {})),
         }
+
+    def record_llm_rule(self, scenario_mode, planner_output, final_action, reward_score=0.0, kpis=None):
+        planner_output = planner_output or {}
+        final_action = final_action or planner_output.get("proposed_action", {})
+        if final_action.get("action") != "redirect":
+            return
+        source = final_action.get("from")
+        destination = final_action.get("to")
+        if not source or not destination or source == destination:
+            return
+
+        rationale = (
+            planner_output.get("llm_summary")
+            or planner_output.get("rationale")
+            or final_action.get("reason")
+            or ""
+        )
+        scenario = scenario_mode or "Unknown"
+        route_key = f"{source}->{destination}"
+        rules = self.state.setdefault("llm_memory_rules", {})
+        rule_key = f"{scenario}|{source}|{destination}"
+        rule = rules.setdefault(
+            rule_key,
+            {
+                "scenario": scenario,
+                "from": source,
+                "to": destination,
+                "route_key": route_key,
+                "prefer_count": 0,
+                "avoid_count": 0,
+                "strength": 0.0,
+                "avg_reward": 0.0,
+                "ttl": 10,
+                "last_reason": "",
+                "last_step": None,
+                "source": "llm",
+            },
+        )
+
+        reward = float(reward_score or 0.0)
+        attempts = int(rule.get("prefer_count", 0)) + int(rule.get("avoid_count", 0)) + 1
+        rule["avg_reward"] = round(((float(rule.get("avg_reward", 0.0)) * (attempts - 1)) + reward) / attempts, 3)
+        negative_language = any(token in rationale.lower() for token in ["avoid", "fail", "blocked", "unsafe", "risk"])
+        if reward < -0.2 or negative_language:
+            rule["avoid_count"] = int(rule.get("avoid_count", 0)) + 1
+            rule["strength"] = round(max(-1.0, float(rule.get("strength", 0.0)) - 0.25), 3)
+        else:
+            rule["prefer_count"] = int(rule.get("prefer_count", 0)) + 1
+            bonus = 0.25 if planner_output.get("llm_influence") else 0.12
+            rule["strength"] = round(min(1.0, float(rule.get("strength", 0.0)) + bonus + max(0.0, reward) * 0.1), 3)
+        rule["ttl"] = 12
+        rule["last_reason"] = rationale[:220]
+        rule["last_step"] = planner_output.get("step")
+        rule["source"] = planner_output.get("llm_source", "llm")
+        rules[rule_key] = rule
+        self.state["llm_memory_rules"] = dict(list(rules.items())[-80:])
+        direction = "prefer" if rule["strength"] >= 0 else "avoid"
+        self.state["latest_learning_insight"] = (
+            f"LLM memory rule learned: {direction} {route_key} during {scenario} "
+            f"(strength {rule['strength']})."
+        )
+
+    def _get_active_llm_rules(self, scenario_mode=None, from_zone=None, to_zone=None):
+        rules = self.state.setdefault("llm_memory_rules", {})
+        active = []
+        for key, rule in list(rules.items()):
+            ttl = int(rule.get("ttl", 0) or 0)
+            if ttl <= 0:
+                del rules[key]
+                continue
+            if scenario_mode and rule.get("scenario") not in {scenario_mode, "Unknown"}:
+                continue
+            if from_zone and rule.get("from") != from_zone:
+                continue
+            if to_zone and rule.get("to") != to_zone:
+                continue
+            active.append(deepcopy(rule))
+        active.sort(key=lambda item: abs(float(item.get("strength", 0.0))), reverse=True)
+        return active[:12]
+
+    def record_plan_outcome(self, plan, critic, execution, reward_score):
+        action = (execution or {}).get("final_action") or (critic or {}).get("revised_action") or (plan or {}).get("proposed_action", {})
+        if action.get("action") != "redirect":
+            signature = "NONE"
+        else:
+            volume = "micro" if int(action.get("vehicles", 0) or 0) <= 2 else "standard"
+            signature = f"{action.get('from')}->{action.get('to')}:{volume}"
+        patterns = self.state.setdefault("plan_patterns", {})
+        profile = patterns.setdefault(
+            signature,
+            {
+                "attempts": 0,
+                "avg_reward": 0.0,
+                "successes": 0,
+                "failures": 0,
+                "last_action": {},
+                "last_critic": {},
+            },
+        )
+        profile["attempts"] += 1
+        attempts = profile["attempts"]
+        profile["avg_reward"] = round(((profile["avg_reward"] * (attempts - 1)) + reward_score) / attempts, 3)
+        if reward_score > 0:
+            profile["successes"] += 1
+        else:
+            profile["failures"] += 1
+            if profile["failures"] >= 2 and signature != "NONE":
+                self.state["latest_learning_insight"] = (
+                    f"Plan pattern {signature} is underperforming; future route scoring will penalize repeat micro-actions."
+                )
+        profile["last_action"] = deepcopy(action)
+        profile["last_critic"] = {
+            "approved": bool((critic or {}).get("approved")),
+            "risk_score": (critic or {}).get("risk_score"),
+            "risk_level": (critic or {}).get("risk_level"),
+        }
+        self.state["plan_patterns"] = dict(sorted(patterns.items())[-40:])
 
     def get_recently_failed_zones(self):
         """Returns a list of destination zones that failed within the last 5 attempts."""
@@ -267,6 +467,22 @@ class AdaptiveLearningProfile:
             self.state["latest_learning_insight"] = insights[0]
         else:
             self.state["consolidated_insights"] = []
+
+        # Logic-based rule generation: convert patterns into scoring penalties
+        penalty_rules = self.state.setdefault("pattern_penalty_rules", {})
+        for route, count in route_failure_stats.items():
+            if count >= 3:
+                # Assign a numeric penalty that the planner scoring can directly use
+                penalty_rules[route] = round(min(0.5, 0.10 * count), 3)  # up to 50% penalty
+        # Decay old rules not seen in recent failures
+        for route in list(penalty_rules.keys()):
+            if route not in route_failure_stats:
+                penalty_rules[route] = round(max(0, penalty_rules[route] - 0.05), 3)
+                if penalty_rules[route] <= 0:
+                    del penalty_rules[route]
+
+        for rule in self.state.setdefault("llm_memory_rules", {}).values():
+            rule["ttl"] = max(0, int(rule.get("ttl", 0) or 0) - 1)
 
 
 class AgentMemory:
@@ -338,13 +554,16 @@ class AgentMemory:
             if "reward" in cycle_data and "agentic_reward_score" in cycle_data["reward"]:
                 self.metrics.add_reward(cycle_data["reward"]["agentic_reward_score"])
                 
-            if cycle_data.get("planner_output", {}).get("llm_influence"):
-                llm_mem = self.state.setdefault("llm_decisions", [])
+            if cycle_data.get("planner_output", {}).get("llm_influence") or cycle_data.get("planner_output", {}).get("llm_advisory_used"):
+                llm_mem = self.learning.state.setdefault("llm_decisions", [])
                 llm_mem.append({
                     "step": cycle_data.get("step"),
                     "action": cycle_data["planner_output"].get("proposed_action"),
-                    "reason": cycle_data["planner_output"].get("llm_summary", "")
+                    "reason": cycle_data["planner_output"].get("llm_summary", ""),
+                    "influenced": bool(cycle_data.get("planner_output", {}).get("llm_influence")),
+                    "source": cycle_data.get("planner_output", {}).get("llm_source", "llm"),
                 })
+                self.learning.state["llm_decisions"] = llm_mem[-50:]
             if len(self.cycles) > self.max_cycles:
                 self.cycles = self.cycles[-self.max_cycles :]
             self._throttled_save()
@@ -376,6 +595,16 @@ class AgentMemory:
     def update_learning_signal(self, scenario_mode, action, reward_score, kpis=None):
         with self._lock:
             self.learning.update_signal(scenario_mode, action, reward_score, kpis)
+            self._throttled_save()
+
+    def record_plan_outcome(self, plan, critic, execution, reward_score):
+        with self._lock:
+            self.learning.record_plan_outcome(plan, critic, execution, reward_score)
+            self._throttled_save()
+
+    def record_llm_rule(self, scenario_mode, planner_output, final_action, reward_score=0.0, kpis=None):
+        with self._lock:
+            self.learning.record_llm_rule(scenario_mode, planner_output, final_action, reward_score, kpis)
             self._throttled_save()
 
     def add_failure(self, from_zone, to_zone, reason):

@@ -3,6 +3,7 @@ pandas
 numpy
 plotly
 scikit-learn
+joblib
 google-genai
 python-dotenv
 matplotlib

@@ -6,6 +6,23 @@ from ml.predict import predict_demand
 
 
 class ParkingEnvironment:
+    SRM_PARKING_ZONES = [
+        ("Main Block", 120, 300, 420),
+        ("Hi-Tech Block", 150, 400, 550),
+        ("ES Block", 100, 250, 350),
+        ("Mech A", 80, 200, 280),
+        ("Mech B", 90, 220, 310),
+        ("Mech C", 85, 210, 295),
+        ("Automobile Block", 70, 180, 250),
+        ("CRC Block", 130, 150, 280),
+        ("Admin Block", 110, 120, 230),
+        ("Library", 60, 200, 260),
+        ("MBA Block", 75, 160, 235),
+        ("Biotech Block", 90, 180, 270),
+        ("Tech Park", 200, 300, 500),
+        ("Basic Eng Lab", 140, 350, 490),
+    ]
+
     DEFAULT_CONFIG = {
         "history_limit": 80,
         "initial_capacity_min": 90,
@@ -35,16 +52,15 @@ class ParkingEnvironment:
         "search_time_utilisation_weight": 0.08,
         "search_time_queue_weight": 0.3,
         "search_time_blocked_penalty": 0.4,
+        "execution_failure_probability": 0.0,
     }
 
     def __init__(self, zones=None, seed=None, config=None):
-        self.default_zones = [
-            "Academic Block",
-            "Library",
-            "Innovation Lab",
-            "Hostel Hub",
-            "Stadium",
-        ]
+        self.default_zones = [zone[0] for zone in self.SRM_PARKING_ZONES]
+        self.zone_capacity_profile = {
+            name: {"car_slots": car_slots, "bike_slots": bike_slots, "total_slots": total_capacity}
+            for name, car_slots, bike_slots, total_capacity in self.SRM_PARKING_ZONES
+        }
         self.seed = seed
         self.rng = random.Random(seed)
         self.config = dict(self.DEFAULT_CONFIG)
@@ -68,21 +84,7 @@ class ParkingEnvironment:
         self.day_index = 0
         self.simulated_hour = 8
         self.active_dynamic_signals = {}
-        self.state = {
-            zone: {
-                "total_slots": self.rng.randint(
-                    self.config["initial_capacity_min"],
-                    self.config["initial_capacity_max"],
-                ),
-                "occupied": self.rng.randint(
-                    self.config["initial_occupied_min"],
-                    self.config["initial_occupied_max"],
-                ),
-                "entry": 0,
-                "exit": 0,
-            }
-            for zone in self.zones
-        }
+        self.state = {zone: self._initial_zone_state(zone) for zone in self.zones}
         self._validate_internal_state()
         self.history = [self.get_state()]
         self.last_transition = {
@@ -98,6 +100,35 @@ class ParkingEnvironment:
             "step_breakdown": self.explain_step_model(),
         }
         return self.get_state()
+
+    def _initial_zone_state(self, zone):
+        profile = self.zone_capacity_profile.get(zone)
+        if profile:
+            total_slots = int(profile["total_slots"])
+            occupied = self.rng.randint(max(1, int(total_slots * 0.25)), max(2, int(total_slots * 0.55)))
+            return {
+                "total_slots": total_slots,
+                "car_slots": int(profile["car_slots"]),
+                "bike_slots": int(profile["bike_slots"]),
+                "occupied": min(occupied, total_slots),
+                "entry": 0,
+                "exit": 0,
+            }
+        total_slots = self.rng.randint(
+            self.config["initial_capacity_min"],
+            self.config["initial_capacity_max"],
+        )
+        return {
+            "total_slots": total_slots,
+            "car_slots": total_slots,
+            "bike_slots": 0,
+            "occupied": self.rng.randint(
+                self.config["initial_occupied_min"],
+                min(self.config["initial_occupied_max"], total_slots),
+            ),
+            "entry": 0,
+            "exit": 0,
+        }
 
     def step(self, action=None):
         previous_state = self.get_state()
@@ -189,8 +220,8 @@ class ParkingEnvironment:
         if from_zone not in self.state or to_zone not in self.state or from_zone == to_zone:
             return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles, "status": "invalid"}
 
-        # Simulated realism: 15% chance of a real-world execution block
-        if self.rng.random() < 0.15:
+        failure_probability = float(self.config.get("execution_failure_probability", 0.0) or 0.0)
+        if failure_probability > 0 and self.rng.random() < failure_probability:
             reason = self.rng.choice(["Network latency timeout", "Security barrier unresponsive", "Dynamic signage offline"])
             return {"moved": 0, "from": from_zone, "to": to_zone, "requested": vehicles, "status": "failed", "reason": reason}
 
@@ -220,16 +251,21 @@ class ParkingEnvironment:
 
     def get_environment_summary(self):
         return {
-            "environment_type": "dynamic event-driven stochastic parking simulation",
+            "environment_type": "SRM campus parking simulation",
+            "campus": "SRM Institute campus",
+            "parking_blocks": deepcopy(self.zone_capacity_profile),
             "step_breakdown": self.explain_step_model(),
             "config": deepcopy(self.config),
             "seed": self.seed,
         }
 
     def get_state(self):
+        self._normalize_all_state_payloads()
         return {
             zone: {
                 "total_slots": self.state[zone]["total_slots"],
+                "car_slots": self.state[zone].get("car_slots", self.state[zone]["total_slots"]),
+                "bike_slots": self.state[zone].get("bike_slots", 0),
                 "occupied": self.state[zone]["occupied"],
                 "free_slots": self.state[zone]["total_slots"] - self.state[zone]["occupied"],
                 "entry": self.state[zone]["entry"],
@@ -274,6 +310,7 @@ class ParkingEnvironment:
         self.zone_map = {zone: index for index, zone in enumerate(self.zones)}
         self.config.update(snapshot.get("config", {}))
         self.state = deepcopy(snapshot.get("state", self.state))
+        self._normalize_all_state_payloads()
         self._validate_internal_state()
         self.history = deepcopy(snapshot.get("history", [self.get_state()]))
         self.step_count = snapshot.get("step_count", 0)
@@ -308,11 +345,11 @@ class ParkingEnvironment:
     def _time_multiplier(self, zone):
         base = 1.0
         if 8 <= self.simulated_hour <= 10:
-            base += self.config["morning_primary_boost"] if zone in {"Academic Block", "Library"} else self.config["morning_secondary_boost"]
+            base += self.config["morning_primary_boost"] if zone in {"Main Block", "Hi-Tech Block", "Admin Block", "Library"} else self.config["morning_secondary_boost"]
         elif 12 <= self.simulated_hour <= 14:
             base += self.config["lunch_boost"]
         elif 17 <= self.simulated_hour <= 19:
-            base += self.config["evening_primary_boost"] if zone in {"Hostel Hub", "Stadium"} else self.config["evening_secondary_boost"]
+            base += self.config["evening_primary_boost"] if zone in {"Tech Park", "Basic Eng Lab", "CRC Block"} else self.config["evening_secondary_boost"]
         return base
 
     def _get_auto_scheduled_event(self):
@@ -331,13 +368,13 @@ class ParkingEnvironment:
 
     def _build_event_catalog(self):
         return {
-            "Auto Schedule": {"name": "Auto Schedule", "severity": "adaptive", "description": "Automatic campus demand schedule.", "focus_zone": "Academic Block", "recommended_zone": "Library", "allocation_strategy": "Adaptive overflow routing", "zone_multipliers": {}, "user_advisory": "The system is automatically selecting the current campus event profile."},
-            "Normal Day": {"name": "Normal Day", "severity": "low", "description": "Baseline weekday parking demand across campus.", "focus_zone": "Academic Block", "recommended_zone": "Library", "allocation_strategy": "Balanced utilisation", "zone_multipliers": {"Academic Block": 1.1, "Library": 1.0, "Innovation Lab": 1.0, "Hostel Hub": 0.95, "Stadium": 0.85}, "user_advisory": "Use the nearest academic parking zone. Overflow demand is currently low."},
-            "Class Changeover": {"name": "Class Changeover", "severity": "medium", "description": "Large inter-building movement between academic blocks during class transitions.", "focus_zone": "Academic Block", "recommended_zone": "Innovation Lab", "allocation_strategy": "Rapid overflow routing", "zone_multipliers": {"Academic Block": 1.45, "Library": 1.1, "Innovation Lab": 1.2, "Hostel Hub": 0.9, "Stadium": 0.8}, "user_advisory": "Drivers should prefer Innovation Lab parking to reduce queues near the Academic Block."},
-            "Exam Rush": {"name": "Exam Rush", "severity": "high", "description": "Exam sessions create sharp demand near study areas and academic halls.", "focus_zone": "Library", "recommended_zone": "Hostel Hub", "allocation_strategy": "Demand smoothing", "zone_multipliers": {"Academic Block": 1.3, "Library": 1.55, "Innovation Lab": 1.25, "Hostel Hub": 1.05, "Stadium": 0.75}, "user_advisory": "Visitors should be redirected early to Hostel Hub and satellite lots during exam peaks."},
-            "Sports Event": {"name": "Sports Event", "severity": "high", "description": "A campus sports event drives heavy incoming flow toward the Stadium.", "focus_zone": "Stadium", "recommended_zone": "Hostel Hub", "allocation_strategy": "Event-priority routing", "zone_multipliers": {"Academic Block": 0.95, "Library": 0.85, "Innovation Lab": 1.0, "Hostel Hub": 1.2, "Stadium": 1.75}, "user_advisory": "Use Hostel Hub overflow parking and walk or shuttle to the Stadium."},
-            "Fest Night": {"name": "Fest Night", "severity": "critical", "description": "Cultural fest traffic pushes both event and nearby residential zones into congestion.", "focus_zone": "Stadium", "recommended_zone": "Innovation Lab", "allocation_strategy": "Festival spillover containment", "zone_multipliers": {"Academic Block": 1.0, "Library": 0.8, "Innovation Lab": 1.3, "Hostel Hub": 1.4, "Stadium": 1.9}, "user_advisory": "Advance parking alerts should send users to Innovation Lab overflow before they reach the Stadium."},
-            "Emergency Spillover": {"name": "Emergency Spillover", "severity": "critical", "description": "A sudden closure or blockage forces fast redistribution across the network.", "focus_zone": "Academic Block", "recommended_zone": "Library", "allocation_strategy": "Protective rerouting", "zone_multipliers": {"Academic Block": 1.6, "Library": 1.25, "Innovation Lab": 1.15, "Hostel Hub": 1.0, "Stadium": 0.9}, "user_advisory": "The system should notify drivers immediately and reroute them away from the affected zone."},
+            "Auto Schedule": {"name": "Auto Schedule", "severity": "adaptive", "description": "Automatic SRM campus parking demand schedule.", "focus_zone": "Main Block", "recommended_zone": "Hi-Tech Block", "allocation_strategy": "Adaptive overflow routing", "zone_multipliers": {}, "user_advisory": "The system is automatically selecting the current SRM campus parking profile."},
+            "Normal Day": {"name": "Normal Day", "severity": "low", "description": "Baseline weekday parking demand across SRM blocks.", "focus_zone": "Main Block", "recommended_zone": "Hi-Tech Block", "allocation_strategy": "Balanced utilisation", "zone_multipliers": {"Main Block": 1.1, "Hi-Tech Block": 1.05, "Admin Block": 1.0, "Library": 1.0, "Tech Park": 0.95}, "user_advisory": "Use the nearest SRM block parking area. Overflow demand is currently low."},
+            "Class Changeover": {"name": "Class Changeover", "severity": "medium", "description": "Large inter-block movement during SRM class transitions.", "focus_zone": "Main Block", "recommended_zone": "Hi-Tech Block", "allocation_strategy": "Rapid overflow routing", "zone_multipliers": {"Main Block": 1.45, "Hi-Tech Block": 1.25, "ES Block": 1.15, "Admin Block": 1.1, "Library": 1.05}, "user_advisory": "Drivers should prefer Hi-Tech Block and ES Block parking to reduce queues near Main Block."},
+            "Exam Rush": {"name": "Exam Rush", "severity": "high", "description": "Exam sessions create sharp demand near SRM academic and library blocks.", "focus_zone": "Library", "recommended_zone": "Tech Park", "allocation_strategy": "Demand smoothing", "zone_multipliers": {"Library": 1.55, "Main Block": 1.35, "Hi-Tech Block": 1.25, "ES Block": 1.2, "Tech Park": 1.05}, "user_advisory": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks."},
+            "Sports Event": {"name": "Sports Event", "severity": "high", "description": "A campus event pushes incoming flow toward larger SRM parking blocks.", "focus_zone": "Tech Park", "recommended_zone": "Basic Eng Lab", "allocation_strategy": "Event-priority routing", "zone_multipliers": {"Tech Park": 1.75, "Basic Eng Lab": 1.35, "CRC Block": 1.2, "Main Block": 0.95, "Library": 0.85}, "user_advisory": "Use Basic Eng Lab and CRC Block overflow parking for event spillover."},
+            "Fest Night": {"name": "Fest Night", "severity": "critical", "description": "Cultural fest traffic pushes high-capacity SRM blocks into congestion.", "focus_zone": "Tech Park", "recommended_zone": "Basic Eng Lab", "allocation_strategy": "Festival spillover containment", "zone_multipliers": {"Tech Park": 1.9, "Basic Eng Lab": 1.5, "CRC Block": 1.35, "Hi-Tech Block": 1.2, "Library": 0.8}, "user_advisory": "Advance parking alerts should send users to Basic Eng Lab and CRC Block before they reach Tech Park."},
+            "Emergency Spillover": {"name": "Emergency Spillover", "severity": "critical", "description": "A sudden SRM block closure forces fast redistribution across parking areas.", "focus_zone": "Main Block", "recommended_zone": "CRC Block", "allocation_strategy": "Protective rerouting", "zone_multipliers": {"Main Block": 1.6, "Admin Block": 1.3, "Hi-Tech Block": 1.2, "CRC Block": 1.15, "Tech Park": 1.0}, "user_advisory": "The system should notify drivers immediately and reroute them away from the affected SRM block."},
         }
 
     def _build_zone_flow_plan(self, event_context, dynamic_signals):
@@ -647,8 +684,8 @@ class ParkingEnvironment:
         if from_zone not in zone_flow_plan or to_zone not in zone_flow_plan or from_zone == to_zone:
             return {"moved": 0, "from": from_zone, "to": to_zone, "requested": requested, "mode": "incoming_reroute", "status": "invalid"}
 
-        # Simulated realism: 15% chance of a real-world execution block during high intensity simulations
-        if self.rng.random() < 0.15:
+        failure_probability = float(self.config.get("execution_failure_probability", 0.0) or 0.0)
+        if failure_probability > 0 and self.rng.random() < failure_probability:
             reason = self.rng.choice(["Network latency timeout", "Security barrier unresponsive", "Dynamic signage offline"])
             return {"moved": 0, "from": from_zone, "to": to_zone, "requested": requested, "mode": "incoming_reroute", "status": "failed", "failure_reason": reason}
 
@@ -658,7 +695,8 @@ class ParkingEnvironment:
             0,
             (destination_plan["total_slots"] - destination_plan["occupied"]) + destination_plan["exit_count"],
         )
-        moved = max(0, min(requested, source_plan["raw_entry"], destination_capacity))
+        source_reroute_capacity = max(source_plan["raw_entry"], requested)
+        moved = max(0, min(requested, source_reroute_capacity, destination_capacity))
         return {
             "moved": moved,
             "from": from_zone,
@@ -684,6 +722,7 @@ class ParkingEnvironment:
                 raise ValueError("redirect action zones must exist in the environment")
 
     def _validate_internal_state(self):
+        self._normalize_all_state_payloads()
         for zone in self.zones:
             payload = self.state.get(zone)
             if not isinstance(payload, dict):
@@ -694,3 +733,38 @@ class ParkingEnvironment:
                 raise ValueError(f"Zone '{zone}' has invalid total_slots")
             if occupied < 0 or occupied > total:
                 raise ValueError(f"Zone '{zone}' has invalid occupied count")
+
+    def _normalize_all_state_payloads(self):
+        for zone in self.zones:
+            self.state[zone] = self._normalize_state_payload(zone, self.state.get(zone, {}))
+
+    def _normalize_state_payload(self, zone, payload):
+        payload = dict(payload or {})
+        profile = self.zone_capacity_profile.get(zone, {})
+        total_slots = int(payload.get("total_slots", profile.get("total_slots", 0)) or 0)
+        car_slots = int(payload.get("car_slots", profile.get("car_slots", total_slots)) or 0)
+        bike_slots = int(payload.get("bike_slots", profile.get("bike_slots", max(0, total_slots - car_slots))) or 0)
+        profile_total = int(profile.get("total_slots", 0) or 0)
+        if profile_total and (total_slots <= 0 or total_slots != profile_total):
+            total_slots = profile_total
+            car_slots = int(profile.get("car_slots", car_slots))
+            bike_slots = int(profile.get("bike_slots", bike_slots))
+        if total_slots <= 0:
+            total_slots = max(1, car_slots + bike_slots)
+        if car_slots < 0:
+            car_slots = 0
+        if bike_slots < 0:
+            bike_slots = 0
+        if car_slots + bike_slots != total_slots and profile_total:
+            car_slots = int(profile.get("car_slots", car_slots))
+            bike_slots = int(profile.get("bike_slots", bike_slots))
+        occupied = int(payload.get("occupied", 0) or 0)
+        occupied = max(0, min(occupied, total_slots))
+        return {
+            "total_slots": total_slots,
+            "car_slots": car_slots,
+            "bike_slots": bike_slots,
+            "occupied": occupied,
+            "entry": max(0, int(payload.get("entry", 0) or 0)),
+            "exit": max(0, int(payload.get("exit", 0) or 0)),
+        }

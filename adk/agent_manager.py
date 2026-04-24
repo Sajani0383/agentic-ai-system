@@ -84,7 +84,7 @@ def get_agent_registry():
             {
                 "id": "demand",
                 "name": "DemandAgent",
-                "role": "Predict zone-level demand pressure.",
+                "role": "Predict SRM block-level demand pressure.",
             },
             {
                 "id": "bayesian",
@@ -243,7 +243,7 @@ def update_goal(**updates):
     current_goal = runtime_service.memory.get_active_goal()
     if not current_goal:
         current_goal = {
-            "objective": "Reduce congestion and parking search time.",
+            "objective": "Reduce SRM block congestion and parking search time.",
             "target_congested_zones": 1,
             "horizon_steps": 5,
             "target_search_time_min": 4.0,
@@ -268,7 +268,7 @@ def get_policy_learning_report():
     learning_profile = metrics.get("learning_profile", {})
     q_table = learning_profile.get("q_table", [])
     return {
-        "policy_type": "Q-learning informed parking-zone selection",
+        "policy_type": "Q-learning informed SRM parking-block selection",
         "q_table": q_table,
         "q_table_shape": [
             len(q_table),

@@ -175,5 +175,94 @@ class AgentsComprehensiveTests(unittest.TestCase):
         self.assertEqual(demo_result["decision_mode"], "demo_simulated_gemini")
         self.assertEqual(demo_result["llm_source"], "demo_simulated")
 
+    def test_planner_applies_llm_memory_route_preference(self):
+        planner = PlannerAgent()
+        state = {
+            "Zone_A": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 7, "exit": 1},
+            "Zone_B": {"total_slots": 100, "occupied": 20, "free_slots": 80, "entry": 1, "exit": 4},
+            "Zone_C": {"total_slots": 100, "occupied": 35, "free_slots": 65, "entry": 2, "exit": 3},
+        }
+        tools = {
+            "build_zone_pressure_report": lambda s, d: {},
+            "build_belief_state": lambda *args, **kwargs: {},
+            "reward_trend_analysis": lambda: {},
+            "get_recent_cycles": lambda: [],
+            "get_event_context": lambda: {"severity": "high", "name": "Exam Rush", "recommended_zone": "Zone_B", "focus_zone": "Zone_A"},
+            "get_scenario_mode": lambda: "Exam Rush",
+            "get_operational_signals": lambda: {"queue_length": 4},
+            "suggest_best_zone": lambda s: "Zone_B",
+            "get_goal_status": lambda: {},
+            "get_learning_profile": lambda **kwargs: {
+                "blocked_routes": [],
+                "recent_failures": [],
+                "consolidated_insights": [],
+                "route_profile": {},
+                "scenario_profile": {},
+                "recent_reward_avg": 0.1,
+                "last_reward": 0.1,
+                "force_recovery_redirect_next_step": False,
+                "none_block_active": False,
+                "route_consecutive_failures": {},
+                "llm_memory_rules": [
+                    {"scenario": "Exam Rush", "from": "Zone_A", "to": "Zone_C", "route_key": "Zone_A->Zone_C", "strength": 0.9, "ttl": 8}
+                ],
+            },
+            "estimate_transfer_capacity": lambda f, t, r: min(4, r),
+        }
+        result = planner.plan(
+            state,
+            {"Zone_A": 22, "Zone_B": 4, "Zone_C": 5},
+            {"confidence": 0.72, "uncertainty": {"entropy": 0.8}},
+            {"steps": 3},
+            tools=tools,
+            reasoning_budget={"planner_llm_strategy": "deterministic"},
+        )
+        self.assertEqual(result["analysis"]["recommended_destination"], "Zone_C")
+        self.assertEqual(result["proposed_action"]["to"], "Zone_C")
+
+    def test_planner_uses_positive_llm_rule_to_strengthen_volume(self):
+        planner = PlannerAgent()
+        state = {
+            "Zone_A": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 7, "exit": 1},
+            "Zone_B": {"total_slots": 100, "occupied": 15, "free_slots": 85, "entry": 1, "exit": 4},
+        }
+        tools = {
+            "build_zone_pressure_report": lambda s, d: {},
+            "build_belief_state": lambda *args, **kwargs: {},
+            "reward_trend_analysis": lambda: {},
+            "get_recent_cycles": lambda: [],
+            "get_event_context": lambda: {"severity": "high", "name": "Exam Rush", "recommended_zone": "Zone_B", "focus_zone": "Zone_A"},
+            "get_scenario_mode": lambda: "Exam Rush",
+            "get_operational_signals": lambda: {"queue_length": 4},
+            "suggest_best_zone": lambda s: "Zone_B",
+            "get_goal_status": lambda: {},
+            "get_learning_profile": lambda **kwargs: {
+                "blocked_routes": [],
+                "recent_failures": [],
+                "consolidated_insights": [],
+                "route_profile": {},
+                "scenario_profile": {},
+                "recent_reward_avg": 0.2,
+                "last_reward": 0.2,
+                "force_recovery_redirect_next_step": False,
+                "none_block_active": False,
+                "route_consecutive_failures": {},
+                "llm_memory_rules": [
+                    {"scenario": "Exam Rush", "from": "Zone_A", "to": "Zone_B", "route_key": "Zone_A->Zone_B", "strength": 0.9, "ttl": 8}
+                ],
+            },
+            "estimate_transfer_capacity": lambda f, t, r: min(6, r),
+        }
+        result = planner.plan(
+            state,
+            {"Zone_A": 24, "Zone_B": 3},
+            {"confidence": 0.74, "uncertainty": {"entropy": 0.7}},
+            {"steps": 3},
+            tools=tools,
+            reasoning_budget={"planner_llm_strategy": "deterministic"},
+        )
+        self.assertEqual(result["proposed_action"]["action"], "redirect")
+        self.assertGreaterEqual(result["proposed_action"]["vehicles"], 4)
+
 if __name__ == "__main__":
     unittest.main()

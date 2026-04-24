@@ -35,6 +35,8 @@ def _ensure_session_state():
         st.session_state.run = False
     if "last_run" not in st.session_state:
         st.session_state.last_run = 0.0
+    if "last_ui_interaction_at" not in st.session_state:
+        st.session_state.last_ui_interaction_at = 0.0
     if "chat_response" not in st.session_state:
         st.session_state.chat_response = ""
     if "chat_response_meta" not in st.session_state:
@@ -43,6 +45,14 @@ def _ensure_session_state():
         st.session_state.benchmark_toggle = False
     if "force_llm" not in st.session_state:
         st.session_state.force_llm = False
+
+def _mark_ui_interaction():
+    st.session_state.last_ui_interaction_at = time.time()
+
+def _ui_recently_interacted(now=None, cooldown=0.75):
+    now = time.time() if now is None else now
+    last_interaction = float(st.session_state.get("last_ui_interaction_at", 0.0) or 0.0)
+    return (now - last_interaction) < cooldown
 
 def _schedule_reload(seconds):
     time.sleep(max(0.2, seconds))
@@ -53,13 +63,13 @@ def _build_llm_summary(llm_status, is_forced=False):
     if is_forced:
         return (
             "⚡ Strategic Overdrive Active",
-            "System is strictly prioritizing live Gemini reasoning for mission-critical operations. Safety locks and quota cooldowns are currently overridden.",
+        "System is strictly prioritizing live Gemini reasoning for SRM parking operations. Safety locks and quota cooldowns are currently overridden.",
             "success",
         )
     if quota_backoff.get("active"):
         return (
             "Efficient Local Mode Active",
-            f"System has transitioned to Autonomous Edge Intelligence ({quota_backoff.get('remaining_seconds', 0)}s remaining in cloud optimization cycle). Resilient multi-agent heuristics are currently driving the parking policy.",
+            f"System has transitioned to Autonomous Edge Intelligence ({quota_backoff.get('remaining_seconds', 0)}s remaining in cloud optimization cycle). Resilient multi-agent heuristics are currently driving SRM parking allocation.",
             "info",
         )
     if llm_status.get("available"):
@@ -72,7 +82,7 @@ def _build_llm_summary(llm_status, is_forced=False):
             )
         return (
             "Full Agentic Intelligence Ready",
-            f"Model: {llm_status.get('model', 'gemini')}. System is running in Hybrid Mode, dynamically balancing cloud-based LLM reasoning with efficient local heuristics.",
+            f"Model: {llm_status.get('model', 'gemini')}. System is running in Hybrid Mode, balancing cloud-based LLM reasoning with efficient SRM parking heuristics.",
             "success",
         )
     return (
@@ -84,7 +94,7 @@ def _build_llm_summary(llm_status, is_forced=False):
 def _render_assistant_briefing(briefing):
     if not briefing:
         return
-    st.markdown("**Live AI Copilot**")
+    st.markdown("**SRM Parking AI Copilot**")
     st.info(f"**{briefing.get('headline', 'Operations summary')}**\n\n{briefing.get('narrative', '')}")
     cols = st.columns(2)
     with cols[0]:
@@ -101,7 +111,7 @@ def _render_assistant_briefing(briefing):
 
 def _render_notifications(notifications):
     if not notifications:
-        st.info("No active campus alerts right now.")
+        st.info("No active SRM parking alerts right now.")
         return
     for notification in notifications:
         text = f"**{notification.get('title', 'Update')}**  \n{notification.get('message', '')}"
@@ -110,6 +120,37 @@ def _render_notifications(notifications):
         elif level == "warning": st.warning(text)
         elif level == "success": st.success(text)
         else: st.info(text)
+
+def _render_srm_parking_overview(state_frame):
+    if state_frame.empty:
+        return
+    car_slots = int(state_frame.get("Car Slots", pd.Series(dtype=int)).sum())
+    bike_slots = int(state_frame.get("Bike Slots", pd.Series(dtype=int)).sum())
+    total_capacity = int(state_frame["Capacity"].sum())
+    highest_pressure = state_frame.sort_values("Utilisation %", ascending=False).head(1)
+    best_buffer = state_frame.sort_values("Free", ascending=False).head(1)
+    pressure_block = highest_pressure.iloc[0]["Zone"] if not highest_pressure.empty else "-"
+    buffer_block = best_buffer.iloc[0]["Zone"] if not best_buffer.empty else "-"
+    render_key_value_groups([
+        {
+            "title": "SRM Capacity Map",
+            "items": [
+                {"label": "Parking blocks", "value": len(state_frame)},
+                {"label": "Car slots", "value": car_slots},
+                {"label": "Bike slots", "value": bike_slots},
+                {"label": "Total capacity", "value": total_capacity},
+            ],
+        },
+        {
+            "title": "Live Block Focus",
+            "items": [
+                {"label": "Highest pressure", "value": pressure_block},
+                {"label": "Best buffer", "value": buffer_block},
+                {"label": "Free at buffer", "value": int(best_buffer.iloc[0]["Free"]) if not best_buffer.empty else "-"},
+                {"label": "Capacity source", "value": "SRM block dataset"},
+            ],
+        },
+    ])
 
 def _agent_summary_cards(latest_result, goal, event_context):
     critic_notes = latest_result.get("critic_output", {}).get("critic_notes", [])
@@ -154,11 +195,11 @@ def _render_goal_status(goal, kpis):
     status = "Achieved" if achieved else "In Progress"
     render_key_value_groups([
         {
-            "title": "Goal Status",
+            "title": "SRM Goal Status",
             "items": [
                 {"label": "Status", "value": status},
                 {"label": "Objective", "value": goal.get("objective", "-")},
-                {"label": "Priority zone", "value": goal.get("priority_zone", "-")},
+                {"label": "Priority block", "value": goal.get("priority_zone", "-")},
             ],
         },
         {
@@ -171,7 +212,7 @@ def _render_goal_status(goal, kpis):
         },
     ])
     if achieved:
-        st.success("The current step satisfies the active goal thresholds.")
+        st.success("The current SRM parking step satisfies the active goal thresholds.")
     else:
         st.warning("The goal is still active; the planner will keep monitoring pressure and route options.")
 
@@ -228,6 +269,13 @@ def _get_llm_state(latest_result, llm_status, llm_mode):
     requested = bool(planner.get("llm_requested") or critic.get("llm_requested"))
     planned = bool(budget.get("allow_planner_llm") or budget.get("allow_critic_llm"))
     if backoff.get("active"):
+        if backoff.get("kind") == "daily_quota":
+            return {
+                "mode": "Budget Guard",
+                "status": "Daily Quota Exhausted",
+                "fallback": "Simulated / Local Reasoning",
+                "detail": "Gemini free-tier daily quota is exhausted for the active project/key. The system has intentionally switched to simulated and local agentic reasoning until quota resets or a new quota source is provided.",
+            }
         if llm_mode == "demo":
             return {
                 "mode": "Demo Requested",
@@ -246,6 +294,13 @@ def _get_llm_state(latest_result, llm_status, llm_mode):
     if requested:
         planner = latest_result.get("planner_output", {})
         source = planner.get("llm_source", "gemini")
+        if planner.get("llm_fallback_used") or source == "gemini_failed_fallback":
+            return {
+                "mode": "Gemini Attempted",
+                "status": "Fallback Active",
+                "fallback": "Local Agentic Pipeline",
+                "detail": planner.get("llm_fallback_reason") or planner.get("llm_error") or "Gemini was requested, but local deterministic agents completed the decision.",
+            }
         if source == "demo_simulated":
             return {"mode": "Demo Simulated Gemini", "status": "Simulated Gemini", "fallback": "Not Needed", "detail": "Demo mode produced a simulated Gemini advisory because live Gemini was unavailable."}
         return {"mode": "Demo Planner LLM" if llm_mode == "demo" else "Auto Escalated", "status": "Gemini Used", "fallback": "Not Needed", "detail": "Gemini advisory was requested for this step."}
@@ -303,7 +358,7 @@ def _render_decision_summary_block(latest_result, baseline_comparison):
         else:
             crowded, best, source, target = "-", "-", "-", "-"
         vehicles = 0
-        punchy_reason = f"Agents analyzed all zones → {source} pressured but within safe thresholds → Holding for next cycle."
+        punchy_reason = f"Agents analyzed all SRM blocks → {source} pressured but within safe thresholds → Holding for next cycle."
         display_type = "MONITORING"
         bg_col = "rgba(80, 200, 120, 0.07)"
         border_col = "#50c878"
@@ -318,7 +373,7 @@ def _render_decision_summary_block(latest_result, baseline_comparison):
                     <div style="font-size: 2rem; font-weight: 800; color: #fff;">{display_type}</div>
                 </div>
                 <div style="min-width: 120px;">
-                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: {text_col};">Source Zone</div>
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: {text_col};">Source SRM Block</div>
                     <div style="font-size: 1.5rem; font-weight: 600; color: #fff;">{source}</div>
                 </div>
                 <div style="min-width: 120px;">
@@ -346,12 +401,24 @@ def _render_llm_insight(latest_result):
     planner = latest_result.get("planner_output", {})
     budget = latest_result.get("reasoning_budget", {})
     llm_advisory_used = critic.get("llm_advisory_used") or planner.get("llm_advisory_used") or planner.get("llm_requested")
+    llm_fallback_used = planner.get("llm_fallback_used") or critic.get("llm_fallback_used") or planner.get("llm_source") == "gemini_failed_fallback"
     budget_level = budget.get("budget_level", "local_only")
     planner_reason = budget.get("planner_reason", "")
     rationale = planner.get("rationale") or (critic.get("critic_notes") or [""])[0] or ""
     gate_notes = budget.get("gate_notes", [])
 
-    if llm_advisory_used:
+    if llm_fallback_used:
+        st.markdown(
+            f"""
+            <div style="background: rgba(255,184,77,0.08); border-left: 3px solid #ffb84d; padding: 0.65rem 1rem; border-radius: 4px 10px 10px 4px; margin-bottom: 1rem;">
+                <strong style="color: #ffcf80; display: block; margin-bottom: 0.2rem;">Gemini Attempted - Local Fallback Executed</strong>
+                <span style="font-size: 0.85rem; color: #d0d7e1; display: block;">{planner.get('llm_fallback_reason') or planner.get('llm_error') or 'Gemini was unavailable, so the deterministic agentic pipeline completed the decision.'}</span>
+                <span style="font-size: 0.78rem; color: #8da0b7; margin-top: 0.2rem; display:block;">Final mode: <b>{planner.get('decision_mode', 'local_fallback')}</b></span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    elif llm_advisory_used:
         # LLM WAS used — show what it said prominently
         st.markdown(
             f"""
@@ -367,16 +434,25 @@ def _render_llm_insight(latest_result):
         # LLM was NOT used — explain why in a compact visible note
         gate_msg = " ".join(gate_notes) if gate_notes else planner_reason
         action = latest_result.get("action", {})
+        planner_source = planner.get("llm_source", "deterministic")
         action_desc = (
             f"Redirect {action.get('vehicles',0)} vehicles from {action.get('from','-')} → {action.get('to','-')}"
             if action.get("action") == "redirect"
             else "No redirect — system stable"
         )
+        mode_title = "Reasoning Core Active"
+        mode_text = "Local simulated reasoning is driving this step while live Gemini is unavailable."
+        if planner_source == "cached":
+            mode_text = "Cached Gemini reasoning is driving this step to preserve prior LLM behavior."
+        elif planner_source == "deterministic":
+            mode_title = "Deterministic Step"
+            mode_text = "Deterministic agents handled this step because the state did not justify extra reasoning cost."
         st.markdown(
             f"""
             <div style="background: rgba(255,255,255,0.02); border-left: 3px solid rgba(150,150,180,0.4); padding: 0.65rem 1rem; border-radius: 4px 10px 10px 4px; margin-bottom: 1rem;">
-                <strong style="color: #8899bb; display: block; margin-bottom: 0.2rem;">⚡ Deterministic Step — Gemini Not Needed</strong>
+                <strong style="color: #8899bb; display: block; margin-bottom: 0.2rem;">⚡ {mode_title}</strong>
                 <span style="font-size: 0.85rem; color: #7a8fa6; display: block;">Decision: <b style='color:#ccd3d9'>{action_desc}</b></span>
+                <span style="font-size: 0.78rem; color: #5e6e82; margin-top: 0.2rem; display:block;">{mode_text}</span>
                 <span style="font-size: 0.78rem; color: #5e6e82; margin-top: 0.2rem; display:block;">Why skipped: {gate_msg or 'Network pressure within deterministic thresholds — Gemini call would be wasteful.'}</span>
             </div>
             """,
@@ -399,7 +475,7 @@ def _format_decision_impact(baseline_comparison):
     hotspot_delta = float(baseline_comparison.get("hotspot_delta", 0.0) or 0.0)
     if transferred and abs(search_delta) < 0.01:
         if hotspot_delta > 0:
-            return f"Redirected {transferred} vehicle(s), prevented congestion escalation, and reduced pressure by {hotspot_delta:.0f} zone(s) while keeping search time stable."
+            return f"Redirected {transferred} vehicle(s), prevented congestion escalation, and reduced pressure by {hotspot_delta:.0f} SRM block(s) while keeping search time stable."
         return f"Redirected {transferred} vehicle(s) and kept search time stable under load versus the no-redirect baseline."
     if transferred and search_delta > 0:
         return f"Redirected {transferred} vehicle(s) and reduced search time by {search_delta:.2f} min versus the no-redirect baseline."
@@ -413,7 +489,7 @@ def _render_decision_card(latest_result, baseline_comparison):
         return
     action = latest_result.get("action", {})
     critic = latest_result.get("critic_output", {})
-    route = f"{action.get('from', '-') } -> {action.get('to', '-')}" if action.get("action") == "redirect" else "No route change"
+    route = f"{action.get('from', '-') } -> {action.get('to', '-')}" if action.get("action") == "redirect" else "No SRM block change"
     impact = _format_decision_impact(baseline_comparison)
     # Determine Decision Label
     decision_label = "Deterministic Baseline"
@@ -442,7 +518,7 @@ def _render_decision_card(latest_result, baseline_comparison):
             "items": [
                 {"label": "Impact", "value": impact},
                 {"label": "Search time delta", "value": f"{baseline_comparison.get('search_time_delta_min', 0):+.2f} min"},
-                {"label": "Hotspot delta", "value": f"{baseline_comparison.get('hotspot_delta', 0):+.0f} zone(s)"},
+                {"label": "Hotspot delta", "value": f"{baseline_comparison.get('hotspot_delta', 0):+.0f} block(s)"},
                 {"label": "Execution", "value": _execution_summary(latest_result)},
             ],
         },
@@ -460,7 +536,7 @@ def _render_decision_card(latest_result, baseline_comparison):
             "items": [
                 {"label": "Active Adaptation", "value": "Applied" if action.get("learning_applied") else "Passive"},
                 {"label": "Learning Note", "value": latest_result.get("reward", {}).get("adaptation_note", "Policy stable.")},
-                {"label": "Memory Status", "value": "Route Avoided" if latest_result.get("planner_output", {}).get("memory_avoidance_triggered") else "Nominal"},
+                {"label": "Memory Status", "value": "SRM route avoided" if latest_result.get("planner_output", {}).get("memory_avoidance_triggered") else "Nominal"},
                 {"label": "Avoided Route", "value": latest_result.get("planner_output", {}).get("avoided_route", "-")},
             ],
         },
@@ -479,15 +555,24 @@ def _render_agent_decision_table(latest_result):
         crowded = min(state, key=lambda zone: state[zone].get("free_slots", 999))
         total_slots = state[crowded].get("total_slots", 1)
         occupancy = round((state[crowded].get("occupied", 0) / max(1, total_slots)) * 100)
-        perception_string = f"{crowded} congestion {occupancy}%"
+        perception_string = f"{crowded} SRM block congestion {occupancy}%"
     else:
-        perception_string = "Network observation loaded"
+        perception_string = "SRM parking observation loaded"
         
     planner_route = f"Redirect {planner_action.get('vehicles', 0)} vehicles to {planner_action.get('to', '-')}" if planner_action.get("action") == "redirect" else "Maintain system baseline"
     critic_notes = critic.get("critic_notes", [])
     critic_reason = critic_notes[0] if critic_notes else f"Valid ({critic.get('risk_level', 'low')} risk)"
     critic_string = critic_reason if critic.get("approved") else f"Rejected: {critic_reason}"
-    policy_string = "Approve" if action.get("action") == planner_action.get("action") else "Fallback to safety policy"
+    if planner.get("llm_requested"):
+        if planner.get("llm_fallback_used") or planner.get("llm_source") == "gemini_failed_fallback":
+            llm_string = "Gemini attempted -> local fallback used"
+        elif planner.get("llm_advisory_used"):
+            llm_string = "Gemini advisory applied"
+        else:
+            llm_string = "Gemini requested -> no plan change"
+    else:
+        llm_string = "Skipped -> deterministic agents used"
+    policy_string = "Advisory only; never overrides critic-approved execution"
     
     if action.get("status") == "failed":
         action_string = f"Execution failed: {action.get('failure_reason', 'Network timeout')}"
@@ -499,10 +584,11 @@ def _render_agent_decision_table(latest_result):
     st.markdown(f"""
     <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); padding: 1.2rem; border-radius: 12px; margin-bottom: 1rem; font-family: monospace; line-height: 1.8;">
         <div style="color: #4da3ff;"><b>Step 1: Perception</b> &rarr; <span style="color: #ccc;">{perception_string}</span></div>
-        <div style="color: #4da3ff;"><b>Step 2: Planner</b> &rarr; <span style="color: #ccc;">Suggest {planner_route.lower()}</span></div>
-        <div style="color: #4da3ff;"><b>Step 3: Critic</b> &rarr; <span style="color: #ccc;">{critic_string}</span></div>
-        <div style="color: #4da3ff;"><b>Step 4: Policy</b> &rarr; <span style="color: #ccc;">{policy_string}</span></div>
-        <div style="color: {action_color};"><b>Step 5: Action</b> &rarr; <span style="color: #fff;">{action_string}</span></div>
+        <div style="color: #4da3ff;"><b>Step 2: LLM Gate</b> &rarr; <span style="color: #ccc;">{llm_string}</span></div>
+        <div style="color: #4da3ff;"><b>Step 3: Planner</b> &rarr; <span style="color: #ccc;">Suggest {planner_route.lower()}</span></div>
+        <div style="color: #4da3ff;"><b>Step 4: Critic</b> &rarr; <span style="color: #ccc;">{critic_string}</span></div>
+        <div style="color: #73839a;"><b>Step 5: Policy Advisory</b> &rarr; <span style="color: #ccc;">{policy_string}</span></div>
+        <div style="color: {action_color};"><b>Step 6: Action</b> &rarr; <span style="color: #fff;">{action_string}</span></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -517,12 +603,30 @@ def _build_zone_status_frame(state_frame):
         else:
             status = "🟢 Safe"
         rows.append({
-            "Zone": row["Zone"],
+            "SRM Block": row["Zone"],
             "Status": status,
+            "Car Slots": int(row.get("Car Slots", 0)),
+            "Bike Slots": int(row.get("Bike Slots", 0)),
+            "Total Capacity": int(row["Capacity"]),
             "Free Slots": int(row["Free"]),
             "Utilisation": f"{utilisation:.1f}%",
         })
     return pd.DataFrame(rows)
+
+def _build_srm_capacity_dataset(state_frame):
+    if state_frame.empty:
+        return pd.DataFrame(columns=["block_name", "car_slots", "bike_slots", "total_capacity", "occupied", "free_slots"])
+    frame = state_frame.copy()
+    return frame.rename(
+        columns={
+            "Zone": "block_name",
+            "Car Slots": "car_slots",
+            "Bike Slots": "bike_slots",
+            "Capacity": "total_capacity",
+            "Occupied": "occupied",
+            "Free": "free_slots",
+        }
+    )[["block_name", "car_slots", "bike_slots", "total_capacity", "occupied", "free_slots"]]
 
 def _render_decision_audit(latest_result):
     if not latest_result:
@@ -534,6 +638,7 @@ def _render_decision_audit(latest_result):
     critic = latest_result.get("critic_output", {})
     executor = latest_result.get("execution_output", {})
     budget = latest_result.get("reasoning_budget", {})
+    provenance = latest_result.get("decision_provenance", {})
     baseline = latest_result.get("baseline_comparison", {})
     reward_impact = latest_result.get("reward_impact", {})
     model_alignment = latest_result.get("model_alignment", {})
@@ -554,8 +659,21 @@ def _render_decision_audit(latest_result):
             "items": [
                 {"label": "Planner Gemini requested", "value": "Yes" if planner.get("llm_requested") else "No"},
                 {"label": "Planner Gemini changed plan", "value": "Yes" if planner.get("llm_advisory_used") else "No"},
+                {"label": "Planner fallback used", "value": "Yes" if planner.get("llm_fallback_used") else "No"},
                 {"label": "Critic Gemini requested", "value": "Yes" if critic.get("llm_requested") else "No"},
                 {"label": "Critic Gemini changed review", "value": "Yes" if critic.get("llm_advisory_used") else "No"},
+                {"label": "Fallback reason", "value": planner.get("llm_fallback_reason") or critic.get("llm_fallback_reason") or "-"},
+            ],
+        },
+        {
+            "title": "Decision Provenance",
+            "items": [
+                {"label": "Origin", "value": provenance.get("decision_origin", "-").replace("_", " ").title()},
+                {"label": "Final authority", "value": provenance.get("final_authority", "-").title()},
+                {"label": "Memory influenced", "value": "Yes" if provenance.get("memory_influenced") else "No"},
+                {"label": "Critic changed action", "value": "Yes" if provenance.get("critic_changed_action") else "No"},
+                {"label": "Controller override", "value": "Yes" if provenance.get("controller_override") else "No"},
+                {"label": "Fallback used", "value": "Yes" if provenance.get("fallback_used") else "No"},
             ],
         },
         {
@@ -634,6 +752,161 @@ def _chart_key(name, step_number, suffix=""):
     suffix_part = f"-{suffix}" if suffix else ""
     return f"{name}-step-{step_number}{suffix_part}"
 
+def _safe_dict(value):
+    return value if isinstance(value, dict) else {}
+
+def _safe_list(value):
+    return value if isinstance(value, list) else []
+
+def _fallback_snapshot():
+    from environment.parking_environment import ParkingEnvironment
+
+    env = ParkingEnvironment(seed=0)
+    transition = env.get_last_transition()
+    return {
+        "state": env.get_state(),
+        "latest_result": {
+            "state": env.get_state(),
+            "transition": transition,
+            "planner_output": {},
+            "critic_output": {},
+            "execution_output": {},
+            "agent_interactions": [],
+            "reasoning_budget": {},
+        },
+        "latest_transition": transition,
+        "metrics": {"steps": 0},
+        "goal": {},
+        "scenario_mode": env.get_scenario_mode(),
+        "llm_status": {"available": False, "message": "Local fallback snapshot active."},
+        "llm_mode": "auto",
+        "force_llm": False,
+        "event_context": env.get_event_context(),
+        "notifications": [],
+        "notification_dispatch": [],
+        "kpis": {},
+        "recent_cycles": [],
+        "recent_states": [env.get_state()],
+        "trace": [],
+        "benchmark": {},
+        "benchmark_summary": {"message": "Run the benchmark from the sidebar to generate metrics."},
+        "reasoning_summary": {},
+        "agent_loop_steps": [],
+        "memory_summary": {},
+        "notification_summary": {},
+        "last_llm_decision": {},
+        "llm_usage_summary": {},
+        "assistant_briefing": {},
+    }
+
+def _normalize_dashboard_snapshot(snapshot):
+    if not isinstance(snapshot, dict) or not snapshot:
+        return _fallback_snapshot()
+    normalized = dict(snapshot)
+    fallback = _fallback_snapshot()
+    for key, value in fallback.items():
+        normalized.setdefault(key, value)
+    normalized["state"] = _safe_dict(normalized.get("state")) or fallback["state"]
+    normalized["latest_result"] = _safe_dict(normalized.get("latest_result"))
+    normalized["latest_transition"] = _safe_dict(normalized.get("latest_transition"))
+    normalized["latest_result"]["state"] = normalized["state"]
+    normalized["latest_result"].setdefault("transition", normalized["latest_transition"])
+    for key in ["planner_output", "critic_output", "execution_output", "reasoning_budget"]:
+        normalized["latest_result"].setdefault(key, {})
+    normalized["latest_result"].setdefault("agent_interactions", [])
+    normalized["recent_states"] = _safe_list(normalized.get("recent_states")) or [normalized["state"]]
+    normalized["recent_cycles"] = _safe_list(normalized.get("recent_cycles"))
+    normalized["trace"] = _safe_list(normalized.get("trace"))
+    normalized.setdefault("blocks", normalized["state"])
+    return normalized
+
+def _safe_number(value, default=0):
+    try:
+        if pd.isna(value):
+            return default
+        return value
+    except TypeError:
+        return value if value is not None else default
+
+def _format_reasoning_text(value):
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    if isinstance(value, dict):
+        for key in ("rationale", "reason", "message", "summary"):
+            text = value.get(key)
+            if isinstance(text, str) and text.strip():
+                return text.strip()
+        compact = []
+        for key, item in value.items():
+            if item in (None, "", [], {}):
+                continue
+            compact.append(f"{key}: {item}")
+            if len(compact) >= 3:
+                break
+        if compact:
+            return " | ".join(compact)
+    return "Waiting for reasoning..."
+
+def _normalize_recent_states(recent_states, current_state, current_kpis, step_number):
+    normalized = []
+    for index, item in enumerate(recent_states or []):
+        if not isinstance(item, dict):
+            continue
+        kpis = _safe_dict(item.get("kpis"))
+        if not kpis and item == current_state:
+            kpis = current_kpis
+        normalized.append({
+            **item,
+            "step": item.get("step", index if step_number == 0 else step_number - len(recent_states) + index + 1),
+            "kpis": kpis,
+        })
+    if not normalized:
+        normalized = [{"step": step_number, "state": current_state, "kpis": current_kpis}]
+    elif normalized[-1].get("state") != current_state and normalized[-1] != current_state:
+        normalized.append({"step": step_number, "state": current_state, "kpis": current_kpis})
+    return normalized
+
+def _build_dashboard_view_model(snapshot, state_frame, step_number):
+    latest_result = _safe_dict(snapshot.get("latest_result"))
+    latest_transition = _safe_dict(snapshot.get("latest_transition"))
+    current_state = _safe_dict(snapshot.get("state"))
+    kpis = _safe_dict(snapshot.get("kpis"))
+    agent_trace = _safe_list(snapshot.get("agent_loop_steps"))
+    if not agent_trace:
+        agent_trace = _safe_list(latest_result.get("agent_interactions"))
+    memory = _safe_dict(snapshot.get("memory_summary"))
+    learning = _safe_dict(memory.get("learning_profile"))
+    recent_states = _normalize_recent_states(
+        _safe_list(snapshot.get("recent_states")),
+        current_state,
+        kpis,
+        step_number,
+    )
+    return {
+        "blocks": current_state,
+        "state_frame": state_frame,
+        "capacity": int(state_frame["Capacity"].sum()) if not state_frame.empty else 0,
+        "occupied": int(state_frame["Occupied"].sum()) if not state_frame.empty else 0,
+        "free_slots": int(state_frame["Free"].sum()) if not state_frame.empty else 0,
+        "metrics": kpis,
+        "runtime_metrics": _safe_dict(snapshot.get("metrics")),
+        "latest_result": latest_result,
+        "latest_transition": latest_transition,
+        "agent_trace": agent_trace,
+        "planner_output": _safe_dict(latest_result.get("planner_output")),
+        "critic_output": _safe_dict(latest_result.get("critic_output")),
+        "memory": memory,
+        "learning": learning,
+        "blocked_routes": _safe_list(learning.get("blocked_routes")),
+        "recent_states": recent_states,
+        "recent_cycles": _safe_list(snapshot.get("recent_cycles")),
+        "benchmark": _safe_dict(snapshot.get("benchmark")),
+        "benchmark_summary": _safe_dict(snapshot.get("benchmark_summary")),
+        "event_context": _safe_dict(snapshot.get("event_context")),
+        "goal": _safe_dict(snapshot.get("goal")),
+        "notifications": _safe_list(snapshot.get("notifications")),
+    }
+
 def main():
     st.set_page_config(layout="wide", page_title=STRINGS["title"])
     inject_styles()
@@ -652,14 +925,21 @@ def main():
         snapshot = api_bridge.get_snapshot()
 
     if not snapshot:
-        st.stop() # Stops execution gracefully if completely crashed
+        st.warning("Simulation core returned no snapshot. Rendering the SRM block fallback state instead of a blank dashboard.")
+    snapshot = _normalize_dashboard_snapshot(snapshot)
 
     current_scenario = snapshot.get("scenario_mode", "Auto Schedule")
     metrics = snapshot.get("metrics", {})
     step_number = metrics.get("steps", 0)
 
     st.sidebar.header("Simulation Controls")
-    selected_scenario = st.sidebar.selectbox("Campus Scenario", SCENARIOS, index=SCENARIOS.index(current_scenario) if current_scenario in SCENARIOS else 0)
+    selected_scenario = st.sidebar.selectbox(
+        "SRM Parking Scenario",
+        SCENARIOS,
+        index=SCENARIOS.index(current_scenario) if current_scenario in SCENARIOS else 0,
+        key="sidebar_scenario",
+        on_change=_mark_ui_interaction,
+    )
     if selected_scenario != current_scenario:
         if api_bridge.set_scenario(selected_scenario):
             st.rerun()
@@ -672,6 +952,8 @@ def main():
         list(label_to_mode.keys()),
         index=list(label_to_mode.keys()).index(llm_labels.get(current_llm_mode, "Auto")),
         horizontal=True,
+        key="sidebar_llm_mode",
+        on_change=_mark_ui_interaction,
     )
     selected_llm_mode = label_to_mode[selected_llm_label]
     if selected_llm_mode != current_llm_mode:
@@ -683,46 +965,51 @@ def main():
         "⚡ Strategic Overdrive (Force LLM)",
         value=force_llm_active,
         help="Bypasses app-level efficiency logic and forces a live Gemini attempt on every single step. Provider quota limits can still return 429.",
+        key="sidebar_force_llm",
+        on_change=_mark_ui_interaction,
     )
     if new_force_llm != force_llm_active:
         if api_bridge.set_force_llm(new_force_llm):
             st.rerun()
 
-    if st.sidebar.button("🔄 Reset AI Quota Cooldown", help="Clear local 429 backoffs and retry Gemini immediately."):
+    if st.sidebar.button("🔄 Reset AI Quota Cooldown", help="Clear local 429 backoffs and retry Gemini immediately.", on_click=_mark_ui_interaction):
         api_bridge.reset_llm_runtime_state()
         st.toast("AI runtime state reset. Attempting fresh Gemini link...")
         st.rerun()
 
     llm_stride = snapshot.get("latest_result", {}).get("reasoning_budget", {}).get("signals", {}).get("llm_stride_steps", 10)
-    st.sidebar.caption(f"Auto uses Gemini once every {llm_stride} steps when available. Demo allows one planner advisory when available. Local never calls Gemini.")
+    st.sidebar.caption(
+        f"Budget-Aware Adaptive Invocation: Gemini recalibrates every {llm_stride} steps and only escalates early for queue >= 3, entropy > 3.5, risk > 70, or decision conflict."
+    )
 
-    st.session_state.run = st.sidebar.toggle("Autonomous Mode", value=st.session_state.run)
-    speed = st.sidebar.slider("Step Interval (seconds)", 1.0, 8.0, 3.0)
+    st.session_state.run = st.sidebar.toggle("Autonomous Mode", value=st.session_state.run, key="sidebar_autonomous_mode", on_change=_mark_ui_interaction)
+    speed = st.sidebar.slider("Step Interval (seconds)", 1.0, 8.0, 3.0, key="sidebar_step_interval", on_change=_mark_ui_interaction)
     st.sidebar.caption("Use Run One Step first to test logic.")
     
-    benchmark_episodes = st.sidebar.slider("Benchmark Episodes", 1, 5, 3)
-    benchmark_steps = st.sidebar.slider("Benchmark Steps", 6, 15, 10)
+    benchmark_episodes = st.sidebar.slider("Benchmark Episodes", 1, 5, 3, key="sidebar_benchmark_episodes", on_change=_mark_ui_interaction)
+    benchmark_steps = st.sidebar.slider("Benchmark Steps", 6, 15, 10, key="sidebar_benchmark_steps", on_change=_mark_ui_interaction)
     
     c1, c2 = st.sidebar.columns(2)
-    if c1.button("Run One Step", width="stretch"):
+    if c1.button("Run One Step", width="stretch", on_click=_mark_ui_interaction):
         with st.spinner("Tick..."):
             api_bridge.step_simulation()
         st.rerun()
         
-    if c2.button("Pause", width="stretch"):
+    if c2.button("Pause", width="stretch", on_click=_mark_ui_interaction):
         st.session_state.run = False
         st.rerun()
 
     c3, c4 = st.sidebar.columns(2)
-    if c3.button("Resume", width="stretch"):
+    if c3.button("Resume", width="stretch", on_click=_mark_ui_interaction):
         st.session_state.run = True
+        st.session_state.last_run = 0.0
         st.rerun()
-    if c4.button("Reset Runtime", width="stretch"):
+    if c4.button("Reset Runtime", width="stretch", on_click=_mark_ui_interaction):
         api_bridge.reset(clear_memory=False)
         st.session_state.run = False
         st.rerun()
 
-    if st.sidebar.button("Run Benchmark", width="stretch"):
+    if st.sidebar.button("Run Benchmark", width="stretch", on_click=_mark_ui_interaction):
         with st.spinner("Benchmarking Agents vs Baseline..."):
             api_bridge.run_benchmark(benchmark_episodes, benchmark_steps)
             st.session_state.benchmark_toggle = not st.session_state.benchmark_toggle
@@ -730,38 +1017,38 @@ def main():
         st.rerun()
 
     st.sidebar.divider()
-    st.session_state.developer_mode = st.sidebar.toggle("🖥️ Developer Mode", value=st.session_state.get('developer_mode', False))
+    st.session_state.developer_mode = st.sidebar.toggle("🖥️ Developer Mode", value=st.session_state.get('developer_mode', False), key="sidebar_developer_mode", on_change=_mark_ui_interaction)
 
     now = time.time()
-    if st.session_state.run and now - st.session_state.last_run >= speed:
+    if st.session_state.run and not _ui_recently_interacted(now) and now - st.session_state.last_run >= speed:
         st.session_state.last_run = now
         api_bridge.step_simulation()
-        snapshot = api_bridge.get_snapshot() # Refresh locally during tick instead of full rerun cache miss
+        snapshot = _normalize_dashboard_snapshot(api_bridge.get_snapshot()) # Refresh locally during tick instead of full rerun cache miss
         metrics = snapshot.get("metrics", {})
         step_number = metrics.get("steps", 0)
 
-    state = snapshot.get("state", {})
-    latest_result = snapshot.get("latest_result", {})
-    latest_transition = snapshot.get("latest_transition", {})
-    goal = snapshot.get("goal", {})
-    event_context = snapshot.get("event_context", {})
-    kpis = snapshot.get("kpis", {})
-    notifications = snapshot.get("notifications", [])
-    recent_cycles = snapshot.get("recent_cycles", [])
-    recent_states = snapshot.get("recent_states", [])
-    llm_status = snapshot.get("llm_status", {})
+    state = _safe_dict(snapshot.get("state"))
+    latest_result = _safe_dict(snapshot.get("latest_result"))
+    latest_transition = _safe_dict(snapshot.get("latest_transition"))
+    goal = _safe_dict(snapshot.get("goal"))
+    event_context = _safe_dict(snapshot.get("event_context"))
+    kpis = _safe_dict(snapshot.get("kpis"))
+    notifications = _safe_list(snapshot.get("notifications"))
+    recent_cycles = _safe_list(snapshot.get("recent_cycles"))
+    recent_states = _safe_list(snapshot.get("recent_states")) or [state]
+    llm_status = _safe_dict(snapshot.get("llm_status"))
     llm_mode = snapshot.get("llm_mode", "auto")
-    benchmark = snapshot.get("benchmark", {})
-    benchmark_summary = snapshot.get("benchmark_summary", {})
-    assistant_briefing = snapshot.get("assistant_briefing", {})
-    operational_signals = latest_result.get("operational_signals", latest_transition.get("dynamic_signals", {}))
-    baseline_comparison = latest_result.get("baseline_comparison", {})
-    reasoning_summary = snapshot.get("reasoning_summary", {})
-    agent_loop_steps = snapshot.get("agent_loop_steps", [])
-    memory_summary = snapshot.get("memory_summary", {})
-    notification_summary = snapshot.get("notification_summary", {})
-    last_llm_decision = snapshot.get("last_llm_decision", {})
-    llm_usage_summary = snapshot.get("llm_usage_summary", {})
+    benchmark = _safe_dict(snapshot.get("benchmark"))
+    benchmark_summary = _safe_dict(snapshot.get("benchmark_summary"))
+    assistant_briefing = _safe_dict(snapshot.get("assistant_briefing"))
+    operational_signals = _safe_dict(latest_result.get("operational_signals", latest_transition.get("dynamic_signals", {})))
+    baseline_comparison = _safe_dict(latest_result.get("baseline_comparison"))
+    reasoning_summary = _safe_dict(snapshot.get("reasoning_summary"))
+    agent_loop_steps = _safe_list(snapshot.get("agent_loop_steps"))
+    memory_summary = _safe_dict(snapshot.get("memory_summary"))
+    notification_summary = _safe_dict(snapshot.get("notification_summary"))
+    last_llm_decision = _safe_dict(snapshot.get("last_llm_decision"))
+    llm_usage_summary = _safe_dict(snapshot.get("llm_usage_summary"))
 
     force_llm = snapshot.get("force_llm", False)
     if force_llm:
@@ -779,37 +1066,59 @@ def main():
     else:
         st.sidebar.info(f"Local mode: {llm_status.get('message', 'No status available.')}")
     if llm_mode == "auto":
-        st.sidebar.info("Quota optimization is active: scheduled Gemini checkpoint every 10 steps.")
+        st.sidebar.info("Smart LLM Policy is active: Gemini is invoked adaptively with a mandatory heartbeat every 10 steps.")
     elif force_llm:
         st.sidebar.info("Overdrive mode overrides local gating. Every step will visibly attempt live Gemini reasoning.")
 
     # Cached heavy processing bound strictly to the step number cache key
     state_frame = state_manager.get_state_frame(state, step_number)
+    if state_frame.empty:
+        st.error("No SRM parking block state is available. Reset the runtime to reload the block dataset.")
+        st.stop()
 
-    total_capacity = int(state_frame["Capacity"].sum())
-    total_occupied = int(state_frame["Occupied"].sum())
-    total_free = int(state_frame["Free"].sum())
+    dashboard_state = _build_dashboard_view_model(snapshot, state_frame, step_number)
+    st.session_state.dashboard_state = dashboard_state
+    state = dashboard_state["blocks"]
+    state_frame = dashboard_state["state_frame"]
+    latest_result = dashboard_state["latest_result"]
+    latest_transition = dashboard_state["latest_transition"]
+    goal = dashboard_state["goal"]
+    event_context = dashboard_state["event_context"]
+    kpis = dashboard_state["metrics"]
+    notifications = dashboard_state["notifications"]
+    recent_cycles = dashboard_state["recent_cycles"]
+    recent_states = dashboard_state["recent_states"]
+    benchmark = dashboard_state["benchmark"]
+    benchmark_summary = dashboard_state["benchmark_summary"]
+    agent_loop_steps = dashboard_state["agent_trace"]
+    memory_summary = dashboard_state["memory"]
+
+    total_capacity = dashboard_state["capacity"]
+    total_occupied = dashboard_state["occupied"]
+    total_free = dashboard_state["free_slots"]
     congestion = round((total_occupied / total_capacity * 100), 2) if total_capacity else 0.0
 
     st.markdown(
         f"""
         <div class="event-banner">
-            <div class="event-title">{event_context.get("name", "Campus Simulation")} | {event_context.get("time_window", "")}</div>
+            <div class="event-title">SRM Parking Simulation: {event_context.get("name", "SRM Simulation")} | {event_context.get("time_window", "")}</div>
             <div class="event-copy">
                 {event_context.get("description", "")}
                 Strategy: <strong>{event_context.get("allocation_strategy", "Balanced utilisation")}</strong>.
-                Recommended zone for incoming vehicles: <strong>{event_context.get("recommended_zone", "-")}</strong>.
+                Recommended SRM block for incoming vehicles: <strong>{event_context.get("recommended_zone", "-")}</strong>.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    _render_srm_parking_overview(state_frame)
+
     m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Total Capacity", total_capacity)
+    m1.metric("SRM Total Capacity", total_capacity)
     m2.metric("Occupied", total_occupied)
     m3.metric("Free Slots", total_free)
-    m4.metric("Congestion %", congestion)
+    m4.metric("SRM Occupancy %", congestion)
     m5.metric("Saved Steps", step_number)
 
     signal_cards(event_context, latest_result, kpis, goal)
@@ -822,12 +1131,34 @@ def main():
         else:
             st.info(f"Autonomous mode is active. The simulation refreshes every {speed:.1f} seconds.")
 
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(
-        ["Operations", "Events & KPIs", "Benchmark", "Agent Loop", "Reasoning", "Memory & Goals", "Notifications", "AI Chat"]
-    )
+    dashboard_pages = ["SRM Operations", "Events & KPIs", "Benchmark", "Agent Loop", "Reasoning", "Memory & Goals", "Notifications", "AI Chat"]
+    current_page = st.session_state.get("active_dashboard_page", "SRM Operations")
+    if current_page not in dashboard_pages:
+        current_page = "SRM Operations"
+    nav_left, nav_center, nav_right = st.columns([0.14, 0.72, 0.14])
+    with nav_left:
+        if st.button("Previous", width="stretch", on_click=_mark_ui_interaction):
+            current_index = dashboard_pages.index(current_page)
+            current_page = dashboard_pages[max(0, current_index - 1)]
+    with nav_center:
+        active_page = st.selectbox(
+            "Dashboard section",
+            dashboard_pages,
+            index=dashboard_pages.index(current_page),
+            label_visibility="collapsed",
+            key="dashboard_section",
+            on_change=_mark_ui_interaction,
+        )
+        current_page = active_page
+    with nav_right:
+        if st.button("Next", width="stretch", on_click=_mark_ui_interaction):
+            current_index = dashboard_pages.index(current_page)
+            current_page = dashboard_pages[min(len(dashboard_pages) - 1, current_index + 1)]
+    active_page = current_page
+    st.session_state.active_dashboard_page = active_page
 
-    with tab1:
-        st.markdown("<div class='section-kicker'>Live Operations</div>", unsafe_allow_html=True)
+    if active_page == "SRM Operations":
+        st.markdown("<div class='section-kicker'>Live SRM Parking Operations</div>", unsafe_allow_html=True)
         _render_decision_summary_block(latest_result, baseline_comparison)
         _render_llm_insight(latest_result)
         
@@ -840,7 +1171,7 @@ def main():
                     "items": [
                         {"label": "No-redirect baseline", "value": f"{baseline.get('estimated_search_time_min', 0):.1f} min"},
                         {"label": "Agent decision applied", "value": f"{agent_kpis.get('estimated_search_time_min', 0):.1f} min"},
-                        {"label": "Congestion Hotspots", "value": f"{baseline.get('congestion_hotspots', 0)} → {agent_kpis.get('congestion_hotspots', 0)}"},
+                        {"label": "Congested SRM blocks", "value": f"{baseline.get('congestion_hotspots', 0)} → {agent_kpis.get('congestion_hotspots', 0)}"},
                     ],
                 }
             ]
@@ -856,7 +1187,7 @@ def main():
         st.markdown("<div class='section-kicker'>Agent Decisions</div>", unsafe_allow_html=True)
         _render_agent_decision_table(latest_result)
 
-        st.markdown("<div class='section-kicker'>Zone Pressure</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-kicker'>SRM Block Pressure</div>", unsafe_allow_html=True)
         st.dataframe(_build_zone_status_frame(state_frame), width="stretch", hide_index=True)
 
         left, right = st.columns([1, 1])
@@ -866,7 +1197,7 @@ def main():
             if kpi_chart is not None:
                 left.plotly_chart(
                     kpi_chart,
-                    use_container_width=True,
+                    width="stretch",
                     config={"displayModeBar": False},
                     key=_chart_key("operations-kpi", step_number),
                 )
@@ -875,24 +1206,24 @@ def main():
             if latest_chart is not None:
                 right.plotly_chart(
                     latest_chart,
-                    use_container_width=True,
+                    width="stretch",
                     config={"displayModeBar": False},
                     key=_chart_key("operations-baseline", step_number),
                 )
             else:
                 right.plotly_chart(
                     build_utilisation_chart(state_frame),
-                    use_container_width=True,
+                    width="stretch",
                     config={"displayModeBar": False},
                     key=_chart_key("operations-utilisation", step_number),
                 )
 
-        with st.expander("Advanced View: zone cards, occupancy chart, and detailed table", expanded=False):
+        with st.expander("Advanced View: SRM block cards, occupancy chart, and detailed table", expanded=False):
             render_story_cards(goal, latest_result, event_context, kpis)
             render_zone_cards(state_frame)
             st.plotly_chart(
                 build_zone_chart(state_frame),
-                use_container_width=True,
+                width="stretch",
                 config={"displayModeBar": False},
                 key=_chart_key("operations-zone", step_number),
             )
@@ -903,13 +1234,13 @@ def main():
             with st.expander("Advanced View: raw entries, exits, and redirects"):
                 st.plotly_chart(
                     flow_chart,
-                    use_container_width=True,
+                    width="stretch",
                     config={"displayModeBar": False},
                     key=_chart_key("operations-flow", step_number),
                 )
 
         lower_left, lower_right = st.columns([1, 1])
-        lower_left.markdown("<div class='section-kicker'>Latest Zone Transition</div>", unsafe_allow_html=True)
+        lower_left.markdown("<div class='section-kicker'>Latest SRM Block Transition</div>", unsafe_allow_html=True)
         
         transition_frame = state_manager.get_transition_frame(latest_transition.get("zones", []), step_number)
         lower_left.dataframe(styled_transition_frame(transition_frame), width="stretch", hide_index=True)
@@ -928,38 +1259,43 @@ def main():
                     {
                         "title": "Routing Context",
                         "items": [
-                            {"label": "Recommended zone", "value": event_context.get("recommended_zone", "-")},
-                            {"label": "Focus zone", "value": event_context.get("focus_zone", "-")},
+                            {"label": "Recommended SRM block", "value": event_context.get("recommended_zone", "-")},
+                            {"label": "Focus SRM block", "value": event_context.get("focus_zone", "-")},
                         ],
                     },
                 ]
             )
 
-    with tab2:
-        st.markdown("<div class='section-kicker'>Industry Outcome Metrics</div>", unsafe_allow_html=True)
+    elif active_page == "Events & KPIs":
+        st.markdown("<div class='section-kicker'>SRM Parking Blocks & Slots</div>", unsafe_allow_html=True)
+        st.dataframe(_build_srm_capacity_dataset(state_frame), width="stretch", hide_index=True)
+
+        st.markdown("<div class='section-kicker'>SRM Outcome Metrics</div>", unsafe_allow_html=True)
         render_insight_cards([
             {"title": "Search Time", "value_label": "Estimated", "value": f"{kpis.get('estimated_search_time_min', 0)} min", "note": "Lower is better."},
             {"title": "Space Utilisation", "value_label": "Current", "value": f"{kpis.get('space_utilisation_pct', 0)}%", "note": "Healthy utilisation."},
             {"title": "Allocation Success", "value_label": "Current", "value": f"{kpis.get('allocation_success_pct', 0)}%", "note": "Reallocation success."},
-            {"title": "Congestion Hotspots", "value_label": "Current", "value": str(kpis.get('congestion_hotspots', 0)), "note": "Zones deeply congested."},
+            {"title": "SRM Block Hotspots", "value_label": "Current", "value": str(kpis.get('congestion_hotspots', 0)), "note": "Blocks deeply congested."},
         ], columns=4)
 
         kpi_chart = build_kpi_chart(recent_states)
         if kpi_chart is not None:
             st.plotly_chart(
                 kpi_chart,
-                use_container_width=True,
+                width="stretch",
                 config={"displayModeBar": False},
                 key=_chart_key("events-kpi", step_number),
             )
+        else:
+            st.info("Metrics history is not populated yet. Run one step to draw SRM search-time and hotspot trends.")
 
-    with tab3:
+    elif active_page == "Benchmark":
         st.markdown("<div class='section-kicker'>Simulation Proof</div>", unsafe_allow_html=True)
         aggregate = benchmark_summary.get("aggregate", benchmark.get("aggregate", {}))
         render_insight_cards([
             {"title": "Search Time Gain", "value_label": "Average", "value": f"{aggregate.get('avg_search_time_gain_min', 0)} min", "note": "Agent mode reduction."},
             {"title": "Resilience Gain", "value_label": "Average", "value": aggregate.get("avg_resilience_gain", 0), "note": "Higher is better."},
-            {"title": "Hotspot Reduction", "value_label": "Average", "value": aggregate.get("avg_hotspot_reduction", 0), "note": "Fewer critical zones."},
+            {"title": "Hotspot Reduction", "value_label": "Average", "value": aggregate.get("avg_hotspot_reduction", 0), "note": "Fewer critical SRM blocks."},
         ], columns=3)
         
         benchmark_frame = state_manager.get_benchmark_frame(benchmark, st.session_state.benchmark_toggle)
@@ -967,25 +1303,34 @@ def main():
         if chart is not None:
             st.plotly_chart(
                 chart,
-                use_container_width=True,
+                width="stretch",
                 config={"displayModeBar": False},
                 key=_chart_key("benchmark-summary", step_number, str(st.session_state.benchmark_toggle)),
             )
             st.dataframe(benchmark_frame, width="stretch", hide_index=True)
         else:
             st.info(benchmark_summary.get("message", "Run the benchmark from the sidebar to generate a baseline comparison."))
+            history_chart = build_kpi_chart(recent_states)
+            if history_chart is not None:
+                st.markdown("<div class='section-kicker'>Current Metrics History</div>", unsafe_allow_html=True)
+                st.plotly_chart(
+                    history_chart,
+                    width="stretch",
+                    config={"displayModeBar": False},
+                    key=_chart_key("benchmark-history", step_number),
+                )
 
         latest_chart = build_latest_baseline_chart(baseline_comparison)
         if latest_chart is not None:
             st.markdown("<div class='section-kicker'>Current Step Baseline</div>", unsafe_allow_html=True)
             st.plotly_chart(
                 latest_chart,
-                use_container_width=True,
+                width="stretch",
                 config={"displayModeBar": False},
                 key=_chart_key("benchmark-latest-baseline", step_number),
             )
 
-    with tab4:
+    elif active_page == "Agent Loop":
         st.markdown("<div class='section-kicker'>Planner, Critic, Executor</div>", unsafe_allow_html=True)
         _agent_summary_cards(latest_result, goal, event_context)
         left, right = st.columns([1.05, 1])
@@ -998,30 +1343,62 @@ def main():
                     with st.expander("🛠️ Open Developer Trace (Data Matrix)"):
                         st.dataframe(agent_df[["Agent", "Mode", "Action Taken", "Why"]], width="stretch", hide_index=True)
         else:
-            left.info("Run the system to populate the agent loop.")
+            with left:
+                if agent_loop_steps:
+                    st.info("Detailed agent interaction rows are pending; showing the step trace instead.")
+                    step_trace_frame = pd.DataFrame([
+                        {
+                            "step": item.get("step", ""),
+                            "output": item.get("output", ""),
+                            "details": _format_reasoning_text(item.get("details", {})),
+                        }
+                        for item in agent_loop_steps
+                    ])
+                    st.dataframe(step_trace_frame, width="stretch", hide_index=True)
+                else:
+                    st.info("Run the system to populate the agent loop.")
 
         with right:
             st.markdown("<div class='section-kicker'>Intelligent Chain of Thought</div>", unsafe_allow_html=True)
             
             # Show individual agent reasoning more prominently
-            for agent_data in latest_result.get("agent_interactions", []):
+            interaction_rows = latest_result.get("agent_interactions", [])
+            if not interaction_rows and agent_loop_steps:
+                interaction_rows = [
+                    {
+                        "Agent": item.get("step", "Agent"),
+                        "Action Taken": item.get("output", "Pending"),
+                        "Why": item.get("details", {}),
+                        "Key Output": item.get("output", ""),
+                    }
+                    for item in agent_loop_steps
+                ]
+            for agent_data in interaction_rows:
                 agent_name = agent_data.get("Agent", "Agent")
                 with st.expander(f"🧠 {agent_name} Logic", expanded=True):
                     st.write(f"**Action:** {agent_data.get('Action Taken', 'none')}")
-                    st.info(agent_data.get("Why") or "No reasoning recorded.")
+                    st.info(_format_reasoning_text(agent_data.get("Why")))
                     if agent_data.get("Key Output"):
                         st.caption(f"Signal: {agent_data.get('Key Output')}")
+            if not interaction_rows:
+                st.info("Planner, critic, and executor trace will appear after the first simulation step.")
 
             if st.session_state.get("developer_mode", False):
                 with st.expander("🛠️ Open raw JSON payload dumps"):
                     st.json({"planner_output": latest_result.get("planner_output", {}), "critic_output": latest_result.get("critic_output", {})})
 
         cycle_df = state_manager.get_cycle_frame(recent_cycles, step_number)
-        if not cycle_df.empty and st.session_state.get("developer_mode", False):
-            with st.expander("🛠️ Open recent agent cycle history"):
-                st.dataframe(styled_cycle_frame(cycle_df.tail(6)), width="stretch", hide_index=True)
+        if not cycle_df.empty:
+            st.markdown("#### 📊 Agent Decision History (with LLM Tracking)")
+            st.dataframe(cycle_df.tail(8)[["Step", "Event", "Planner", "Final", "Reward", "LLM Used", "LLM Influence", "LLM Decision"]], hide_index=True, width="stretch")
+            llm_influence_total = cycle_df[cycle_df["LLM Influence"] == "🎯 Modified"].shape[0]
+            if llm_influence_total > 0:
+                st.success(f"🧠 LLM has directly modified **{llm_influence_total}** decision(s) in this session — hybrid intelligence confirmed.")
+            if st.session_state.get("developer_mode", False):
+                with st.expander("🛠️ Open raw JSON payload dumps"):
+                    st.json({"planner_output": latest_result.get("planner_output", {}), "critic_output": latest_result.get("critic_output", {})})
 
-    with tab5:
+    elif active_page == "Reasoning":
         st.markdown("<div class='section-kicker'>Gemini Budget & LLM Decision Log</div>", unsafe_allow_html=True)
         if reasoning_summary:
             st.markdown(f"### 🤖 Agent Narrative Summary")
@@ -1067,13 +1444,18 @@ def main():
                         {"label": "Gemini attempts", "value": llm_usage_summary.get("gemini_attempts", 0)},
                         {"label": "Forced attempts", "value": llm_usage_summary.get("forced_live_attempts", 0)},
                         {"label": "Gemini calls", "value": llm_usage_summary.get("gemini_calls", 0)},
+                        {"label": "Remaining budget", "value": llm_usage_summary.get("remaining_budget", 0)},
                         {"label": "Gemini fallbacks", "value": llm_usage_summary.get("gemini_failures", 0)},
                         {"label": "Cache used", "value": llm_usage_summary.get("cache_used", 0)},
                         {"label": "Simulated Gemini", "value": llm_usage_summary.get("simulated_gemini", 0)},
                         {"label": "Local reasoning", "value": llm_usage_summary.get("local_reasoning", 0)},
+                        {"label": "Last Gemini step", "value": llm_usage_summary.get("last_gemini_step", "-")},
+                        {"label": "LLM influence", "value": f"{llm_usage_summary.get('llm_influence_pct', 0)}%"},
                     ],
                 }
             ])
+            if llm_usage_summary.get("budget_guard_active"):
+                st.warning("Budget guard is active: Gemini usage reached the reserve threshold, so the runtime is holding the remaining calls for operator-triggered highlights.")
 
         if last_llm_decision:
             st.markdown("**Most Recent Gemini Advisory**")
@@ -1087,19 +1469,27 @@ def main():
             if last_llm_decision.get("source") == "gemini_failed_fallback":
                 st.warning("Live Gemini was attempted on this step, but the planner fell back to local reasoning.")
             st.write(last_llm_decision.get("rationale", "No LLM rationale stored yet."))
+            compare_cols = st.columns(3)
+            compare_cols[0].metric("Local Decision", last_llm_decision.get("local_action_text", "No action stored."))
+            compare_cols[1].metric("Gemini Suggestion", last_llm_decision.get("llm_action_text", "No action stored."))
+            compare_cols[2].metric("Final Decision", last_llm_decision.get("final_action_text", last_llm_decision.get("action_text", "No action stored.")))
+            st.caption(f"LLM influence: {last_llm_decision.get('influence_label', 'Confirmed')}")
         else:
-            st.info("No Gemini advisory has been recorded yet. In Auto mode, the planner will request Gemini once every 10 steps when the provider is available.")
+            st.info("No Gemini advisory has been recorded yet. In Auto mode, the planner requests Gemini every 10 steps or earlier when queue >= 3, entropy > 3.5, risk > 70, or a decision conflict appears.")
 
         # --- LLM DECISION PANEL ---
         planner_out = latest_result.get("planner_output", {})
         critic_out = latest_result.get("critic_output", {})
         budget_out = latest_result.get("reasoning_budget", {})
+        if not planner_out and not critic_out:
+            st.info("Planner and critic outputs are not available yet. Run one step to populate reasoning details.")
         llm_used = planner_out.get("llm_advisory_used") or critic_out.get("llm_advisory_used") or planner_out.get("llm_requested")
         budget_level = budget_out.get("budget_level", "local_only")
         severe_triggers = budget_out.get("severe_triggers", [])
         moderate_triggers = budget_out.get("moderate_triggers", [])
         gate_notes = budget_out.get("gate_notes", [])
 
+        planner_source = planner_out.get("llm_source", "deterministic")
         if llm_used:
             llm_rationale = planner_out.get("rationale", "") or (critic_out.get("critic_notes") or [""])[0]
             llm_strategy = planner_out.get("strategy", "")
@@ -1111,16 +1501,44 @@ def main():
             c3.metric("LLM Action", llm_action.get("action", "none").upper())
             st.markdown("**📋 Gemini Rationale**")
             st.info(llm_rationale or "Gemini advisory was applied — rationale embedded in planner output.")
+            compare_cols = st.columns(3)
+            compare_cols[0].metric("Local Suggestion", planner_out.get("local_decision_snapshot", {}).get("action", "none").upper())
+            compare_cols[1].metric("Gemini Suggestion", planner_out.get("llm_decision_snapshot", {}).get("action", "none").upper())
+            compare_cols[2].metric("Final Decision", planner_out.get("final_decision_snapshot", {}).get("action", llm_action.get("action", "none")).upper())
+            st.caption(f"Gemini outcome: {planner_out.get('llm_decision_status', 'modified').replace('_', ' ').title()}")
             if llm_strategy and st.session_state.get("developer_mode", False):
                 st.markdown(f"**Strategy adopted:** {llm_strategy}")
             if st.session_state.get("developer_mode", False):
                 with st.expander("🛠️ Open full Gemini planner JSON"):
-                    st.json({"proposed_action": llm_action, "strategy": llm_strategy, "rationale": llm_rationale})
+                    st.json({
+                        "local_decision": planner_out.get("local_decision_snapshot", {}),
+                        "gemini_suggestion": planner_out.get("llm_decision_snapshot", {}),
+                        "final_decision": planner_out.get("final_decision_snapshot", {}),
+                        "strategy": llm_strategy,
+                        "rationale": llm_rationale,
+                    })
         else:
-            st.warning(f"⚡ **Gemini skipped this step** — deterministic agents handled decision. Budget: `{budget_level}`")
+            if planner_source in {"local_simulated", "simulated_edge_intelligence", "cached"}:
+                st.info(f"⚡ **Reasoning core remained active** — `{planner_source}` guided the planner while live Gemini was unavailable. Budget: `{budget_level}`")
+            else:
+                st.warning(f"⚡ **Gemini skipped this step** — deterministic agents handled decision. Budget: `{budget_level}`")
             if gate_notes:
                 for note in gate_notes:
                     st.caption(f"🔒 {note}")
+            signals = budget_out.get("signals", {})
+            render_key_value_groups([
+                {
+                    "title": "Gemini Schedule",
+                    "items": [
+                        {"label": "Next Gemini call", "value": signals.get("next_scheduled_llm_step", "-")},
+                        {"label": "Steps until call", "value": signals.get("steps_until_next_llm", "-")},
+                        {"label": "Trigger reason", "value": signals.get("llm_trigger_reason", "local")},
+                        {"label": "Event trigger", "value": "Yes" if signals.get("event_trigger_due") else "No"},
+                        {"label": "Calls used", "value": f"{signals.get('gemini_calls_today', 0)} / {signals.get('gemini_budget_limit', 18)}"},
+                        {"label": "Decision conflict", "value": "Yes" if signals.get("decision_conflict") else "No"},
+                    ],
+                }
+            ])
             action_out = latest_result.get("action", {})
             st.markdown("**Deterministic Decision Made:**")
             det_col1, det_col2 = st.columns(2)
@@ -1146,7 +1564,7 @@ def main():
             st.info("Run the system to inspect why each agent or model path was chosen.")
 
 
-    with tab6:
+    elif active_page == "Memory & Goals":
         st.markdown("<div class='section-kicker'>Persistent Learning View</div>", unsafe_allow_html=True)
         _memory_summary_cards(metrics)
         _render_goal_status(goal, kpis)
@@ -1169,9 +1587,33 @@ def main():
                         {"label": "Global transfer bias", "value": learning_profile.get("global_transfer_bias", "-")},
                         {"label": "Recent reward avg", "value": learning_profile.get("recent_reward_avg", "-")},
                         {"label": "Tracked failures", "value": len(recent_failures)},
+                        {"label": "Blocked routes", "value": len(learning_profile.get("blocked_routes", []))},
+                        {"label": "LLM memory rules", "value": len(learning_profile.get("llm_memory_rules", []))},
                     ],
                 }
             ])
+            goal_history = memory_summary.get("goal_history", [])
+            if goal_history:
+                with st.expander("Autonomous goal revisions", expanded=False):
+                    goal_frame = pd.DataFrame([
+                        {
+                            "objective": item.get("objective", "-"),
+                            "priority_zone": item.get("priority_zone", "-"),
+                            "target_hotspots": item.get("target_congested_zones", "-"),
+                            "target_search_time_min": item.get("target_search_time_min", "-"),
+                            "status": item.get("status", "-"),
+                            "revision_reason": item.get("revision_reason", "-"),
+                            "revision_count": item.get("revision_count", 0),
+                        }
+                        for item in goal_history
+                    ])
+                    st.dataframe(goal_frame, width="stretch", hide_index=True)
+            llm_rules = learning_profile.get("llm_memory_rules", [])
+            if llm_rules:
+                with st.expander("LLM-derived route rules", expanded=False):
+                    st.dataframe(pd.DataFrame(llm_rules), width="stretch", hide_index=True)
+        else:
+            st.info("Learning profile is not available yet. Run one step to initialize memory signals.")
         history = memory_summary.get("history", [])
         if history:
             with st.expander("Recent decision memory", expanded=False):
@@ -1185,7 +1627,7 @@ def main():
             with st.expander("Open memory trace log", expanded=False):
                 st.dataframe(trace_frame.tail(8), width="stretch", hide_index=True)
 
-    with tab7:
+    elif active_page == "Notifications":
         st.markdown("<div class='section-kicker'>Proactive User Notifications</div>", unsafe_allow_html=True)
         _render_notifications(notification_summary.get("items", notifications))
 
@@ -1194,7 +1636,7 @@ def main():
         st.markdown("<div class='section-kicker'>Live Alert Context</div>", unsafe_allow_html=True)
         alert_cols = st.columns(3)
         alert_cols[0].metric("Queue Length", kpis.get("queue_length", 0))
-        alert_cols[1].metric("Congestion Hotspots", kpis.get("congestion_hotspots", 0))
+        alert_cols[1].metric("SRM Block Hotspots", kpis.get("congestion_hotspots", 0))
         alert_cols[2].metric("Resilience Score", kpis.get("resilience_score", 100))
 
         # Denied entries trigger
@@ -1202,7 +1644,7 @@ def main():
         if denied > 0:
             st.error(f"**{denied} vehicle(s) were denied entry this step** — overflow risk is elevated. Agent is monitoring for redirect opportunity.")
         else:
-            st.success("No denied entries this step — network is absorbing arrivals normally.")
+            st.success("No denied entries this step — SRM parking blocks are absorbing arrivals normally.")
 
         dispatch = notification_summary.get("dispatch", snapshot.get("notification_dispatch", []))
         if dispatch:
@@ -1211,16 +1653,16 @@ def main():
             with st.expander("Open delivery audit log"):
                 st.dataframe(dispatch_frame, width="stretch", hide_index=True)
         else:
-            st.info("The notification service is live. New alerts appear here when queue pressure, blocked zones, denied entries, or redirect events occur.")
+            st.info("The notification service is live. New alerts appear here when queue pressure, blocked SRM blocks, denied entries, or redirect events occur.")
 
 
-    with tab8:
-        st.markdown("<div class='section-kicker'>Parking Operations Assistant</div>", unsafe_allow_html=True)
+    elif active_page == "AI Chat":
+        st.markdown("<div class='section-kicker'>SRM Parking Operations Assistant</div>", unsafe_allow_html=True)
         if llm_status.get("quota_backoff", {}).get("active"):
             st.warning("Gemini chat is paused by quota backoff. Local chat fallback will still answer operational questions.")
         _render_assistant_briefing(assistant_briefing)
         suggestion_cols = st.columns(4)
-        suggestions = ["Which zone is best right now?", "What event is affecting parking?", "Show the latest allocation decision", "Which block is most congested?"]
+        suggestions = ["Which SRM block is best right now?", "What event is affecting parking?", "Show the latest allocation decision", "Which block is most congested?"]
         for col, suggestion in zip(suggestion_cols, suggestions):
             with col:
                 if st.button(suggestion, width="stretch"):
@@ -1229,7 +1671,7 @@ def main():
                     st.session_state.chat_response_meta = response
                     
         with st.form("chat_form", clear_on_submit=False):
-            raw_query = st.text_input("Ask about parking rush, best zones, current event impact, or dynamic allocation")
+            raw_query = st.text_input("Ask about parking rush, best SRM blocks, current event impact, or dynamic allocation")
             submitted = st.form_submit_button("Ask")
 
         if submitted:

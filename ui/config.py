@@ -40,7 +40,7 @@ THRESHOLDS = {
 # Base UI strings
 STRINGS = {
     "title": "SRM Agentic Parking Command Center",
-    "subtitle": "Event-aware campus parking simulation with demand prediction, dynamic space allocation, measurable performance outcomes, and proactive parking recommendations.",
+    "subtitle": "SRM block-wise parking simulation with car/bike capacity, demand prediction, dynamic allocation, measurable outcomes, and proactive parking recommendations.",
     "recommendations": {
         "preferred": "Preferred",
         "overflow": "Overflow",

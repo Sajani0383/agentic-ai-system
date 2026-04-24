@@ -1,14 +1,28 @@
 import os
+import sys
 import time
 import logging
 import threading
 import hashlib
+import warnings
 from types import SimpleNamespace
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
+
+warnings.filterwarnings(
+    "ignore",
+    category=FutureWarning,
+    module=r"google\.auth|google\.oauth2",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*@model_validator.*mode='after'.*",
+)
 try:
-    from dotenv import load_dotenv
+    from dotenv import dotenv_values, load_dotenv
 except ImportError:  # Optional in local fallback mode
+    def dotenv_values(*args, **kwargs):
+        return {}
     def load_dotenv(*args, **kwargs):
         return False
 
@@ -16,7 +30,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ENV_PATH = PROJECT_ROOT / ".env"
 ENV_EXAMPLE_PATH = PROJECT_ROOT / ".env.example"
 
-if ENV_PATH.exists(): load_dotenv(dotenv_path=ENV_PATH, override=False)
+if ENV_PATH.exists(): load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 DEFAULT_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
 _LLM_INSTANCE = None
@@ -98,9 +112,22 @@ def _is_quota_llm_error(message):
     text = (message or "").upper()
     return any(m in text for m in ["429", "RESOURCE_EXHAUSTED", "QUOTA", "RATE_LIMIT", "RATE LIMIT"])
 
+def _is_daily_quota_llm_error(message):
+    text = (message or "").upper()
+    return (
+        "GENERATEREQUESTSPERDAYPERPROJECTPERMODEL-FREETIER" in text
+        or "GENERATIVELANGUAGE.GOOGLEAPIS.COM/GENERATE_CONTENT_FREE_TIER_REQUESTS" in text
+    )
+
 
 def get_api_key():
-    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    file_values = dotenv_values(ENV_PATH) if ENV_PATH.exists() else {}
+    api_key = (
+        file_values.get("GOOGLE_API_KEY")
+        or file_values.get("GEMINI_API_KEY")
+        or os.getenv("GOOGLE_API_KEY")
+        or os.getenv("GEMINI_API_KEY")
+    )
     if not api_key: return None
     cleaned = api_key.strip()
     if cleaned.lower() in {"your_google_api_key_here", "your_real_key_here", "replace_me"} or len(cleaned) < 20 or not cleaned.startswith("AIza"):
@@ -124,7 +151,7 @@ class GeminiLLMWrapper:
         # can never fire on a stale reference and raise
         # "cannot schedule new futures after shutdown".
         
-        self.TIMEOUT_SECONDS = 30.0    # Increased for complex agentic prompts
+        self.TIMEOUT_SECONDS = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "15.0"))
         self.RATE_LIMIT_DELAY = 1.0    # 1 second spacing protects QPS quotas
 
     def invoke(self, prompt):
@@ -145,12 +172,14 @@ class GeminiLLMWrapper:
         last_exc = None
         for attempt in range(2):
             start_time = time.time()
+            executor = None
+            future = None
             try:
-                # 3. Fresh executor per call — avoids "cannot schedule new futures
-                # after shutdown" when Python's atexit fires on interpreter teardown.
-                with ThreadPoolExecutor(max_workers=1) as _ex:
-                    future = _ex.submit(self.client.models.generate_content, model=self.model, contents=prompt)
-                    response = future.result(timeout=self.TIMEOUT_SECONDS)
+                if sys.is_finalizing():
+                    raise RuntimeError("Interpreter is shutting down; skipping Gemini request.")
+                executor = ThreadPoolExecutor(max_workers=1)
+                future = executor.submit(self.client.models.generate_content, model=self.model, contents=prompt)
+                response = future.result(timeout=self.TIMEOUT_SECONDS)
                 
                 text = ""
                 # Use native SDK property if available
@@ -180,15 +209,25 @@ class GeminiLLMWrapper:
                 
             except TimeoutError:
                 last_exc = Exception("Cloud LLM Timeout bounds breached successfully dropping request.")
-                logging.warning(f"Attempt {attempt+1} LLM generation timed out after {self.TIMEOUT_SECONDS}s.")
-                STATUS_MANAGER.start_backoff(str(last_exc), seconds=12, kind="transient")
-                time.sleep(1.0)
+                log_fn = logging.info if attempt == 0 else logging.warning
+                log_fn(f"Attempt {attempt+1} LLM generation timed out after {self.TIMEOUT_SECONDS}s.")
+                if future is not None:
+                    future.cancel()
+                STATUS_MANAGER.start_backoff(str(last_exc), seconds=20, kind="transient")
+                raise last_exc
             except Exception as exc:
                 last_exc = exc
                 message = f"{type(exc).__name__}: {exc}"
-                logging.warning(f"Attempt {attempt+1} Exception: {message}")
+                log_fn = logging.info if attempt == 0 else logging.warning
+                log_fn(f"Attempt {attempt+1} Exception: {message}")
+                if "cannot schedule new futures after shutdown" in message.lower() or "interpreter is shutting down" in message.lower():
+                    STATUS_MANAGER.start_backoff(message, seconds=20, kind="transient")
+                    raise
                 if _is_quota_llm_error(message):
-                    STATUS_MANAGER.start_backoff(message, seconds=45, kind="quota")
+                    if _is_daily_quota_llm_error(message):
+                        STATUS_MANAGER.start_backoff(message, seconds=6 * 60 * 60, kind="daily_quota")
+                    else:
+                        STATUS_MANAGER.start_backoff(message, seconds=45, kind="quota")
                     raise
                 if _is_connectivity_llm_error(message):
                     STATUS_MANAGER.start_backoff(message, seconds=10, kind="transient")
@@ -198,6 +237,12 @@ class GeminiLLMWrapper:
                     continue
                 STATUS_MANAGER.set_error(message)
                 raise
+            finally:
+                if executor is not None:
+                    try:
+                        executor.shutdown(wait=False, cancel_futures=True)
+                    except TypeError:
+                        executor.shutdown(wait=False)
                 
         if last_exc:
             STATUS_MANAGER.set_error(str(last_exc))
@@ -240,26 +285,45 @@ def get_llm_status(ignore_backoff=False):
     backoff = STATUS_MANAGER.get_backoff()
     status["quota_backoff"] = backoff
     if backoff.get("active") and not ignore_backoff:
-        if backoff.get("kind") == "quota":
-            status["available"] = False
+        status["available"] = False
+        if backoff.get("kind") == "daily_quota":
+            status["message"] = (
+                "Gemini daily free-tier quota is exhausted for the active project/key. "
+                "The system will stay in simulated/local reasoning mode until quota resets or a different quota source is used."
+            )
+        elif backoff.get("kind") == "quota":
             status["message"] = (
                 f"Gemini is temporarily paused after a quota/rate-limit response. "
                 f"Retry will resume in {backoff.get('remaining_seconds', 0)} seconds."
             )
-            return status
+        else:
+            status["message"] = (
+                f"Gemini is temporarily paused after a transient provider/network error. "
+                f"Retry will resume in {backoff.get('remaining_seconds', 0)} seconds."
+            )
+        return status
     
     # If we are ignoring backoff, we treat it as available even if a backoff is active
     status["available"] = True
     if backoff.get("active"):
-        status["message"] = (
-            f"Gemini saw a recent transient error and will keep retrying. "
-            f"Last error cooldown window: {backoff.get('remaining_seconds', 0)} seconds."
-        )
+        if backoff.get("kind") == "daily_quota":
+            status["message"] = (
+                "Gemini daily free-tier quota is exhausted for the active project/key. "
+                "Live calls are paused and local/simulated reasoning remains active."
+            )
+        else:
+            status["message"] = (
+                f"Gemini saw a recent transient error and will keep retrying. "
+                f"Last error cooldown window: {backoff.get('remaining_seconds', 0)} seconds."
+            )
 
     if last_err:
         if _is_terminal_llm_error(last_err):
             status["available"] = False
             status["message"] = "Gemini is disabled because the configured API key is invalid or expired."
+        elif _is_daily_quota_llm_error(last_err):
+            status["available"] = False
+            status["message"] = "Gemini daily free-tier quota is exhausted. Autonomous Edge Intelligence will continue with simulated/local reasoning until quota resets."
         elif _is_quota_llm_error(last_err):
             status["available"] = False
             status["message"] = "Autonomous Edge Intelligence mode active (Provider Quota Optimization). System remains fully operational via high-fidelity local models."

@@ -129,8 +129,8 @@ autonomous_loop = AutonomousLoop(runtime_service)
 
 
 app = FastAPI(
-    title="Smart Parking Agent API",
-    description="API for the agentic parking runtime, goals, traces, and control loop.",
+    title="SRM Smart Parking Agent API",
+    description="API for the SRM agentic parking runtime, goals, traces, and control loop.",
     version="2.0.0",
 )
 
@@ -213,7 +213,7 @@ def _build_metrics_report(snapshot):
 @app.get("/")
 def root(_authorized=Depends(require_api_key)):
     return {
-        "name": "Smart Parking Agent API",
+        "name": "SRM Smart Parking Agent API",
         "version": "2.0.0",
         "health": "/health",
         "docs": "/docs",

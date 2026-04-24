@@ -72,6 +72,8 @@ class ExecutorAgent:
         from_zone = action.get("from")
         to_zone = action.get("to")
         requested = max(0, int(action.get("vehicles", 0) or 0))
+        if float(action.get("confidence", 1.0) or 0.0) <= 0 and requested > 1:
+            requested = 1
 
         if from_zone not in state or to_zone not in state:
             return {
@@ -105,16 +107,19 @@ class ExecutorAgent:
             state[from_zone]["entry"],
             max(0, 12 - state[from_zone]["free_slots"]),
         )
+        if action.get("force_micro") or action.get("controller_forced"):
+            source_redirect_capacity = max(source_redirect_capacity, requested)
         free_capacity = state[to_zone]["free_slots"]
         executable_vehicles = max(0, min(requested, source_redirect_capacity, free_capacity))
         if executable_vehicles <= 0:
             return {
                 "valid": False,
-                "reason": "No incoming demand can be rerouted because source pressure or destination capacity is unavailable.",
+                "reason": "No incoming demand can be rerouted — source pressure or destination capacity unavailable. Triggering failure recovery.",
                 "action": {"action": "none"},
                 "requested": requested,
                 "executable_vehicles": 0,
                 "partial_execution": False,
+                "failure_recovery": True,
             }
 
         executable = dict(action)
@@ -166,25 +171,26 @@ class ExecutorAgent:
         return last_report
 
     def _build_prepared_result(self, review, executable, validation):
+        executable_count = validation["executable_vehicles"]
         note = (
             f"Executor prepared redirect from {executable.get('from')} to {executable.get('to')} "
-            f"for {validation['executable_vehicles']} vehicles."
+            f"for {executable_count} vehicles."
         )
         if validation["partial_execution"]:
-            note += f" Requested {validation['requested']} vehicles, but only {validation['executable_vehicles']} are executable."
+            note += f" Requested {validation['requested']} vehicles, but only {executable_count} are executable."
         result = {
             "final_action": executable,
             "execution_note": note,
             "approved": review.get("approved", False),
             "risk_level": review.get("risk_level", "medium"),
-            "success": True,
+            "success": executable_count > 0,
             "applied": False,
             "partial_execution": validation["partial_execution"],
             "requested_vehicles": validation["requested"],
-            "executed_vehicles": 0,
-            "executable_vehicles": validation["executable_vehicles"],
+            "executed_vehicles": executable_count,   # sync with actual executable count
+            "executable_vehicles": executable_count,
             "validation": validation,
-            "learning_feedback": self._learning_feedback(review, validation["executable_vehicles"], validation),
+            "learning_feedback": self._learning_feedback(review, executable_count, validation),
         }
         return result
 
@@ -194,13 +200,13 @@ class ExecutorAgent:
             "execution_note": reason,
             "approved": review.get("approved", False),
             "risk_level": review.get("risk_level", "medium"),
-            "success": True,
+            "success": False,
             "applied": False,
             "partial_execution": False,
             "requested_vehicles": 0,
             "executed_vehicles": 0,
             "executable_vehicles": 0,
-            "learning_feedback": {"execution_success": True, "moved": 0, "reason": reason},
+            "learning_feedback": {"execution_success": False, "moved": 0, "reason": reason},
         }
         self._record_execution(result)
         return result
@@ -259,5 +265,5 @@ class ExecutorAgent:
         }
         self.execution_history.append(summary)
         self.execution_history = self.execution_history[-100:]
-        level = "INFO" if result.get("success") else "ERROR"
+        level = "INFO" if result.get("success") else "WARNING"
         self.logger.log("-", "executor_execution", summary, level=level)

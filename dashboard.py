@@ -1,6 +1,21 @@
 import argparse
 import logging
 import sys
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message=r".*urllib3 v2 only supports OpenSSL 1\.1\.1\+.*",
+)
+warnings.filterwarnings(
+    "ignore",
+    category=FutureWarning,
+    module=r"google\.auth|google\.oauth2",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*@model_validator.*mode='after'.*",
+)
 
 from ui.adk_dashboard import main
 
