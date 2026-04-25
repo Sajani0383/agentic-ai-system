@@ -548,6 +548,20 @@ class AgentController:
                     "Contract repair preserved a safe micro-action for replan."
                 ).strip()
                 review["critic_notes"].append("Critic contract repair preserved a safe micro-action for replan instead of collapsing to NONE.")
+            elif (
+                planner_action.get("action") == "redirect"
+                and (planner_action.get("force_micro") or planner_action.get("controller_forced"))
+                and float(review.get("risk_score", 100.0) or 100.0) < 95
+                and not review.get("risk_factors", {}).get("blocked_zone")
+            ):
+                action = deepcopy(planner_action)
+                action["vehicles"] = max(1, min(2, int(action.get("vehicles", 1) or 1)))
+                action["force_micro"] = True
+                review["approved"] = True
+                review["risk_level"] = "high"
+                review["critic_notes"].append(
+                    "Critic contract repair allowed the pressure-guard micro-action because no hard safety constraint was violated."
+                )
             else:
                 action = {"action": "none"}
         review["revised_action"] = action
@@ -1322,7 +1336,7 @@ class AgentController:
         elif route_key in blocked_routes:
             adaptation_note = f"Memory active: {route_key} is BLOCKED — system avoided this route based on {failure_count} past failures."
         else:
-            adaptation_note = "Policy stable: outcome within expected bounds, no significant adaptation this step."
+            adaptation_note = "Learning held steady this step: recent outcome stayed within expected bounds, so no route weight change was needed."
         eval_output["adaptation_note"] = adaptation_note
         
         self.memory.update_learning_signal(
@@ -1458,7 +1472,7 @@ class AgentController:
             {"agent": "PlannerAgent", "message": "Optimized routing via Autonomous Edge Intelligence.", "why": pipeline_results["planner_output"].get("rationale") or pipeline_results["planner_output"].get("reasoning_budget", {}).get("planner", "Calculated adaptive local routing path."), "mode": pipeline_results["planner_output"].get("decision_mode", "autonomous_local"), "payload": pipeline_results["planner_output"]},
             {"agent": "CriticAgent", "message": "Tested the proposed execution tree limits.", "why": pipeline_results["critic_output"].get("critic_notes", ["Checked capacity limits."])[0] if pipeline_results["critic_output"].get("critic_notes") else pipeline_results["critic_output"].get("reasoning_budget", {}).get("critic", "Approved local proposal."), "mode": "llm_advisory" if pipeline_results["critic_output"].get("llm_advisory_used") else "deterministic", "payload": pipeline_results["critic_output"]},
             {"agent": "ExecutorAgent", "message": "Generated executable safe action.", "why": "Execution remains local so the runtime can stay fast and bounded.", "mode": "local", "payload": pipeline_results["execution_output"]},
-            {"agent": "PolicyBaseline", "message": "Computed Q-learning deterministic baseline fallback.", "why": "Baseline policy remains available when LLM escalation is unnecessary or fails.", "mode": "local", "payload": pipeline_results["policy_action"]},
+            {"agent": "BaselinePolicy", "message": "Computed the low-cost reference policy for comparison and safety recovery.", "why": "This baseline is a reference path for recovery and benchmarking, not a competing authority over critic-approved execution.", "mode": "local", "payload": pipeline_results["policy_action"]},
             {"agent": "RewardAgent", "message": "Measured final operational impacts.", "why": "Feedback updates the low-cost policy path so the system needs fewer future LLM calls.", "mode": "local", "payload": eval_metrics},
         ]
         

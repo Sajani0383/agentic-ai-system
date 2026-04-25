@@ -4,7 +4,8 @@ import time
 from threading import Event, Lock, Thread
 from typing import Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from adk.agent_manager import (
@@ -37,6 +38,12 @@ class ResetRequest(BaseModel):
 
 class ScenarioRequest(BaseModel):
     scenario_mode: str
+
+class LLMModeRequest(BaseModel):
+    llm_mode: str
+
+class ForceLLMRequest(BaseModel):
+    enabled: bool
 
 
 class BenchmarkRequest(BaseModel):
@@ -132,6 +139,13 @@ app = FastAPI(
     title="SRM Smart Parking Agent API",
     description="API for the SRM agentic parking runtime, goals, traces, and control loop.",
     version="2.0.0",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -267,6 +281,24 @@ def scenario(request: ScenarioRequest, _authorized=Depends(require_api_key)):
     return safe_call(lambda: set_runtime_scenario(request.scenario_mode), "Scenario update failed")
 
 
+@app.post("/llm/mode")
+def set_llm_mode(request: LLMModeRequest, _authorized=Depends(require_api_key)):
+    _validate_non_empty(request.llm_mode, "llm_mode")
+    if request.llm_mode not in {"auto", "demo", "local"}:
+        raise HTTPException(status_code=422, detail="llm_mode must be one of auto, demo, or local.")
+    return safe_call(lambda: runtime_service.set_llm_mode(request.llm_mode), "LLM mode update failed")
+
+
+@app.post("/llm/force")
+def set_force_llm(request: ForceLLMRequest, _authorized=Depends(require_api_key)):
+    return safe_call(lambda: runtime_service.set_force_llm(request.enabled), "Force LLM update failed")
+
+
+@app.post("/llm/reset")
+def reset_llm_state(_authorized=Depends(require_api_key)):
+    return safe_call(runtime_service.reset_llm_runtime_state, "LLM runtime reset failed")
+
+
 @app.post("/benchmark")
 def benchmark(request: BenchmarkRequest, _authorized=Depends(require_api_key)):
     if not 1 <= request.episodes <= 20:
@@ -319,7 +351,10 @@ def autonomy_status(_authorized=Depends(require_api_key)):
 
 
 @app.get("/state")
-def state(_authorized=Depends(require_api_key)):
+def state(response: Response, _authorized=Depends(require_api_key)):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return safe_call(get_runtime_snapshot, "State read failed")
 
 

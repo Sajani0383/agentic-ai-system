@@ -15,6 +15,7 @@ from ui.components.charts import (
     build_kpi_chart,
     build_benchmark_chart,
     build_latest_baseline_chart,
+    build_performance_trend_chart,
 )
 from ui.components.cards import (
     render_html_block,
@@ -67,6 +68,12 @@ def _build_llm_summary(llm_status, is_forced=False):
             "success",
         )
     if quota_backoff.get("active"):
+        if quota_backoff.get("kind") == "daily_quota":
+            return (
+                "Live Gemini Paused By Daily Quota",
+                "The active Gemini project/key has reached its free-tier daily cap. The planner is staying in simulated and local agentic reasoning so the parking system keeps operating without blank steps or broken execution.",
+                "info",
+            )
         return (
             "Efficient Local Mode Active",
             f"System has transitioned to Autonomous Edge Intelligence ({quota_backoff.get('remaining_seconds', 0)}s remaining in cloud optimization cycle). Resilient multi-agent heuristics are currently driving SRM parking allocation.",
@@ -330,25 +337,21 @@ def _render_system_status_bar(latest_result, event_context, kpis, llm_status, ll
         """
     )
 
-def _render_decision_summary_block(latest_result, baseline_comparison):
+def _render_decision_summary_block(latest_result, baseline_comparison, updated_at=""):
     if not latest_result:
         return
+    baseline_comparison = _safe_dict(baseline_comparison)
     action = latest_result.get("action", {})
     act_type = action.get("action", "none").upper()
-    reason_raw = action.get("reason", "Network pressure is within bounds.")
-    
-    # Condense the reason into a punchy one-liner if it's a redirect
+    impact = _format_decision_impact(baseline_comparison)
     if act_type == "REDIRECT":
         source = action.get("from", "Unknown")
         target = action.get("to", "Unknown")
         vehicles = int(action.get("vehicles", 0))
-        punchy_reason = f"{source} congested → {target} has free capacity → Redirecting {vehicles} vehicles now."
+        punchy_reason = action.get("reason") or f"{source} is under pressure and {target} has the best free capacity, so the agent is redirecting {vehicles} vehicles right now."
         display_type = "REDIRECT"
-        bg_col = "rgba(77, 163, 255, 0.12)"
-        border_col = "#4da3ff"
-        text_col = "#cce5ff"
+        route = f"{source} → {target}"
     else:
-        # Build intelligent context from live state
         state = latest_result.get("state", {})
         if state:
             crowded = min(state, key=lambda z: state[z].get("free_slots", 0))
@@ -358,39 +361,36 @@ def _render_decision_summary_block(latest_result, baseline_comparison):
         else:
             crowded, best, source, target = "-", "-", "-", "-"
         vehicles = 0
-        punchy_reason = f"Agents analyzed all SRM blocks → {source} pressured but within safe thresholds → Holding for next cycle."
+        punchy_reason = action.get("reason") or f"The agent reviewed all SRM blocks and kept monitoring active because {source} remains within safe limits for this cycle."
         display_type = "MONITORING"
-        bg_col = "rgba(80, 200, 120, 0.07)"
-        border_col = "#50c878"
-        text_col = "#b0d8b8"
+        route = f"{source} stable | best buffer {target}"
 
-    st.markdown(
+    render_html_block(
         f"""
-        <div style="background: {bg_col}; border-left: 5px solid {border_col}; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-                <div style="min-width: 120px;">
-                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: {text_col};">Decision</div>
-                    <div style="font-size: 2rem; font-weight: 800; color: #fff;">{display_type}</div>
-                </div>
-                <div style="min-width: 120px;">
-                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: {text_col};">Source SRM Block</div>
-                    <div style="font-size: 1.5rem; font-weight: 600; color: #fff;">{source}</div>
-                </div>
-                <div style="min-width: 120px;">
-                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: {text_col};">Destination</div>
-                    <div style="font-size: 1.5rem; font-weight: 600; color: #fff;">{target}</div>
-                </div>
-                <div style="min-width: 120px;">
-                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: {text_col};">Volume</div>
-                    <div style="font-size: 2rem; font-weight: 800; color: #fff;">{vehicles}</div>
+        <div class="realtime-badge"><span class="realtime-dot"></span>Live backend timestamp: {_format_live_timestamp(updated_at)}</div>
+        <div class="focus-grid">
+            <div class="focus-card">
+                <div class="focus-kicker">Current Decision</div>
+                <div class="focus-title">{display_type}</div>
+                <div class="focus-route">{route}</div>
+                <div class="focus-reason">{punchy_reason}</div>
+                <div class="focus-stat-grid">
+                    <div class="focus-stat"><span>Vehicles</span><strong>{vehicles}</strong></div>
+                    <div class="focus-stat"><span>Source</span><strong>{source}</strong></div>
+                    <div class="focus-stat"><span>Destination</span><strong>{target}</strong></div>
                 </div>
             </div>
-            <div style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.4; color: #f5f5f5; font-style: italic; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-                " {punchy_reason} "
+            <div class="focus-card accent">
+                <div class="focus-kicker">Decision Impact</div>
+                <div class="focus-impact">{impact}</div>
+                <div class="focus-stat-grid">
+                    <div class="focus-stat"><span>Search Delta</span><strong>{baseline_comparison.get('search_time_delta_min', 0):+.2f}m</strong></div>
+                    <div class="focus-stat"><span>Hotspot Delta</span><strong>{baseline_comparison.get('hotspot_delta', 0):+.0f}</strong></div>
+                    <div class="focus-stat"><span>Execution</span><strong>{_execution_summary(latest_result)}</strong></div>
+                </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True
+        """
     )
 
 def _render_llm_insight(latest_result):
@@ -535,8 +535,8 @@ def _render_decision_card(latest_result, baseline_comparison):
             "title": "Learning & Adaptation",
             "items": [
                 {"label": "Active Adaptation", "value": "Applied" if action.get("learning_applied") else "Passive"},
-                {"label": "Learning Note", "value": latest_result.get("reward", {}).get("adaptation_note", "Policy stable.")},
-                {"label": "Memory Status", "value": "SRM route avoided" if latest_result.get("planner_output", {}).get("memory_avoidance_triggered") else "Nominal"},
+                {"label": "Learning Note", "value": latest_result.get("reward", {}).get("adaptation_note", "Learning baseline unchanged this step.")},
+                {"label": "Memory Status", "value": "SRM route avoided" if latest_result.get("planner_output", {}).get("memory_avoidance_triggered") else "No route block active"},
                 {"label": "Avoided Route", "value": latest_result.get("planner_output", {}).get("avoided_route", "-")},
             ],
         },
@@ -572,7 +572,7 @@ def _render_agent_decision_table(latest_result):
             llm_string = "Gemini requested -> no plan change"
     else:
         llm_string = "Skipped -> deterministic agents used"
-    policy_string = "Advisory only; never overrides critic-approved execution"
+    policy_string = "Reference baseline only; used for safety recovery and benchmarking, not final authority"
     
     if action.get("status") == "failed":
         action_string = f"Execution failed: {action.get('failure_reason', 'Network timeout')}"
@@ -587,7 +587,7 @@ def _render_agent_decision_table(latest_result):
         <div style="color: #4da3ff;"><b>Step 2: LLM Gate</b> &rarr; <span style="color: #ccc;">{llm_string}</span></div>
         <div style="color: #4da3ff;"><b>Step 3: Planner</b> &rarr; <span style="color: #ccc;">Suggest {planner_route.lower()}</span></div>
         <div style="color: #4da3ff;"><b>Step 4: Critic</b> &rarr; <span style="color: #ccc;">{critic_string}</span></div>
-        <div style="color: #73839a;"><b>Step 5: Policy Advisory</b> &rarr; <span style="color: #ccc;">{policy_string}</span></div>
+        <div style="color: #73839a;"><b>Step 5: Baseline Context</b> &rarr; <span style="color: #ccc;">{policy_string}</span></div>
         <div style="color: {action_color};"><b>Step 6: Action</b> &rarr; <span style="color: #fff;">{action_string}</span></div>
     </div>
     """, unsafe_allow_html=True)
@@ -627,6 +627,162 @@ def _build_srm_capacity_dataset(state_frame):
             "Free": "free_slots",
         }
     )[["block_name", "car_slots", "bike_slots", "total_capacity", "occupied", "free_slots"]]
+
+def _format_live_timestamp(value):
+    if not value:
+        return "Awaiting live state"
+    text = str(value).replace("Z", "+00:00")
+    try:
+        ts = pd.Timestamp(text)
+        if ts.tzinfo is not None:
+            ts = ts.tz_convert("Asia/Kolkata")
+        return ts.strftime("%d %b %Y, %I:%M:%S %p")
+    except Exception:
+        return str(value)
+
+def _render_live_slot_board(blocks, vehicles, updated_at):
+    if not blocks:
+        st.info("Live slot view will appear once the backend publishes a shared parking state.")
+        return
+    block_names = list(blocks.keys())
+    selected = st.session_state.get("dashboard_block_focus")
+    if selected not in blocks:
+        selected = block_names[0]
+    st.session_state.dashboard_block_focus = selected
+
+    render_html_block(
+        f"""
+        <div class="slot-board">
+            <div class="slot-selector-card">
+                <div class="section-kicker">Interactive Block Selector</div>
+                <div style="color:#dce8f8; font-size:1.05rem; font-weight:700;">Choose an SRM block to inspect live slots</div>
+                <div class="slot-timestamp">Live backend timestamp: { _format_live_timestamp(updated_at) }</div>
+            </div>
+            <div class="slot-detail-card">
+                <div class="section-kicker">Slot-Level Environment View</div>
+                <div style="color:#dce8f8; font-size:1.05rem; font-weight:700;">Separate car and bike slots are rendered from the shared backend vehicle state.</div>
+                <div class="slot-legend">
+                    <span><i class="slot-swatch car"></i>Car slot</span>
+                    <span><i class="slot-swatch bike"></i>Bike slot</span>
+                    <span><i class="slot-swatch free"></i>Free slot</span>
+                </div>
+            </div>
+        </div>
+        """
+    )
+
+    selector_cols = st.columns(4)
+    for index, block_name in enumerate(block_names):
+        block = blocks.get(block_name, {})
+        occupied = int(block.get("occupied", 0) or 0)
+        capacity = int(block.get("capacity", 0) or 0)
+        ratio = (occupied / capacity) if capacity else 0.0
+        icon = "🔴" if ratio >= 0.7 else ("🟡" if ratio >= 0.4 else "🟢")
+        if selector_cols[index % 4].button(
+            f"{icon} {block_name}\n{occupied}/{capacity}",
+            key=f"dashboard-block-{block_name}",
+            use_container_width=True,
+            on_click=_mark_ui_interaction,
+        ):
+            st.session_state.dashboard_block_focus = block_name
+            selected = block_name
+
+    selected = st.session_state.get("dashboard_block_focus", selected)
+    block = blocks.get(selected, {})
+    block_capacity = int(block.get("capacity", 0) or 0)
+    car_slots = min(block_capacity, int(block.get("car_slots", block_capacity) or block_capacity))
+    bike_slots = max(0, int(block.get("bike_slots", max(0, block_capacity - car_slots)) or 0))
+    block_vehicles = [vehicle for vehicle in vehicles if vehicle.get("block") == selected]
+    slot_lookup = {int(vehicle.get("slot", 0) or 0): vehicle for vehicle in block_vehicles}
+    slot_html = []
+    for slot_number in range(1, block_capacity + 1):
+        vehicle = slot_lookup.get(slot_number)
+        slot_type = "bike" if slot_number > car_slots else "car"
+        if vehicle:
+            klass = "filled-bike" if vehicle.get("type") == "bike" else "filled-car"
+            icon = "🏍" if vehicle.get("type") == "bike" else "🚗"
+        else:
+            klass = "empty"
+            icon = "·"
+        slot_html.append(
+            f"<div class='slot-cell {klass}'><div>{icon}</div><small>{slot_number}</small></div>"
+        )
+
+    cars_live = sum(1 for vehicle in block_vehicles if vehicle.get("type") == "car")
+    bikes_live = sum(1 for vehicle in block_vehicles if vehicle.get("type") == "bike")
+    render_html_block(
+        f"""
+        <div class="slot-detail-card">
+            <div class="focus-kicker">Selected SRM Block</div>
+            <div style="display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; flex-wrap:wrap;">
+                <div>
+                    <div class="focus-title" style="font-size:2rem; margin-bottom:0.3rem;">{selected}</div>
+                    <div class="focus-route">Occupied {int(block.get("occupied", 0) or 0)} of {block_capacity} | Free {int(block.get("free_slots", 0) or 0)}</div>
+                </div>
+                <div class="focus-stat-grid" style="margin-top:0; min-width:320px;">
+                    <div class="focus-stat"><span>Car Slots</span><strong>{car_slots}</strong></div>
+                    <div class="focus-stat"><span>Bike Slots</span><strong>{bike_slots}</strong></div>
+                    <div class="focus-stat"><span>Live Vehicles</span><strong>{len(block_vehicles)}</strong></div>
+                    <div class="focus-stat"><span>Cars Parked</span><strong>{cars_live}</strong></div>
+                    <div class="focus-stat"><span>Bikes Parked</span><strong>{bikes_live}</strong></div>
+                    <div class="focus-stat"><span>Entry / Exit</span><strong>{int(block.get("entry", 0) or 0)} / {int(block.get("exit", 0) or 0)}</strong></div>
+                </div>
+            </div>
+            <div class="slot-grid-dash">{''.join(slot_html)}</div>
+        </div>
+        """
+    )
+
+def _summarize_agent_rows(latest_result, agent_loop_steps):
+    rows = _safe_list(latest_result.get("agent_interactions"))
+    if not rows and agent_loop_steps:
+        rows = [
+            {
+                "Agent": item.get("step", "Agent"),
+                "Action Taken": item.get("output", "Pending"),
+                "Why": item.get("details", {}),
+                "Key Output": item.get("output", ""),
+            }
+            for item in agent_loop_steps
+        ]
+    ordered = []
+    seen = {}
+    for item in rows:
+        if not isinstance(item, dict):
+            continue
+        agent = item.get("Agent") or item.get("agent") or "Agent"
+        normalized = {
+            "agent": str(agent),
+            "action": str(item.get("Action Taken", item.get("message", "Pending"))),
+            "why": _format_reasoning_text(item.get("Why", item.get("why", ""))),
+            "signal": str(item.get("Key Output", "")),
+        }
+        if agent not in seen:
+            ordered.append(agent)
+        seen[agent] = normalized
+    return [seen[name] for name in ordered]
+
+def _build_movement_frame(movement_log):
+    rows = []
+    for item in movement_log or []:
+        if not isinstance(item, dict):
+            continue
+        timestamp = _format_live_timestamp(item.get("timestamp"))
+        rows.append(
+            {
+                "Timestamp": timestamp,
+                "Step": item.get("step", "-"),
+                "SRM Block": item.get("block", "-"),
+                "Entries": int(item.get("entries", 0) or 0),
+                "Exits": int(item.get("exits", 0) or 0),
+                "Car In": int(item.get("car_entries", 0) or 0),
+                "Bike In": int(item.get("bike_entries", 0) or 0),
+                "Car Out": int(item.get("car_exits", 0) or 0),
+                "Bike Out": int(item.get("bike_exits", 0) or 0),
+                "Occupied After": int(item.get("occupied_after", 0) or 0),
+            }
+        )
+    return pd.DataFrame(rows)
 
 def _render_decision_audit(latest_result):
     if not latest_result:
@@ -783,6 +939,7 @@ def _fallback_snapshot():
         "force_llm": False,
         "event_context": env.get_event_context(),
         "notifications": [],
+        "alerts": [],
         "notification_dispatch": [],
         "kpis": {},
         "recent_cycles": [],
@@ -797,6 +954,10 @@ def _fallback_snapshot():
         "last_llm_decision": {},
         "llm_usage_summary": {},
         "assistant_briefing": {},
+        "vehicles": [],
+        "movement_log": [],
+        "actions": [],
+        "updated_at": transition.get("timestamp", ""),
     }
 
 def _normalize_dashboard_snapshot(snapshot):
@@ -818,6 +979,11 @@ def _normalize_dashboard_snapshot(snapshot):
     normalized["recent_cycles"] = _safe_list(normalized.get("recent_cycles"))
     normalized["trace"] = _safe_list(normalized.get("trace"))
     normalized.setdefault("blocks", normalized["state"])
+    normalized.setdefault("vehicles", [])
+    normalized.setdefault("movement_log", [])
+    normalized.setdefault("actions", [])
+    normalized.setdefault("alerts", [])
+    normalized.setdefault("updated_at", "")
     return normalized
 
 def _safe_number(value, default=0):
@@ -905,6 +1071,11 @@ def _build_dashboard_view_model(snapshot, state_frame, step_number):
         "event_context": _safe_dict(snapshot.get("event_context")),
         "goal": _safe_dict(snapshot.get("goal")),
         "notifications": _safe_list(snapshot.get("notifications")),
+        "alerts": _safe_list(snapshot.get("alerts")),
+        "vehicles": _safe_list(snapshot.get("vehicles")),
+        "movement_log": _safe_list(snapshot.get("movement_log")),
+        "actions": _safe_list(snapshot.get("actions")),
+        "updated_at": snapshot.get("updated_at", ""),
     }
 
 def main():
@@ -921,8 +1092,7 @@ def main():
         unsafe_allow_html=True,
     )
 
-    with st.spinner("Synchronizing Simulation Core..."):
-        snapshot = api_bridge.get_snapshot()
+    snapshot = api_bridge.get_snapshot()
 
     if not snapshot:
         st.warning("Simulation core returned no snapshot. Rendering the SRM block fallback state instead of a blank dashboard.")
@@ -983,8 +1153,8 @@ def main():
     )
 
     st.session_state.run = st.sidebar.toggle("Autonomous Mode", value=st.session_state.run, key="sidebar_autonomous_mode", on_change=_mark_ui_interaction)
-    speed = st.sidebar.slider("Step Interval (seconds)", 1.0, 8.0, 3.0, key="sidebar_step_interval", on_change=_mark_ui_interaction)
-    st.sidebar.caption("Use Run One Step first to test logic.")
+    speed = st.sidebar.slider("Step Interval (seconds)", 3.0, 12.0, 6.0, key="sidebar_step_interval", on_change=_mark_ui_interaction)
+    st.sidebar.caption("Use Run One Step first. For a polished project demo, 5-7 seconds looks smoother and easier to follow.")
     
     benchmark_episodes = st.sidebar.slider("Benchmark Episodes", 1, 5, 3, key="sidebar_benchmark_episodes", on_change=_mark_ui_interaction)
     benchmark_steps = st.sidebar.slider("Benchmark Steps", 6, 15, 10, key="sidebar_benchmark_steps", on_change=_mark_ui_interaction)
@@ -1086,12 +1256,17 @@ def main():
     event_context = dashboard_state["event_context"]
     kpis = dashboard_state["metrics"]
     notifications = dashboard_state["notifications"]
+    alerts = dashboard_state["alerts"]
     recent_cycles = dashboard_state["recent_cycles"]
     recent_states = dashboard_state["recent_states"]
     benchmark = dashboard_state["benchmark"]
     benchmark_summary = dashboard_state["benchmark_summary"]
     agent_loop_steps = dashboard_state["agent_trace"]
     memory_summary = dashboard_state["memory"]
+    vehicles = dashboard_state["vehicles"]
+    movement_log = dashboard_state["movement_log"]
+    actions = dashboard_state["actions"]
+    updated_at = dashboard_state["updated_at"]
 
     total_capacity = dashboard_state["capacity"]
     total_occupied = dashboard_state["occupied"]
@@ -1101,7 +1276,7 @@ def main():
     st.markdown(
         f"""
         <div class="event-banner">
-            <div class="event-title">SRM Parking Simulation: {event_context.get("name", "SRM Simulation")} | {event_context.get("time_window", "")}</div>
+            <div class="event-title">SRM Parking Simulation: {event_context.get("name", "SRM Simulation")} | Live at {_format_live_timestamp(updated_at)}</div>
             <div class="event-copy">
                 {event_context.get("description", "")}
                 Strategy: <strong>{event_context.get("allocation_strategy", "Balanced utilisation")}</strong>.
@@ -1123,7 +1298,18 @@ def main():
 
     signal_cards(event_context, latest_result, kpis, goal)
     _render_system_status_bar(latest_result, event_context, kpis, llm_status, llm_mode)
-    _render_decision_card(latest_result, baseline_comparison)
+    _render_decision_summary_block(latest_result, baseline_comparison, updated_at)
+
+    backoff = llm_status.get("quota_backoff", {})
+    if backoff.get("active") and backoff.get("kind") == "daily_quota":
+        render_html_block(
+            """
+            <div class="quota-panel">
+                <strong>Live Gemini is paused by daily quota.</strong>
+                <span>The system is still running through simulated and local multi-agent reasoning, so execution remains continuous while the provider quota is exhausted.</span>
+            </div>
+            """
+        )
 
     if st.session_state.run:
         if speed < 3:
@@ -1131,7 +1317,7 @@ def main():
         else:
             st.info(f"Autonomous mode is active. The simulation refreshes every {speed:.1f} seconds.")
 
-    dashboard_pages = ["SRM Operations", "Events & KPIs", "Benchmark", "Agent Loop", "Reasoning", "Memory & Goals", "Notifications", "AI Chat"]
+    dashboard_pages = ["SRM Operations", "Events & KPIs", "Benchmark", "Agent Loop", "Reasoning", "Memory & Goals", "Vehicle Flow", "Notifications", "AI Chat"]
     current_page = st.session_state.get("active_dashboard_page", "SRM Operations")
     if current_page not in dashboard_pages:
         current_page = "SRM Operations"
@@ -1159,7 +1345,7 @@ def main():
 
     if active_page == "SRM Operations":
         st.markdown("<div class='section-kicker'>Live SRM Parking Operations</div>", unsafe_allow_html=True)
-        _render_decision_summary_block(latest_result, baseline_comparison)
+        _render_decision_card(latest_result, baseline_comparison)
         _render_llm_insight(latest_result)
         
         if baseline_comparison:
@@ -1189,41 +1375,42 @@ def main():
 
         st.markdown("<div class='section-kicker'>SRM Block Pressure</div>", unsafe_allow_html=True)
         st.dataframe(_build_zone_status_frame(state_frame), width="stretch", hide_index=True)
+        st.markdown("<div class='section-kicker'>Live Slot-Level Parking View</div>", unsafe_allow_html=True)
+        _render_live_slot_board(state, vehicles, updated_at)
 
         left, right = st.columns([1, 1])
-        with st.spinner("Plotting layouts..."): # Loading indicators injected natively
-            kpi_chart = build_kpi_chart(recent_states)
-            latest_chart = build_latest_baseline_chart(baseline_comparison)
-            if kpi_chart is not None:
-                left.plotly_chart(
-                    kpi_chart,
-                    width="stretch",
-                    config={"displayModeBar": False},
-                    key=_chart_key("operations-kpi", step_number),
-                )
-            else:
-                left.info("Run a few steps to plot search time and congestion trend.")
-            if latest_chart is not None:
-                right.plotly_chart(
-                    latest_chart,
-                    width="stretch",
-                    config={"displayModeBar": False},
-                    key=_chart_key("operations-baseline", step_number),
-                )
-            else:
-                right.plotly_chart(
-                    build_utilisation_chart(state_frame),
-                    width="stretch",
-                    config={"displayModeBar": False},
-                    key=_chart_key("operations-utilisation", step_number),
-                )
+        kpi_chart = build_kpi_chart(recent_states)
+        latest_chart = build_latest_baseline_chart(baseline_comparison)
+        if kpi_chart is not None:
+            left.plotly_chart(
+                kpi_chart,
+                use_container_width=True,
+                config={"displayModeBar": False},
+                key=_chart_key("operations-kpi", step_number),
+            )
+        else:
+            left.info("Run a few steps to plot search time and congestion trend.")
+        if latest_chart is not None:
+            right.plotly_chart(
+                latest_chart,
+                use_container_width=True,
+                config={"displayModeBar": False},
+                key=_chart_key("operations-baseline", step_number),
+            )
+        else:
+            right.plotly_chart(
+                build_utilisation_chart(state_frame),
+                use_container_width=True,
+                config={"displayModeBar": False},
+                key=_chart_key("operations-utilisation", step_number),
+            )
 
         with st.expander("Advanced View: SRM block cards, occupancy chart, and detailed table", expanded=False):
             render_story_cards(goal, latest_result, event_context, kpis)
             render_zone_cards(state_frame)
             st.plotly_chart(
                 build_zone_chart(state_frame),
-                width="stretch",
+                use_container_width=True,
                 config={"displayModeBar": False},
                 key=_chart_key("operations-zone", step_number),
             )
@@ -1234,7 +1421,7 @@ def main():
             with st.expander("Advanced View: raw entries, exits, and redirects"):
                 st.plotly_chart(
                     flow_chart,
-                    width="stretch",
+                    use_container_width=True,
                     config={"displayModeBar": False},
                     key=_chart_key("operations-flow", step_number),
                 )
@@ -1269,6 +1456,8 @@ def main():
     elif active_page == "Events & KPIs":
         st.markdown("<div class='section-kicker'>SRM Parking Blocks & Slots</div>", unsafe_allow_html=True)
         st.dataframe(_build_srm_capacity_dataset(state_frame), width="stretch", hide_index=True)
+        st.markdown("<div class='section-kicker'>Live Car and Bike Slot View</div>", unsafe_allow_html=True)
+        _render_live_slot_board(state, vehicles, updated_at)
 
         st.markdown("<div class='section-kicker'>SRM Outcome Metrics</div>", unsafe_allow_html=True)
         render_insight_cards([
@@ -1282,7 +1471,7 @@ def main():
         if kpi_chart is not None:
             st.plotly_chart(
                 kpi_chart,
-                width="stretch",
+                use_container_width=True,
                 config={"displayModeBar": False},
                 key=_chart_key("events-kpi", step_number),
             )
@@ -1303,7 +1492,7 @@ def main():
         if chart is not None:
             st.plotly_chart(
                 chart,
-                width="stretch",
+                use_container_width=True,
                 config={"displayModeBar": False},
                 key=_chart_key("benchmark-summary", step_number, str(st.session_state.benchmark_toggle)),
             )
@@ -1315,7 +1504,7 @@ def main():
                 st.markdown("<div class='section-kicker'>Current Metrics History</div>", unsafe_allow_html=True)
                 st.plotly_chart(
                     history_chart,
-                    width="stretch",
+                    use_container_width=True,
                     config={"displayModeBar": False},
                     key=_chart_key("benchmark-history", step_number),
                 )
@@ -1325,7 +1514,7 @@ def main():
             st.markdown("<div class='section-kicker'>Current Step Baseline</div>", unsafe_allow_html=True)
             st.plotly_chart(
                 latest_chart,
-                width="stretch",
+                use_container_width=True,
                 config={"displayModeBar": False},
                 key=_chart_key("benchmark-latest-baseline", step_number),
             )
@@ -1360,27 +1549,36 @@ def main():
 
         with right:
             st.markdown("<div class='section-kicker'>Intelligent Chain of Thought</div>", unsafe_allow_html=True)
-            
-            # Show individual agent reasoning more prominently
-            interaction_rows = latest_result.get("agent_interactions", [])
-            if not interaction_rows and agent_loop_steps:
-                interaction_rows = [
-                    {
-                        "Agent": item.get("step", "Agent"),
-                        "Action Taken": item.get("output", "Pending"),
-                        "Why": item.get("details", {}),
-                        "Key Output": item.get("output", ""),
-                    }
-                    for item in agent_loop_steps
-                ]
-            for agent_data in interaction_rows:
-                agent_name = agent_data.get("Agent", "Agent")
-                with st.expander(f"🧠 {agent_name} Logic", expanded=True):
-                    st.write(f"**Action:** {agent_data.get('Action Taken', 'none')}")
-                    st.info(_format_reasoning_text(agent_data.get("Why")))
-                    if agent_data.get("Key Output"):
-                        st.caption(f"Signal: {agent_data.get('Key Output')}")
-            if not interaction_rows:
+            summarized_agents = _summarize_agent_rows(latest_result, agent_loop_steps)
+            if summarized_agents:
+                options = [item["agent"] for item in summarized_agents]
+                current_agent = st.session_state.get("agent_loop_focus")
+                if current_agent not in options:
+                    current_agent = options[0]
+                selected_agent = st.selectbox(
+                    "Inspect agent",
+                    options,
+                    index=options.index(current_agent),
+                    key="agent_loop_focus_selector",
+                    on_change=_mark_ui_interaction,
+                )
+                st.session_state.agent_loop_focus = selected_agent
+                selected_payload = next((item for item in summarized_agents if item["agent"] == selected_agent), summarized_agents[0])
+                render_html_block(
+                    f"""
+                    <div class="focus-card">
+                        <div class="focus-kicker">{selected_payload['agent']}</div>
+                        <div class="focus-route">{selected_payload['action']}</div>
+                        <div class="focus-reason">{selected_payload['why']}</div>
+                        <div class="slot-timestamp">Latest signal: {selected_payload['signal'] or 'No extra signal recorded.'}</div>
+                    </div>
+                    """
+                )
+                quick_cols = st.columns(min(4, len(summarized_agents)))
+                for column, item in zip(quick_cols, summarized_agents[:4]):
+                    with column:
+                        st.metric(item["agent"], item["action"][:28] + ("..." if len(item["action"]) > 28 else ""))
+            else:
                 st.info("Planner, critic, and executor trace will appear after the first simulation step.")
 
             if st.session_state.get("developer_mode", False):
@@ -1456,6 +1654,15 @@ def main():
             ])
             if llm_usage_summary.get("budget_guard_active"):
                 st.warning("Budget guard is active: Gemini usage reached the reserve threshold, so the runtime is holding the remaining calls for operator-triggered highlights.")
+        if llm_status.get("quota_backoff", {}).get("active") and llm_status.get("quota_backoff", {}).get("kind") == "daily_quota":
+            render_html_block(
+                """
+                <div class="quota-panel">
+                    <strong>Why live Gemini is not visible right now</strong>
+                    <span>The active project/key is still in daily quota exhaustion, so the 10-step heartbeat is being routed into simulated and local reasoning instead of a live cloud call. Execution should still continue through the agent loop without freezing.</span>
+                </div>
+                """
+            )
 
         if last_llm_decision:
             st.markdown("**Most Recent Gemini Advisory**")
@@ -1464,6 +1671,7 @@ def main():
                 f"{last_llm_decision.get('mode', 'llm_advisory').replace('_', ' ').title()} | "
                 f"{last_llm_decision.get('action_text', 'No action stored.')}"
             )
+            st.caption(f"Timestamp: {_format_live_timestamp(last_llm_decision.get('timestamp'))}")
             if last_llm_decision.get("requested"):
                 st.caption("This step explicitly requested live Gemini reasoning.")
             if last_llm_decision.get("source") == "gemini_failed_fallback":
@@ -1571,8 +1779,14 @@ def main():
         learning_profile = memory_summary.get("learning_profile", metrics.get("learning_profile", {}))
         recent_failures = learning_profile.get("recent_failures", [])
         learning_insight = learning_profile.get("latest_learning_insight", "No specific route patterns consolidated yet.")
-        
-        st.info(f"**Latest Learning Adaptation:** {learning_insight}")
+        render_html_block(
+            f"""
+            <div class="learning-banner">
+                <strong>Latest learning change</strong>
+                <span>{learning_insight}</span>
+            </div>
+            """
+        )
         patterns = memory_summary.get("patterns", [])
         if patterns:
             st.markdown("**Learned patterns**")
@@ -1592,6 +1806,15 @@ def main():
                     ],
                 }
             ])
+            trend_chart = build_performance_trend_chart(recent_states)
+            if trend_chart is not None:
+                st.markdown("<div class='section-kicker'>Learning Effect Over Recent Steps</div>", unsafe_allow_html=True)
+                st.plotly_chart(
+                    trend_chart,
+                    use_container_width=True,
+                    config={"displayModeBar": False},
+                    key=_chart_key("memory-learning-trend", step_number),
+                )
             goal_history = memory_summary.get("goal_history", [])
             if goal_history:
                 with st.expander("Autonomous goal revisions", expanded=False):
@@ -1630,6 +1853,19 @@ def main():
     elif active_page == "Notifications":
         st.markdown("<div class='section-kicker'>Proactive User Notifications</div>", unsafe_allow_html=True)
         _render_notifications(notification_summary.get("items", notifications))
+        if alerts:
+            st.markdown("<div class='section-kicker'>Real-Time App User Alerts</div>", unsafe_allow_html=True)
+            alert_frame = pd.DataFrame([
+                {
+                    "Level": item.get("level", "info"),
+                    "Alert": item.get("title", "SRM parking update"),
+                    "Message": item.get("message", ""),
+                    "Block": item.get("block", "-"),
+                    "Audience": item.get("audience", "parking_app_users"),
+                }
+                for item in alerts
+            ])
+            st.dataframe(alert_frame, width="stretch", hide_index=True)
 
         # Show live sensor context even with no dispatched notifications
         st.divider()
@@ -1654,6 +1890,51 @@ def main():
                 st.dataframe(dispatch_frame, width="stretch", hide_index=True)
         else:
             st.info("The notification service is live. New alerts appear here when queue pressure, blocked SRM blocks, denied entries, or redirect events occur.")
+
+    elif active_page == "Vehicle Flow":
+        st.markdown("<div class='section-kicker'>Vehicle Entry, Exit, and Redirect Timeline</div>", unsafe_allow_html=True)
+        movement_frame = _build_movement_frame(movement_log)
+        if movement_frame.empty:
+            st.info("Vehicle flow history will appear after the next backend step.")
+        else:
+            top = movement_frame.iloc[-1].to_dict()
+            render_key_value_groups([
+                {
+                    "title": "Latest Vehicle Movement",
+                    "items": [
+                        {"label": "Timestamp", "value": top.get("Timestamp", "-")},
+                        {"label": "SRM Block", "value": top.get("SRM Block", "-")},
+                        {"label": "Entries / Exits", "value": f"{top.get('Entries', 0)} / {top.get('Exits', 0)}"},
+                        {"label": "Occupied After", "value": top.get("Occupied After", 0)},
+                    ],
+                },
+                {
+                    "title": "Vehicle Type Split",
+                    "items": [
+                        {"label": "Car In", "value": top.get("Car In", 0)},
+                        {"label": "Bike In", "value": top.get("Bike In", 0)},
+                        {"label": "Car Out", "value": top.get("Car Out", 0)},
+                        {"label": "Bike Out", "value": top.get("Bike Out", 0)},
+                    ],
+                },
+            ])
+            redirect_frame = pd.DataFrame([
+                {
+                    "Timestamp": _format_live_timestamp(item.get("timestamp")),
+                    "Step": item.get("step", "-"),
+                    "Route": f"{item.get('from', '-')} → {item.get('to', '-')}",
+                    "Total Redirected": item.get("vehicles", 0),
+                    "Cars Redirected": item.get("car_vehicles", 0),
+                    "Bikes Redirected": item.get("bike_vehicles", 0),
+                    "Reason": item.get("reason", "Agent route execution"),
+                }
+                for item in actions
+            ])
+            if not redirect_frame.empty:
+                st.markdown("<div class='section-kicker'>Redirect Execution History</div>", unsafe_allow_html=True)
+                st.dataframe(redirect_frame.iloc[::-1], width="stretch", hide_index=True)
+            st.markdown("<div class='section-kicker'>Full Vehicle Flow Log</div>", unsafe_allow_html=True)
+            st.dataframe(movement_frame.iloc[::-1], width="stretch", hide_index=True)
 
 
     elif active_page == "AI Chat":

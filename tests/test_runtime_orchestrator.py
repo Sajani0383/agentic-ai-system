@@ -107,6 +107,10 @@ class RuntimeOrchestratorTests(unittest.TestCase):
     def test_runtime_snapshot_exposes_tab_ready_structures(self):
         runtime = ParkingRuntimeService(storage_path=self.state_path)
         snapshot = runtime.get_runtime_snapshot()
+        self.assertIn("current_state", snapshot)
+        self.assertIn("blocks", snapshot["current_state"])
+        self.assertIn("vehicles", snapshot["current_state"])
+        self.assertIn("actions", snapshot["current_state"])
         self.assertIn("reasoning_summary", snapshot)
         self.assertIn("agent_loop_steps", snapshot)
         self.assertIn("memory_summary", snapshot)
@@ -125,6 +129,20 @@ class RuntimeOrchestratorTests(unittest.TestCase):
         self.assertIn("goal_history", stepped["memory_summary"])
         self.assertIn("local_reasoning", stepped["llm_usage_summary"])
         self.assertIn("gemini_attempts", stepped["llm_usage_summary"])
+
+    def test_shared_current_state_vehicle_counts_match_blocks(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        runtime.step()
+        snapshot = runtime.get_runtime_snapshot()
+        current_state = snapshot["current_state"]
+        vehicles_by_block = {}
+        for vehicle in current_state["vehicles"]:
+            vehicles_by_block[vehicle["block"]] = vehicles_by_block.get(vehicle["block"], 0) + 1
+            self.assertIn("position", vehicle)
+            self.assertIn("x", vehicle["position"])
+            self.assertIn("y", vehicle["position"])
+        for block_name, block_data in current_state["blocks"].items():
+            self.assertEqual(block_data["occupied"], vehicles_by_block.get(block_name, 0))
 
     def test_memory_can_persist_llm_route_rules(self):
         runtime = ParkingRuntimeService(storage_path=self.state_path)

@@ -320,6 +320,216 @@ def inject_styles():
             border-radius: 4px 12px 12px 4px;
             margin-bottom: 1rem;
         }}
+        .realtime-badge {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.72rem;
+            border-radius: 999px;
+            background: rgba(75, 211, 138, 0.12);
+            border: 1px solid rgba(75, 211, 138, 0.28);
+            color: #8ae8b0;
+            font-size: 0.76rem;
+            font-weight: 700;
+            margin-bottom: 0.65rem;
+        }}
+        .realtime-dot {{
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: #4bd38a;
+            box-shadow: 0 0 16px rgba(75, 211, 138, 0.8);
+            animation: realtimePulse 1.4s ease-in-out infinite;
+        }}
+        .focus-grid {{
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
+            gap: 1rem;
+            margin: 0.75rem 0 1.2rem;
+        }}
+        .focus-card {{
+            background: linear-gradient(135deg, rgba(18,31,47,0.98), rgba(9,18,29,0.98));
+            border: 1px solid rgba(77,163,255,0.28);
+            border-radius: 22px;
+            padding: 1.25rem 1.25rem 1.1rem;
+            box-shadow: 0 22px 54px rgba(0,0,0,0.24);
+        }}
+        .focus-card.accent {{
+            border-color: rgba(75,211,138,0.26);
+            background: linear-gradient(135deg, rgba(14,35,29,0.96), rgba(9,18,29,0.98));
+        }}
+        .focus-kicker {{
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: {PALETTE["muted"]};
+            margin-bottom: 0.45rem;
+        }}
+        .focus-title {{
+            color: {PALETTE["text"]};
+            font-size: 2.7rem;
+            line-height: 1;
+            font-weight: 800;
+            margin-bottom: 0.45rem;
+        }}
+        .focus-route {{
+            color: #9ed4ff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }}
+        .focus-reason {{
+            color: #dce8f8;
+            font-size: 1rem;
+            line-height: 1.6;
+        }}
+        .focus-impact {{
+            color: #f1f6ff;
+            font-size: 1.05rem;
+            line-height: 1.55;
+        }}
+        .focus-stat-grid {{
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.7rem;
+            margin-top: 1rem;
+        }}
+        .focus-stat {{
+            padding: 0.75rem 0.8rem;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }}
+        .focus-stat span {{
+            display: block;
+            color: {PALETTE["muted"]};
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.24rem;
+        }}
+        .focus-stat strong {{
+            color: {PALETTE["text"]};
+            font-size: 1.35rem;
+            line-height: 1.1;
+        }}
+        .quota-panel {{
+            padding: 0.9rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,184,77,0.28);
+            background: rgba(255,184,77,0.08);
+            margin: 0.4rem 0 1rem;
+        }}
+        .quota-panel strong {{
+            color: #ffd08a;
+            display: block;
+            margin-bottom: 0.22rem;
+        }}
+        .quota-panel span {{
+            color: #d8e2ef;
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }}
+        .slot-board {{
+            display: grid;
+            grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.18fr);
+            gap: 1rem;
+            margin: 0.6rem 0 1rem;
+        }}
+        .slot-selector-card,
+        .slot-detail-card {{
+            background: linear-gradient(180deg, rgba(15,27,41,0.95), rgba(10,18,29,0.95));
+            border: 1px solid {PALETTE["border"]};
+            border-radius: 20px;
+            padding: 1rem;
+        }}
+        .slot-selector-grid {{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.65rem;
+            margin-top: 0.85rem;
+        }}
+        .slot-timestamp {{
+            color: {PALETTE["muted"]};
+            font-size: 0.84rem;
+            margin-top: 0.18rem;
+        }}
+        .slot-grid-dash {{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+            gap: 0.45rem;
+            margin-top: 0.95rem;
+        }}
+        .slot-cell {{
+            min-height: 42px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.12rem;
+            font-size: 0.9rem;
+        }}
+        .slot-cell.filled-car {{
+            background: rgba(127, 217, 255, 0.12);
+            border-color: rgba(127, 217, 255, 0.35);
+        }}
+        .slot-cell.filled-bike {{
+            background: rgba(255, 182, 110, 0.12);
+            border-color: rgba(255, 182, 110, 0.35);
+        }}
+        .slot-cell.empty {{
+            color: #6d829e;
+        }}
+        .slot-cell small {{
+            color: inherit;
+            font-size: 0.62rem;
+        }}
+        .slot-legend {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 0.85rem;
+            color: {PALETTE["muted"]};
+            font-size: 0.8rem;
+        }}
+        .slot-legend span {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }}
+        .slot-swatch {{
+            width: 11px;
+            height: 11px;
+            border-radius: 999px;
+            display: inline-block;
+        }}
+        .slot-swatch.car {{ background: #7fd9ff; }}
+        .slot-swatch.bike {{ background: #ffb66e; }}
+        .slot-swatch.free {{ background: rgba(255,255,255,0.12); }}
+        .learning-banner {{
+            padding: 0.9rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(75,211,138,0.22);
+            background: rgba(75,211,138,0.08);
+            margin: 0.45rem 0 1rem;
+        }}
+        .learning-banner strong {{
+            display: block;
+            color: #8ee6b0;
+            margin-bottom: 0.24rem;
+        }}
+        .learning-banner span {{
+            color: #d8e2ef;
+            font-size: 0.93rem;
+            line-height: 1.5;
+        }}
+        @keyframes realtimePulse {{
+            0%, 100% {{ opacity: 0.55; transform: scale(0.95); }}
+            50% {{ opacity: 1; transform: scale(1.05); }}
+        }}
         </style>
         """,
         unsafe_allow_html=True,

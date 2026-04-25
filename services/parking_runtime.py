@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import asyncio
+import math
 from copy import deepcopy
 from threading import RLock
 from datetime import datetime
@@ -293,8 +294,292 @@ class ParkingRuntimeService:
             self.environment.restore_default_layout()
             self.latest_result = {}
             self.latest_briefing = {}
+        self._vehicle_id_counter = 1
+        self._vehicles = []
+        self._visualization_actions = []
+        self._movement_log = []
+        self._visual_state_step = None
         self.controller = provided_controller or AgentController(environment=self.environment, memory=self.memory)
         self.controller.set_llm_mode(self.llm_mode)
+        self._sync_visual_state(
+            self.environment.get_state(),
+            self.environment.get_last_transition() or {},
+            self.latest_result,
+        )
+
+    def _vehicle_type_for_slot(self, block_name, slot_number):
+        profile = self.environment.zone_capacity_profile.get(block_name, {})
+        car_slots = int(profile.get("car_slots", profile.get("total_slots", 0)) or 0)
+        return "car" if slot_number <= max(1, car_slots) else "bike"
+
+    def _build_vehicle_position(self, capacity, slot_number):
+        if capacity <= 0:
+            return {"x": 0.08, "y": 0.12}
+        columns = max(4, min(10, int(round(math.sqrt(capacity))) or 4))
+        row = max(0, (slot_number - 1) // columns)
+        column = max(0, (slot_number - 1) % columns)
+        rows = max(1, int(math.ceil(capacity / columns)))
+        x = round(0.08 + (column / max(1, columns - 1)) * 0.84, 3)
+        y = round(0.14 + (row / max(1, rows - 1)) * 0.72, 3)
+        return {"x": x, "y": y}
+
+    def _build_vehicle_record(self, block_name, slot_number, vehicle_id=None):
+        zone_state = self.environment.get_state().get(block_name, {})
+        capacity = int(zone_state.get("total_slots", 0) or 0)
+        position = self._build_vehicle_position(capacity, slot_number)
+        return {
+            "id": vehicle_id or self._next_vehicle_id(),
+            "type": self._vehicle_type_for_slot(block_name, slot_number),
+            "block": block_name,
+            "slot": slot_number,
+            "position": position,
+        }
+
+    def _next_vehicle_id(self):
+        vehicle_id = self._vehicle_id_counter
+        self._vehicle_id_counter += 1
+        return vehicle_id
+
+    def _sync_visual_state(self, state, latest_transition=None, latest_result=None):
+        latest_transition = latest_transition or {}
+        latest_result = latest_result or {}
+        current_step = int(latest_transition.get("step", self.environment.step_count) or self.environment.step_count)
+        if self._visual_state_step == current_step and self._vehicles:
+            return
+
+        previous_by_block = {}
+        for vehicle in self._vehicles:
+            previous_by_block.setdefault(vehicle.get("block"), []).append(deepcopy(vehicle))
+        for block_vehicles in previous_by_block.values():
+            block_vehicles.sort(key=lambda item: int(item.get("slot", 0) or 0))
+
+        action = (
+            latest_result.get("action")
+            or latest_result.get("execution_output", {}).get("final_action")
+            or latest_transition.get("applied_action")
+            or {}
+        )
+        transfer_count = int(latest_transition.get("transferred", 0) or 0)
+        action_record = None
+        if action.get("action") == "redirect" and transfer_count > 0:
+            source = action.get("from")
+            destination = action.get("to")
+            movable = previous_by_block.get(source, [])
+            moved = []
+            if movable:
+                move_count = min(transfer_count, len(movable))
+                moved = [movable.pop() for _ in range(move_count)]
+                previous_by_block.setdefault(destination, []).extend(moved)
+            action_record = {
+                "type": "redirect",
+                "from": source,
+                "to": destination,
+                "vehicles": transfer_count,
+                "car_vehicles": sum(1 for vehicle in moved if vehicle.get("type") == "car"),
+                "bike_vehicles": sum(1 for vehicle in moved if vehicle.get("type") == "bike"),
+                "vehicle_ids": [vehicle.get("id") for vehicle in moved],
+                "step": current_step,
+                "timestamp": latest_transition.get("timestamp", datetime.utcnow().isoformat()),
+                "reason": action.get("reason", ""),
+            }
+
+        rebuilt = []
+        for block_name, block_state in state.items():
+            target_count = max(0, int(block_state.get("occupied", 0) or 0))
+            block_vehicles = previous_by_block.get(block_name, [])
+            car_slots = int(block_state.get("car_slots", block_state.get("total_slots", 0)) or 0)
+            bike_slots = int(block_state.get("bike_slots", 0) or 0)
+            total_slots = max(1, int(block_state.get("total_slots", 0) or 1))
+            car_target = min(target_count, car_slots)
+            if bike_slots > 0 and target_count > 0:
+                proportional_car = int(round(target_count * (car_slots / total_slots)))
+                car_target = max(0, min(car_slots, proportional_car))
+                if car_target == target_count and bike_slots > 0 and target_count > 1:
+                    car_target -= 1
+            bike_target = max(0, min(bike_slots, target_count - car_target))
+            remaining_target = max(0, target_count - (car_target + bike_target))
+            car_target = min(car_slots, car_target + remaining_target)
+
+            car_pool = [vehicle for vehicle in block_vehicles if vehicle.get("type") == "car"]
+            bike_pool = [vehicle for vehicle in block_vehicles if vehicle.get("type") == "bike"]
+            neutral_pool = [vehicle for vehicle in block_vehicles if vehicle.get("type") not in {"car", "bike"}]
+
+            while len(car_pool) < car_target and neutral_pool:
+                car_pool.append(neutral_pool.pop(0))
+            while len(bike_pool) < bike_target and neutral_pool:
+                bike_pool.append(neutral_pool.pop(0))
+            while len(car_pool) < car_target:
+                car_pool.append({"id": self._next_vehicle_id(), "block": block_name, "type": "car"})
+            while len(bike_pool) < bike_target:
+                bike_pool.append({"id": self._next_vehicle_id(), "block": block_name, "type": "bike"})
+
+            slot_assignments = []
+            for slot_number in range(1, car_target + 1):
+                slot_assignments.append((slot_number, car_pool[slot_number - 1], "car"))
+            for bike_index in range(bike_target):
+                slot_assignments.append((car_slots + bike_index + 1, bike_pool[bike_index], "bike"))
+
+            for slot_number, vehicle, vehicle_type in slot_assignments:
+                rebuilt.append(
+                    {
+                        "id": vehicle.get("id"),
+                        "type": vehicle_type,
+                        "block": block_name,
+                        "slot": slot_number,
+                        "position": self._build_vehicle_position(int(block_state.get("total_slots", 0) or 0), slot_number),
+                    }
+                )
+
+        self._vehicles = rebuilt
+        if action_record:
+            self._visualization_actions.append(action_record)
+            self._visualization_actions = self._visualization_actions[-20:]
+        self._visual_state_step = current_step
+
+    def _build_shared_state(self, state, latest_result, latest_transition):
+        self._sync_visual_state(state, latest_transition, latest_result)
+        self._record_movement_events(state, latest_transition)
+        blocks = {}
+        for block_name, block_state in state.items():
+            capacity = int(block_state.get("total_slots", 0) or 0)
+            occupied = max(0, min(capacity, int(block_state.get("occupied", 0) or 0)))
+            blocks[block_name] = {
+                "capacity": capacity,
+                "occupied": occupied,
+                "free_slots": max(0, capacity - occupied),
+                "car_slots": int(block_state.get("car_slots", capacity) or capacity),
+                "bike_slots": int(block_state.get("bike_slots", 0) or 0),
+                "entry": int(block_state.get("entry", 0) or 0),
+                "exit": int(block_state.get("exit", 0) or 0),
+            }
+        alerts = self._build_visual_alerts(blocks, latest_result, latest_transition)
+        learning_profile = self.memory.get_learning_profile(scenario_mode=self.environment.get_scenario_mode())
+        return {
+            "step": int(latest_transition.get("step", self.environment.step_count) or self.environment.step_count),
+            "updated_at": latest_transition.get("timestamp", datetime.utcnow().isoformat()),
+            "blocks": blocks,
+            "vehicles": deepcopy(self._vehicles),
+            "actions": deepcopy(self._visualization_actions[-10:]),
+            "movement_log": deepcopy(self._movement_log[-80:]),
+            "alerts": alerts,
+            "latest_decision": deepcopy(latest_result.get("action", {})),
+            "decision_reason": latest_result.get("action", {}).get("reason") or latest_result.get("reasoning", ""),
+            "agent_thought": self._build_visual_agent_thought(latest_result, blocks),
+            "learning": {
+                "blocked_routes": deepcopy(learning_profile.get("blocked_routes", [])),
+                "recent_reward_avg": learning_profile.get("recent_reward_avg", 0.0),
+                "llm_memory_rules": deepcopy(learning_profile.get("llm_memory_rules", [])[:8]),
+                "latest_learning_insight": learning_profile.get("latest_learning_insight", "No route pattern consolidated yet."),
+            },
+            "llm": self._build_visual_llm_state(latest_result),
+        }
+
+    def _build_visual_alerts(self, blocks, latest_result, latest_transition):
+        alerts = []
+        for block_name, block in blocks.items():
+            capacity = max(1, int(block.get("capacity", 1) or 1))
+            occupied = int(block.get("occupied", 0) or 0)
+            utilisation = occupied / capacity
+            if utilisation >= 0.9:
+                alerts.append({
+                    "level": "critical",
+                    "title": f"{block_name} nearing full",
+                    "message": f"{occupied}/{capacity} slots occupied. Drivers should avoid this block.",
+                    "block": block_name,
+                    "audience": "car_bike_users",
+                })
+            elif utilisation >= 0.75:
+                alerts.append({
+                    "level": "warning",
+                    "title": f"{block_name} pressure rising",
+                    "message": "Parking app should recommend nearby buffer blocks.",
+                    "block": block_name,
+                    "audience": "car_bike_users",
+                })
+        action = latest_result.get("action", {}) if isinstance(latest_result, dict) else {}
+        if action.get("action") == "redirect":
+            alerts.insert(0, {
+                "level": "info",
+                "title": "Redirect notification sent",
+                "message": (
+                    f"{action.get('vehicles', 0)} vehicle(s) redirected from "
+                    f"{action.get('from', '-')} to {action.get('to', '-')}."
+                ),
+                "block": action.get("to", "-"),
+                "audience": "affected_car_bike_users",
+            })
+        for notification in latest_transition.get("notifications", []) or []:
+            alerts.append({
+                "level": notification.get("level", "info"),
+                "title": notification.get("title", "SRM parking update"),
+                "message": notification.get("message", ""),
+                "block": notification.get("zone", "-"),
+                "audience": "parking_app_users",
+            })
+        return alerts[:10]
+
+    def _build_visual_agent_thought(self, latest_result, blocks):
+        action = latest_result.get("action", {}) if isinstance(latest_result, dict) else {}
+        if action.get("action") == "redirect":
+            destination = action.get("to", "-")
+            free_slots = blocks.get(destination, {}).get("free_slots", 0)
+            return (
+                f"Planner chose {destination} because it currently has {free_slots} free slots "
+                f"and can absorb redirected traffic from {action.get('from', '-')}."
+            )
+        if blocks:
+            best = max(blocks.items(), key=lambda item: item[1].get("free_slots", 0))[0]
+            crowded = min(blocks.items(), key=lambda item: item[1].get("free_slots", 0))[0]
+            return f"Planner is monitoring {crowded}; {best} is the strongest buffer if pressure rises."
+        return "Planner is waiting for live parking state."
+
+    def _build_visual_llm_state(self, latest_result):
+        planner = latest_result.get("planner_output", {}) if isinstance(latest_result, dict) else {}
+        return {
+            "requested": bool(planner.get("llm_requested")),
+            "used": bool(planner.get("llm_advisory_used")),
+            "influence": "modified" if planner.get("llm_influence") else ("confirmed" if planner.get("llm_requested") else "not_requested"),
+            "source": planner.get("llm_source", "deterministic"),
+            "summary": planner.get("llm_summary") or planner.get("rationale") or planner.get("llm_fallback_reason", ""),
+        }
+
+    def _record_movement_events(self, state, latest_transition):
+        step = int(latest_transition.get("step", self.environment.step_count) or self.environment.step_count)
+        timestamp = latest_transition.get("timestamp", datetime.utcnow().isoformat())
+        if self._movement_log and self._movement_log[-1].get("step") == step:
+            return
+        zone_rows = latest_transition.get("zones", []) or []
+        if not zone_rows:
+            return
+        for row in zone_rows:
+            block_name = row.get("zone")
+            if not block_name:
+                continue
+            block_state = state.get(block_name, {}) if isinstance(state, dict) else {}
+            capacity = max(1, int(block_state.get("total_slots", 1) or 1))
+            car_slots = min(capacity, int(block_state.get("car_slots", capacity) or capacity))
+            car_ratio = car_slots / capacity if capacity else 1.0
+            entries = max(0, int(row.get("entry", 0) or 0))
+            exits = max(0, int(row.get("exit", 0) or 0))
+            car_entries = min(entries, int(round(entries * car_ratio)))
+            bike_entries = max(0, entries - car_entries)
+            car_exits = min(exits, int(round(exits * car_ratio)))
+            bike_exits = max(0, exits - car_exits)
+            self._movement_log.append(
+                {
+                    "step": step,
+                    "timestamp": timestamp,
+                    "block": block_name,
+                    "entries": entries,
+                    "exits": exits,
+                    "car_entries": car_entries,
+                    "bike_entries": bike_entries,
+                    "car_exits": car_exits,
+                    "bike_exits": bike_exits,
+                    "occupied_after": int(row.get("occupied_after", block_state.get("occupied", 0)) or 0),
+                }
+            )
+        self._movement_log = self._movement_log[-200:]
 
     def _build_reasoning_snapshot(self, latest_result):
         llm_status = get_llm_status()
@@ -350,6 +635,7 @@ class ParkingRuntimeService:
                     action_text = "No redirect recommended."
                 return {
                     "step": cycle.get("step"),
+                    "timestamp": cycle.get("timestamp") or cycle.get("transition", {}).get("timestamp", ""),
                     "mode": planner.get("decision_mode", "llm_advisory" if planner.get("llm_requested") else "deterministic"),
                     "source": planner.get("llm_source", "deterministic"),
                     "rationale": planner.get("rationale") or (critic.get("critic_notes") or ["No LLM rationale stored."])[0],
@@ -489,6 +775,15 @@ class ParkingRuntimeService:
             self.trace_log = []
             self.latest_benchmark = {}
             self.latest_briefing = {}
+            self._vehicles = []
+            self._visualization_actions = []
+            self._movement_log = []
+            self._visual_state_step = None
+            self._sync_visual_state(
+                self.environment.get_state(),
+                self.environment.get_last_transition() or {},
+                self.latest_result,
+            )
             # We explicitly skip flushing on reset until it's necessary or call it explicitly
             return self.get_runtime_snapshot()
 
@@ -559,6 +854,11 @@ class ParkingRuntimeService:
                     
                 self.latest_result = result
                 self.latest_briefing = result["assistant_briefing"]
+                self._sync_visual_state(
+                    result.get("state", self.environment.get_state()),
+                    result.get("transition", self.environment.get_last_transition() or {}),
+                    result,
+                )
                 self._append_trace({
                     "step": result.get("step_number"),
                     "mode": result.get("mode"),
@@ -649,6 +949,7 @@ class ParkingRuntimeService:
         latest_result.setdefault("execution_output", {})
         latest_result.setdefault("reasoning_budget", {})
         latest_result.setdefault("decision_provenance", {})
+        current_state = self._build_shared_state(state, latest_result, latest_transition)
         recent_states = self.memory.get_recent_states(limit=10)
         if not recent_states:
             recent_states = [deepcopy(state)]
@@ -663,6 +964,19 @@ class ParkingRuntimeService:
         last_llm_decision = self._build_last_llm_decision_snapshot()
         llm_usage_summary = self._build_llm_usage_summary()
         return {
+            "step": current_state["step"],
+            "updated_at": current_state["updated_at"],
+            "blocks": deepcopy(current_state["blocks"]),
+            "vehicles": deepcopy(current_state["vehicles"]),
+            "actions": deepcopy(current_state["actions"]),
+            "movement_log": deepcopy(current_state.get("movement_log", [])),
+            "alerts": deepcopy(current_state.get("alerts", [])),
+            "latest_decision": deepcopy(current_state.get("latest_decision", {})),
+            "decision_reason": current_state.get("decision_reason", ""),
+            "agent_thought": current_state.get("agent_thought", ""),
+            "learning": deepcopy(current_state.get("learning", {})),
+            "llm": deepcopy(current_state.get("llm", {})),
+            "current_state": current_state,
             "state": state,
             "latest_result": latest_result,
             "latest_transition": deepcopy(latest_transition),
