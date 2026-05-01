@@ -13,6 +13,7 @@ A simulation-first agentic AI parking project designed for SRM campus parking ma
 - demand estimation and congestion-aware routing across SRM parking blocks
 - Streamlit command-center dashboard
 - FastAPI runtime and mock notification API
+- explainable decision reports and benchmark exports
 - optional Gemini-backed reasoning when API keys are available
 
 ## Project Structure
@@ -27,7 +28,11 @@ A simulation-first agentic AI parking project designed for SRM campus parking ma
 - `services/mock_notification_service.py`: mock delivery feed for app, SMS, and signage outputs
 - `tests/`: simulation validation tests
 - `start_project.ps1`: start API and UI
+- `start_project.sh`: start API and UI on macOS/Linux
 - `stop_project.ps1`: stop API and UI
+- `DEMO.md`: 3-5 minute presentation script
+- `docs/architecture.md`: Mermaid architecture diagram and extension notes
+- `scripts/generate_benchmark_report.py`: export benchmark JSON/CSV evidence
 
 ## Setup
 
@@ -57,11 +62,19 @@ Start everything:
 powershell -ExecutionPolicy Bypass -File .\start_project.ps1
 ```
 
+On macOS/Linux:
+
+```bash
+./start_project.sh
+```
+
 Open:
 
 - Dashboard: `http://127.0.0.1:8501`
 - API health: `http://127.0.0.1:8000/health`
 - API docs: `http://127.0.0.1:8000/docs`
+- Decision explanation: `http://127.0.0.1:8000/explain`
+- Run report export: `http://127.0.0.1:8000/export/report`
 
 ## Stop
 
@@ -88,6 +101,17 @@ Run the dashboard:
 ```powershell
 python -m streamlit run ui/adk_dashboard.py --server.headless true --server.address 127.0.0.1 --server.port 8501
 ```
+
+Generate benchmark evidence files:
+
+```bash
+python scripts/generate_benchmark_report.py --episodes 3 --steps 10
+```
+
+Outputs:
+
+- `reports/benchmark_report.json`
+- `reports/benchmark_report.csv`
 
 ## SRM Simulation-First Mode
 
@@ -188,14 +212,34 @@ python -m unittest discover -s tests
 
 When you present the project, these are the strongest SRM-focused features to show:
 
+- the `DEMO.md` walkthrough for a clean viva flow
+- the architecture diagram in `docs/architecture.md`
 - event-aware SRM scenarios such as `Sports Event`, `Exam Rush`, and `Class Changeover`
 - planner / critic / executor decisions in the dashboard agent loop
+- structured explainability in the dashboard `Reasoning` section and `/explain` endpoint
 - adaptive learning with persisted reward and Q-table updates
 - proactive notifications through the mock delivery feed
 - measurable KPI improvements such as search time, utilisation, and allocation success across SRM blocks
+- downloadable run evidence from the dashboard `Prepare Run Report` control
+
+## Frontend Surfaces
+
+- Streamlit is the command-center dashboard for agent decisions, KPI trends, benchmarks, explainability, memory, goals, and notifications.
+- The Vite/React frontend is the live campus visualizer surface for animated block state and shared API-backed parking activity.
+
+## Real-World Extension Plan
+
+The current system is intentionally simulation-first, but the interfaces are ready for real integrations:
+
+- camera, ANPR, or gate-counter feeds can replace simulated entry and exit counts
+- mobile app, SMS, and signage APIs can replace the mock notification service
+- a database can replace JSON persistence for multi-user deployment
+- admin override and approval workflows can be added around high-impact redirects
+- production auth/RBAC can be layered over the existing optional `PARKING_API_KEY`
 
 ## Security Note
 
 - Never commit your real `.env` file or API keys.
 - Rotate any API key that has already been exposed.
 - Use placeholder keys only in `.env.example`.
+- Configure `PARKING_ALLOWED_ORIGINS` instead of using wildcard CORS in shared environments.

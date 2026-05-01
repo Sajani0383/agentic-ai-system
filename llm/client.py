@@ -33,6 +33,14 @@ ENV_EXAMPLE_PATH = PROJECT_ROOT / ".env.example"
 if ENV_PATH.exists(): load_dotenv(dotenv_path=ENV_PATH, override=True)
 
 DEFAULT_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+DEFAULT_GEMINI_MODEL_SEQUENCE = [
+    model.strip()
+    for model in os.getenv(
+        "GEMINI_MODEL_SEQUENCE",
+        "gemini-2.5-flash,gemini-1.5-flash,gemini-flash-latest",
+    ).split(",")
+    if model.strip()
+]
 _LLM_INSTANCE = None
 _LLM_INSTANCE_KEY = None
 _LLM_INSTANCE_LOCK = threading.RLock()
@@ -46,6 +54,9 @@ class LLMStatusManager:
         self.backoff_until = 0.0
         self.backoff_reason = ""
         self.backoff_kind = ""
+        self.key_backoffs = {}
+        self.router_trace = []
+        self.active_route = {}
 
     def set_error(self, message):
         with self._lock:
@@ -70,6 +81,9 @@ class LLMStatusManager:
             self.backoff_until = 0.0
             self.backoff_reason = ""
             self.backoff_kind = ""
+            self.key_backoffs = {}
+            self.router_trace = []
+            self.active_route = {}
 
     def get_error(self):
         with self._lock:
@@ -88,6 +102,50 @@ class LLMStatusManager:
                 "reason": self.backoff_reason,
                 "kind": self.backoff_kind or ("quota" if remaining > 0 else ""),
             }
+
+    def mark_key_backoff(self, key_label, message, seconds=300, kind="quota"):
+        with self._lock:
+            self.key_backoffs[key_label] = {
+                "until": time.time() + max(1, int(seconds)),
+                "reason": message,
+                "kind": kind,
+            }
+
+    def get_key_backoffs(self):
+        with self._lock:
+            active = {}
+            now = time.time()
+            expired = []
+            for key_label, payload in self.key_backoffs.items():
+                remaining = int(payload.get("until", 0) - now)
+                if remaining <= 0:
+                    expired.append(key_label)
+                    continue
+                active[key_label] = {
+                    "active": True,
+                    "remaining_seconds": remaining,
+                    "reason": payload.get("reason", ""),
+                    "kind": payload.get("kind", "quota"),
+                }
+            for key_label in expired:
+                self.key_backoffs.pop(key_label, None)
+            return active
+
+    def is_key_backoff_active(self, key_label):
+        return self.get_key_backoffs().get(key_label, {}).get("active", False)
+
+    def set_router_trace(self, trace, active_route=None):
+        with self._lock:
+            self.router_trace = list(trace or [])[-24:]
+            self.active_route = dict(active_route or {})
+
+    def get_router_trace(self):
+        with self._lock:
+            return list(self.router_trace)
+
+    def get_active_route(self):
+        with self._lock:
+            return dict(self.active_route)
 
 STATUS_MANAGER = LLMStatusManager()
 
@@ -120,27 +178,57 @@ def _is_daily_quota_llm_error(message):
     )
 
 
-def get_api_key():
-    file_values = dotenv_values(ENV_PATH) if ENV_PATH.exists() else {}
-    api_key = (
-        file_values.get("GOOGLE_API_KEY")
-        or file_values.get("GEMINI_API_KEY")
-        or os.getenv("GOOGLE_API_KEY")
-        or os.getenv("GEMINI_API_KEY")
-    )
-    if not api_key: return None
-    cleaned = api_key.strip()
+def _clean_key(raw):
+    cleaned = (raw or "").strip()
     if cleaned.lower() in {"your_google_api_key_here", "your_real_key_here", "replace_me"} or len(cleaned) < 20 or not cleaned.startswith("AIza"):
         return None
     return cleaned
 
 
+def get_api_keys():
+    file_values = dotenv_values(ENV_PATH) if ENV_PATH.exists() else {}
+    combined = (
+        file_values.get("GOOGLE_API_KEYS")
+        or file_values.get("GEMINI_API_KEYS")
+        or os.getenv("GOOGLE_API_KEYS")
+        or os.getenv("GEMINI_API_KEYS")
+        or ""
+    )
+    keys = []
+    for raw in combined.replace("\n", ",").split(","):
+        cleaned = _clean_key(raw)
+        if cleaned and cleaned not in keys:
+            keys.append(cleaned)
+    single_key = (
+        file_values.get("GOOGLE_API_KEY")
+        or file_values.get("GEMINI_API_KEY")
+        or os.getenv("GOOGLE_API_KEY")
+        or os.getenv("GEMINI_API_KEY")
+    )
+    cleaned_single = _clean_key(single_key)
+    if cleaned_single and cleaned_single not in keys:
+        keys.append(cleaned_single)
+    return keys
+
+
+def get_api_key():
+    keys = get_api_keys()
+    return keys[0] if keys else None
+
+
+def _key_label(index):
+    return f"Key {chr(ord('A') + index)}"
+
+
 class GeminiLLMWrapper:
-    """Enterprise LLM implementation supporting Rate Limits, Caching, and hard Timeouts."""
-    def __init__(self, api_key, model):
+    """Enterprise LLM implementation with model routing, key failover, and hard timeouts."""
+    def __init__(self, api_keys, models):
         from google import genai
-        self.client = genai.Client(api_key=api_key)
-        self.model = model
+        self.api_keys = list(api_keys)
+        self.models = list(models) or [DEFAULT_GEMINI_MODEL]
+        self.clients = {}
+        self.model = self.models[0]
+        self._genai = genai
         
         # Operational Limits
         self.call_lock = threading.Lock()
@@ -170,96 +258,131 @@ class GeminiLLMWrapper:
             self.last_call_time = time.time()
 
         last_exc = None
-        for attempt in range(2):
-            start_time = time.time()
-            executor = None
-            future = None
-            try:
-                if sys.is_finalizing():
-                    raise RuntimeError("Interpreter is shutting down; skipping Gemini request.")
-                executor = ThreadPoolExecutor(max_workers=1)
-                future = executor.submit(self.client.models.generate_content, model=self.model, contents=prompt)
-                response = future.result(timeout=self.TIMEOUT_SECONDS)
-                
-                text = ""
-                # Use native SDK property if available
-                if hasattr(response, "text") and response.text:
-                    text = response.text
-                else:
-                    for candidate in getattr(response, "candidates", []) or []:
-                        content = getattr(candidate, "content", None)
-                        parts = getattr(content, "parts", []) if content else []
-                        for part in parts:
-                            part_text = getattr(part, "text", "")
-                            if part_text:
-                                text += part_text
-                                
-                STATUS_MANAGER.set_error("")
-                STATUS_MANAGER.clear_backoff()
-                result_text = (text or "").strip()
-                
-                # Update bounds
-                self._cache[prompt_hash] = result_text
-                if len(self._cache) > 200: self._cache.clear()
-                
-                duration = time.time() - start_time
-                logging.info(f"LLM call successful: {self.model} in {duration:.2f}s")
-                
-                return SimpleNamespace(content=result_text)
-                
-            except TimeoutError:
-                last_exc = Exception("Cloud LLM Timeout bounds breached successfully dropping request.")
-                log_fn = logging.info if attempt == 0 else logging.warning
-                log_fn(f"Attempt {attempt+1} LLM generation timed out after {self.TIMEOUT_SECONDS}s.")
-                if future is not None:
-                    future.cancel()
-                STATUS_MANAGER.start_backoff(str(last_exc), seconds=20, kind="transient")
-                raise last_exc
-            except Exception as exc:
-                last_exc = exc
-                message = f"{type(exc).__name__}: {exc}"
-                log_fn = logging.info if attempt == 0 else logging.warning
-                log_fn(f"Attempt {attempt+1} Exception: {message}")
-                if "cannot schedule new futures after shutdown" in message.lower() or "interpreter is shutting down" in message.lower():
-                    STATUS_MANAGER.start_backoff(message, seconds=20, kind="transient")
-                    raise
-                if _is_quota_llm_error(message):
-                    if _is_daily_quota_llm_error(message):
-                        STATUS_MANAGER.start_backoff(message, seconds=6 * 60 * 60, kind="daily_quota")
-                    else:
-                        STATUS_MANAGER.start_backoff(message, seconds=45, kind="quota")
-                    raise
-                if _is_connectivity_llm_error(message):
-                    STATUS_MANAGER.start_backoff(message, seconds=10, kind="transient")
-                    raise
-                if ("503" in message or "UNAVAILABLE" in message.upper()) and attempt < 1:
-                    time.sleep(1.5)
+        trace = []
+        for key_index, api_key in enumerate(self.api_keys):
+            key_label = _key_label(key_index)
+            if STATUS_MANAGER.is_key_backoff_active(key_label):
+                trace.append({"key": key_label, "model": "-", "status": "skipped", "reason": "key cooldown active"})
+                continue
+            key_quota_failures = 0
+            for model in self.models:
+                start_time = time.time()
+                executor = None
+                future = None
+                try:
+                    if sys.is_finalizing():
+                        raise RuntimeError("Interpreter is shutting down; skipping Gemini request.")
+                    client = self._client_for_key(api_key)
+                    executor = ThreadPoolExecutor(max_workers=1)
+                    future = executor.submit(client.models.generate_content, model=model, contents=prompt)
+                    response = future.result(timeout=self.TIMEOUT_SECONDS)
+                    text = self._extract_text(response)
+                    STATUS_MANAGER.set_error("")
+                    STATUS_MANAGER.clear_backoff()
+                    result_text = (text or "").strip()
+                    self._cache[prompt_hash] = result_text
+                    if len(self._cache) > 200:
+                        self._cache.clear()
+                    duration = time.time() - start_time
+                    active_route = {"key": key_label, "model": model, "latency_seconds": round(duration, 2)}
+                    trace.append({"key": key_label, "model": model, "status": "success", "latency_seconds": round(duration, 2)})
+                    STATUS_MANAGER.set_router_trace(trace, active_route)
+                    logging.info(f"LLM call successful: {model} via {key_label} in {duration:.2f}s")
+                    return SimpleNamespace(content=result_text, model=model, key_label=key_label)
+                except TimeoutError:
+                    last_exc = Exception("Cloud LLM Timeout bounds breached successfully dropping request.")
+                    trace.append({"key": key_label, "model": model, "status": "timeout", "reason": str(last_exc)})
+                    if future is not None:
+                        future.cancel()
                     continue
-                STATUS_MANAGER.set_error(message)
-                raise
-            finally:
-                if executor is not None:
-                    try:
-                        executor.shutdown(wait=False, cancel_futures=True)
-                    except TypeError:
-                        executor.shutdown(wait=False)
-                
+                except Exception as exc:
+                    last_exc = exc
+                    message = f"{type(exc).__name__}: {exc}"
+                    trace.append({"key": key_label, "model": model, "status": "failed", "reason": self._short_reason(message)})
+                    if "cannot schedule new futures after shutdown" in message.lower() or "interpreter is shutting down" in message.lower():
+                        STATUS_MANAGER.start_backoff(message, seconds=20, kind="transient")
+                        STATUS_MANAGER.set_router_trace(trace)
+                        raise
+                    if _is_quota_llm_error(message):
+                        key_quota_failures += 1
+                        continue
+                    if "INVALID_ARGUMENT" in message.upper() and ("MODEL" in message.upper() or "NOT FOUND" in message.upper()):
+                        continue
+                    if _is_terminal_llm_error(message):
+                        STATUS_MANAGER.mark_key_backoff(key_label, message, seconds=6 * 60 * 60, kind="terminal")
+                        break
+                    if _is_connectivity_llm_error(message) or "503" in message or "UNAVAILABLE" in message.upper():
+                        continue
+                    STATUS_MANAGER.set_error(message)
+                    continue
+                finally:
+                    if executor is not None:
+                        try:
+                            executor.shutdown(wait=False, cancel_futures=True)
+                        except TypeError:
+                            executor.shutdown(wait=False)
+            if key_quota_failures >= len(self.models):
+                STATUS_MANAGER.mark_key_backoff(key_label, "All configured Gemini model tiers returned quota/rate-limit errors.", seconds=6 * 60 * 60, kind="daily_quota")
+        STATUS_MANAGER.set_router_trace(trace)
         if last_exc:
-            STATUS_MANAGER.set_error(str(last_exc))
+            message = f"{type(last_exc).__name__}: {last_exc}"
+            if _is_daily_quota_llm_error(message) or any(item.get("status") == "failed" and "quota" in str(item.get("reason", "")).lower() for item in trace):
+                STATUS_MANAGER.start_backoff(message, seconds=45, kind="quota")
+            else:
+                STATUS_MANAGER.start_backoff(message, seconds=20, kind="transient")
+            STATUS_MANAGER.set_error(message)
             raise last_exc
+        raise RuntimeError("No Gemini API keys are available for routing.")
+
+    def _client_for_key(self, api_key):
+        if api_key not in self.clients:
+            self.clients[api_key] = self._genai.Client(api_key=api_key)
+        return self.clients[api_key]
+
+    def _extract_text(self, response):
+        if hasattr(response, "text") and response.text:
+            return response.text
+        text = ""
+        for candidate in getattr(response, "candidates", []) or []:
+            content = getattr(candidate, "content", None)
+            parts = getattr(content, "parts", []) if content else []
+            for part in parts:
+                part_text = getattr(part, "text", "")
+                if part_text:
+                    text += part_text
+        return text
+
+    def _short_reason(self, message):
+        text = str(message or "")
+        if _is_quota_llm_error(text):
+            return "quota/rate-limit"
+        if "INVALID_ARGUMENT" in text.upper() and ("MODEL" in text.upper() or "NOT FOUND" in text.upper()):
+            return "model unavailable"
+        if _is_connectivity_llm_error(text):
+            return "timeout/connectivity"
+        if _is_terminal_llm_error(text):
+            return "key invalid/permission"
+        return text[:140]
 
 
 def get_llm_status(ignore_backoff=False):
     enable_llm = os.getenv("ENABLE_LLM", "true").lower() in {"1", "true", "yes"}
-    api_key = get_api_key()
+    api_keys = get_api_keys()
+    model_sequence = DEFAULT_GEMINI_MODEL_SEQUENCE or [DEFAULT_GEMINI_MODEL]
     status = {
         "enabled": enable_llm,
-        "api_key_present": bool(api_key),
+        "api_key_present": bool(api_keys),
+        "api_key_count": len(api_keys),
         "env_file_present": ENV_PATH.exists(),
         "env_example_present": ENV_EXAMPLE_PATH.exists(),
         "env_path": str(ENV_PATH),
-        "model": DEFAULT_GEMINI_MODEL,
+        "model": model_sequence[0] if model_sequence else DEFAULT_GEMINI_MODEL,
+        "model_sequence": model_sequence,
         "provider": "google-genai",
+        "router_mode": "Multi-Key Adaptive Routing" if len(api_keys) > 1 or len(model_sequence) > 1 else "Single-Key Gemini",
+        "router_trace": STATUS_MANAGER.get_router_trace(),
+        "active_route": STATUS_MANAGER.get_active_route(),
+        "key_backoffs": STATUS_MANAGER.get_key_backoffs(),
         "available": False,
         "message": "",
         "last_error": STATUS_MANAGER.get_error(),
@@ -269,8 +392,8 @@ def get_llm_status(ignore_backoff=False):
     if not enable_llm:
         status["message"] = "LLM mode is disabled by ENABLE_LLM."
         return status
-    if not api_key:
-        status["message"] = "No valid GOOGLE_API_KEY or GEMINI_API_KEY found in .env. .env.example is only a template and is never loaded at runtime."
+    if not api_keys:
+        status["message"] = "No valid GOOGLE_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEYS, or GEMINI_API_KEYS found in .env. .env.example is only a template and is never loaded at runtime."
         return status
 
     try:
@@ -280,7 +403,7 @@ def get_llm_status(ignore_backoff=False):
         return status
 
     status["available"] = True
-    status["message"] = "Gemini SDK is configured."
+    status["message"] = f"Gemini SDK is configured with {len(api_keys)} key route(s) and {len(model_sequence)} model tier(s)."
     last_err = STATUS_MANAGER.get_error()
     backoff = STATUS_MANAGER.get_backoff()
     status["quota_backoff"] = backoff
@@ -341,13 +464,14 @@ def get_llm(force=False):
     status = get_llm_status(ignore_backoff=force)
     if not status["available"]:
         return None
-    api_key = get_api_key()
-    instance_key = (api_key, DEFAULT_GEMINI_MODEL)
+    api_keys = get_api_keys()
+    models = DEFAULT_GEMINI_MODEL_SEQUENCE or [DEFAULT_GEMINI_MODEL]
+    instance_key = (tuple(api_keys), tuple(models))
     with _LLM_INSTANCE_LOCK:
         if _LLM_INSTANCE is not None and _LLM_INSTANCE_KEY == instance_key:
             return _LLM_INSTANCE
         try:
-            _LLM_INSTANCE = GeminiLLMWrapper(api_key=api_key, model=DEFAULT_GEMINI_MODEL)
+            _LLM_INSTANCE = GeminiLLMWrapper(api_keys=api_keys, models=models)
             _LLM_INSTANCE_KEY = instance_key
             return _LLM_INSTANCE
         except Exception as e:

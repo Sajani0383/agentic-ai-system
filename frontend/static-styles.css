@@ -125,6 +125,12 @@ h1, h2, h3 { margin: 0; }
   padding: 18px;
   display: grid;
   gap: 8px;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(126,208,255,0.35);
 }
 
 .summary-card span {
@@ -284,6 +290,10 @@ h1, h2, h3 { margin: 0; }
   stroke-dasharray: 2 1.6;
   animation: pulse-line 1.2s linear infinite;
 }
+.map-flow-dot {
+  fill: #eaf8ff;
+  filter: drop-shadow(0 0 5px rgba(138,216,255,0.9));
+}
 .map-node { z-index: 2; }
 
 .learning-grid {
@@ -321,6 +331,143 @@ h1, h2, h3 { margin: 0; }
 }
 .route-tag.good { color: #9cf3bc; background: rgba(75,211,138,0.1); border-color: rgba(75,211,138,0.28); }
 .route-tag.bad { color: #a9b4c2; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+.route-tag.caution { color: #ffd483; background: rgba(255,190,90,0.1); border-color: rgba(255,190,90,0.3); }
+.learning-warning {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #ffd1d1;
+  background: rgba(255, 91, 91, 0.12);
+  border: 1px solid rgba(255, 91, 91, 0.28);
+}
+
+.llm-badge {
+  width: fit-content;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #87a0bf;
+  background: rgba(255,255,255,0.06);
+}
+
+.llm-badge.modified {
+  color: #9cf3bc;
+  border-color: rgba(75,211,138,0.35);
+  background: rgba(75,211,138,0.12);
+}
+
+.llm-badge.confirmed {
+  color: #9dccff;
+  border-color: rgba(108,180,255,0.32);
+  background: rgba(108,180,255,0.1);
+}
+
+.llm-comparison {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.llm-comparison div {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(4,10,18,0.34);
+}
+
+.llm-comparison span {
+  display: block;
+  font-size: 11px;
+  color: #87a0bf;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.llm-comparison strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+  color: #f4f7fb;
+}
+
+.llm-details {
+  color: #9fb6d2;
+  font-size: 13px;
+}
+
+.llm-details summary {
+  cursor: pointer;
+  width: fit-content;
+  color: #b8cbdf;
+  font-weight: 700;
+}
+
+.llm-details small {
+  display: block;
+  margin-top: 6px;
+}
+
+.router-panel {
+  border: 1px solid rgba(108,180,255,0.18);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(8,17,29,0.82);
+}
+
+.router-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.router-step {
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255,255,255,0.04);
+}
+
+.router-step.success {
+  border-color: rgba(75,211,138,0.35);
+  background: rgba(75,211,138,0.1);
+}
+
+.router-step.failed,
+.router-step.timeout {
+  border-color: rgba(255,99,99,0.28);
+  background: rgba(255,99,99,0.08);
+}
+
+.router-step.skipped {
+  border-color: rgba(255,190,90,0.28);
+  background: rgba(255,190,90,0.08);
+}
+
+.router-step strong,
+.router-step span,
+.router-step small {
+  display: block;
+}
+
+.router-step strong {
+  color: #f4f7fb;
+}
+
+.router-step span {
+  margin-top: 5px;
+  color: #9dccff;
+  font-weight: 800;
+}
+
+.router-step small {
+  margin-top: 4px;
+  color: #87a0bf;
 }
 
 .board-header {
@@ -382,6 +529,9 @@ h1, h2, h3 { margin: 0; }
   stroke-dasharray: 12 10;
   animation: pulse-line 1.2s linear infinite;
 }
+.flow-vehicle-dot {
+  filter: drop-shadow(0 0 8px rgba(138,216,255,0.8));
+}
 
 @keyframes live-pulse {
   0%, 100% { opacity: 0.55; transform: scale(0.95); }
@@ -416,11 +566,34 @@ h1, h2, h3 { margin: 0; }
 .block-card.source-block {
   border-color: rgba(255, 107, 107, 0.95);
   box-shadow: 0 0 0 1px rgba(255,107,107,0.38), 0 0 26px rgba(255,107,107,0.22);
+  animation: source-alert 1.15s ease-in-out infinite;
 }
 
 .block-card.destination-block {
   border-color: rgba(75, 211, 138, 0.95);
   box-shadow: 0 0 0 1px rgba(75,211,138,0.38), 0 0 26px rgba(75,211,138,0.22);
+  animation: destination-pulse 1.15s ease-in-out infinite;
+}
+
+.block-card.inactive-route {
+  opacity: 0.56;
+  filter: saturate(0.72);
+}
+
+.block-card.inactive-route:hover,
+.block-card.inactive-route.selected-block {
+  opacity: 0.82;
+  filter: none;
+}
+
+@keyframes source-alert {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255,107,107,0.34), 0 0 20px rgba(255,107,107,0.2); }
+  50% { box-shadow: 0 0 0 2px rgba(255,107,107,0.75), 0 0 38px rgba(255,107,107,0.42); }
+}
+
+@keyframes destination-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(75,211,138,0.34), 0 0 20px rgba(75,211,138,0.2); }
+  50% { box-shadow: 0 0 0 2px rgba(75,211,138,0.8), 0 0 42px rgba(75,211,138,0.48); }
 }
 
 .block-top {
@@ -496,7 +669,7 @@ h1, h2, h3 { margin: 0; }
 }
 
 .slot-grid.preview {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   margin-bottom: 16px;
 }
 
@@ -625,6 +798,51 @@ h1, h2, h3 { margin: 0; }
   transition: left 1.15s ease, top 1.15s ease, opacity 1.15s ease;
   pointer-events: none;
   filter: drop-shadow(0 8px 14px rgba(0,0,0,0.35));
+  z-index: 8;
+}
+
+.vehicle-dot {
+  width: 8px;
+  height: 8px;
+  background: #00ffcc;
+  border-radius: 50%;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px rgba(0,255,204,0.14), 0 0 16px rgba(0,255,204,0.82);
+  transform: translate(-50%, -50%);
+}
+
+.route-particle {
+  position: absolute;
+  left: var(--x1);
+  top: var(--y1);
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  pointer-events: none;
+  z-index: 7;
+  filter: drop-shadow(0 0 10px rgba(138,216,255,0.9));
+  animation: route-travel 1.65s ease-in-out var(--delay) infinite;
+}
+
+.route-particle.bike {
+  filter: drop-shadow(0 0 10px rgba(255,182,110,0.9));
+}
+
+@keyframes route-travel {
+  0% {
+    left: var(--x1);
+    top: var(--y1);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.75);
+  }
+  15% { opacity: 1; }
+  82% { opacity: 1; }
+  100% {
+    left: var(--x2);
+    top: var(--y2);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
 }
 
 .fallback-panel {

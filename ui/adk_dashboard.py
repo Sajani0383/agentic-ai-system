@@ -1,3 +1,4 @@
+import json
 import time
 import pandas as pd
 import streamlit as st
@@ -46,6 +47,8 @@ def _ensure_session_state():
         st.session_state.benchmark_toggle = False
     if "force_llm" not in st.session_state:
         st.session_state.force_llm = False
+    if "run_report_json" not in st.session_state:
+        st.session_state.run_report_json = ""
 
 def _mark_ui_interaction():
     st.session_state.last_ui_interaction_at = time.time()
@@ -169,7 +172,7 @@ def _agent_summary_cards(latest_result, goal, event_context):
         ("Critic", latest_result.get("critic_output", {}).get("risk_level", "low").upper(), critic_notes[0] if critic_notes else "No critic issue raised."),
         ("Executor", final_action, _execution_summary(latest_result)),
         ("Goal", str(goal.get("target_congested_zones", "-")), goal.get("objective", "No active goal.")),
-        ("Reward", f"{reward_score:+.2f}", "Improved network balance."),
+        ("Reward", f"{reward_score:+.2f}", _reward_summary(latest_result)),
     ]
     cols = st.columns(len(cards))
     for col, (label, value, note) in zip(cols, cards):
@@ -189,6 +192,15 @@ def _memory_summary_cards(metrics):
     for col, (label, value) in zip(cols, cards):
         with col:
             st.metric(label, value)
+
+def _reward_summary(latest_result):
+    reward_score = float(latest_result.get("reward_score", 0) or 0)
+    reward_impact = _safe_dict(latest_result.get("reward_impact"))
+    if reward_score < -0.05:
+        return reward_impact.get("explanation", "Negative reward: route is penalized and repeated failures are blocked.")
+    if reward_score > 0.05:
+        return reward_impact.get("explanation", "Positive reward: route confidence reinforced.")
+    return "Neutral reward: no major route weight change."
 
 def _render_goal_status(goal, kpis):
     if not goal:
@@ -580,6 +592,9 @@ def _render_agent_decision_table(latest_result):
     else:
         action_string = f"Redirect {action.get('vehicles', 0)} vehicles" if action.get("action") == "redirect" else "No redirect executed"
         action_color = "#4bd38a"
+    if not critic.get("approved") and action.get("action") == "redirect":
+        action_string = "Blocked: critic rejection cannot execute"
+        action_color = "#ff9d91"
 
     st.markdown(f"""
     <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); padding: 1.2rem; border-radius: 12px; margin-bottom: 1rem; font-family: monospace; line-height: 1.8;">
@@ -587,7 +602,7 @@ def _render_agent_decision_table(latest_result):
         <div style="color: #4da3ff;"><b>Step 2: LLM Gate</b> &rarr; <span style="color: #ccc;">{llm_string}</span></div>
         <div style="color: #4da3ff;"><b>Step 3: Planner</b> &rarr; <span style="color: #ccc;">Suggest {planner_route.lower()}</span></div>
         <div style="color: #4da3ff;"><b>Step 4: Critic</b> &rarr; <span style="color: #ccc;">{critic_string}</span></div>
-        <div style="color: #73839a;"><b>Step 5: Baseline Context</b> &rarr; <span style="color: #ccc;">{policy_string}</span></div>
+        <div style="color: #73839a;"><b>Step 5: Baseline Context</b> &rarr; <span style="color: #ccc;">{policy_string}. If critic rejects, executor receives NONE.</span></div>
         <div style="color: {action_color};"><b>Step 6: Action</b> &rarr; <span style="color: #fff;">{action_string}</span></div>
     </div>
     """, unsafe_allow_html=True)
@@ -885,6 +900,67 @@ def _render_decision_audit(latest_result):
             st.warning(reward_text)
         else:
             st.info(reward_text)
+    llm_context = _safe_dict(latest_result.get("llm", {}))
+    influence_summary = llm_context.get("influence_summary")
+    if influence_summary:
+        st.markdown("**LLM influence**")
+        st.info(influence_summary)
+
+def _render_decision_explainability(explanation):
+    if not explanation:
+        st.info("Run one simulation step to generate a structured decision explanation.")
+        return
+    signals = _safe_dict(explanation.get("current_signals"))
+    impact = _safe_dict(explanation.get("expected_impact"))
+    safety = _safe_dict(explanation.get("safety_review"))
+    llm_context = _safe_dict(explanation.get("llm_context"))
+    render_key_value_groups([
+        {
+            "title": "Why This Decision",
+            "items": [
+                {"label": "Decision", "value": explanation.get("headline", "-")},
+                {"label": "Reason", "value": explanation.get("why_this_decision", "-")},
+                {"label": "Scenario", "value": signals.get("scenario", "-")},
+                {"label": "Reasoning budget", "value": signals.get("reasoning_budget", "local_only")},
+            ],
+        },
+        {
+            "title": "Signal Check",
+            "items": [
+                {"label": "Search time", "value": f"{signals.get('search_time_min', 0)} min"},
+                {"label": "Hotspots", "value": signals.get("congestion_hotspots", 0)},
+                {"label": "Queue", "value": signals.get("queue_length", 0)},
+                {"label": "Risk", "value": safety.get("risk_level", "low")},
+            ],
+        },
+        {
+            "title": "Expected Impact",
+            "items": [
+                {"label": "Search delta", "value": f"{impact.get('search_time_delta_min', 0):+.2f} min"},
+                {"label": "Hotspot delta", "value": f"{impact.get('hotspot_delta', 0):+.0f}"},
+                {"label": "Resilience delta", "value": f"{impact.get('resilience_delta', 0):+.2f}"},
+                {"label": "Reward", "value": f"{impact.get('reward_score', 0):+.2f}"},
+            ],
+        },
+        {
+            "title": "LLM Context",
+            "items": [
+                {"label": "Source", "value": llm_context.get("source", "deterministic")},
+                {"label": "Requested", "value": "Yes" if llm_context.get("planner_requested") else "No"},
+                {"label": "Used", "value": "Yes" if llm_context.get("planner_used") else "No"},
+                {"label": "Fallback", "value": "Yes" if llm_context.get("fallback_used") else "No"},
+                {"label": "Influence", "value": llm_context.get("influence_summary") or llm_context.get("summary", "-")},
+            ],
+        },
+    ])
+    st.markdown("**Agent Chain**")
+    st.dataframe(pd.DataFrame(_safe_list(explanation.get("agent_chain"))), width="stretch", hide_index=True)
+    alternatives = _safe_list(explanation.get("alternatives_considered"))
+    if alternatives:
+        st.markdown("**Alternatives Considered**")
+        for item in alternatives:
+            st.markdown(f"- {item}")
+    st.info(explanation.get("why_not_other_options", "No alternative-route explanation available."))
 
 def _group_notification_dispatch(dispatch_rows):
     grouped = {}
@@ -954,6 +1030,7 @@ def _fallback_snapshot():
         "last_llm_decision": {},
         "llm_usage_summary": {},
         "assistant_briefing": {},
+        "decision_explanation": {},
         "vehicles": [],
         "movement_log": [],
         "actions": [],
@@ -984,6 +1061,7 @@ def _normalize_dashboard_snapshot(snapshot):
     normalized.setdefault("actions", [])
     normalized.setdefault("alerts", [])
     normalized.setdefault("updated_at", "")
+    normalized.setdefault("decision_explanation", {})
     return normalized
 
 def _safe_number(value, default=0):
@@ -1076,6 +1154,7 @@ def _build_dashboard_view_model(snapshot, state_frame, step_number):
         "movement_log": _safe_list(snapshot.get("movement_log")),
         "actions": _safe_list(snapshot.get("actions")),
         "updated_at": snapshot.get("updated_at", ""),
+        "decision_explanation": _safe_dict(snapshot.get("decision_explanation")),
     }
 
 def main():
@@ -1186,6 +1265,18 @@ def main():
         st.session_state.run = False
         st.rerun()
 
+    if st.sidebar.button("Prepare Run Report", width="stretch", on_click=_mark_ui_interaction):
+        report = api_bridge.get_run_report()
+        st.session_state.run_report_json = json.dumps(report, indent=2) if report else ""
+    if st.session_state.run_report_json:
+        st.sidebar.download_button(
+            "Download Run Report JSON",
+            data=st.session_state.run_report_json,
+            file_name="srm_agentic_run_report.json",
+            mime="application/json",
+            width="stretch",
+        )
+
     st.sidebar.divider()
     st.session_state.developer_mode = st.sidebar.toggle("🖥️ Developer Mode", value=st.session_state.get('developer_mode', False), key="sidebar_developer_mode", on_change=_mark_ui_interaction)
 
@@ -1219,6 +1310,7 @@ def main():
     notification_summary = _safe_dict(snapshot.get("notification_summary"))
     last_llm_decision = _safe_dict(snapshot.get("last_llm_decision"))
     llm_usage_summary = _safe_dict(snapshot.get("llm_usage_summary"))
+    decision_explanation = _safe_dict(snapshot.get("decision_explanation"))
 
     force_llm = snapshot.get("force_llm", False)
     if force_llm:
@@ -1267,6 +1359,7 @@ def main():
     movement_log = dashboard_state["movement_log"]
     actions = dashboard_state["actions"]
     updated_at = dashboard_state["updated_at"]
+    decision_explanation = _safe_dict(dashboard_state.get("decision_explanation"))
 
     total_capacity = dashboard_state["capacity"]
     total_occupied = dashboard_state["occupied"]
@@ -1372,6 +1465,8 @@ def main():
 
         st.markdown("<div class='section-kicker'>Agent Decisions</div>", unsafe_allow_html=True)
         _render_agent_decision_table(latest_result)
+        with st.expander("Decision explainability: why this action was selected", expanded=False):
+            _render_decision_explainability(decision_explanation)
 
         st.markdown("<div class='section-kicker'>SRM Block Pressure</div>", unsafe_allow_html=True)
         st.dataframe(_build_zone_status_frame(state_frame), width="stretch", hide_index=True)
@@ -1598,6 +1693,7 @@ def main():
 
     elif active_page == "Reasoning":
         st.markdown("<div class='section-kicker'>Gemini Budget & LLM Decision Log</div>", unsafe_allow_html=True)
+        _render_decision_explainability(decision_explanation)
         if reasoning_summary:
             st.markdown(f"### 🤖 Agent Narrative Summary")
             st.success(f"**Current Strategy:** {reasoning_summary.get('fallback_label', 'Adaptive Response')}")
@@ -1664,6 +1760,34 @@ def main():
                 """
             )
 
+        router_trace = llm_status.get("router_trace", [])
+        active_route = llm_status.get("active_route", {})
+        if router_trace or llm_status.get("router_mode"):
+            st.markdown("**LLM Orchestrator**")
+            render_key_value_groups([
+                {
+                    "title": "Routing Strategy",
+                    "items": [
+                        {"label": "Mode", "value": llm_status.get("router_mode", "Single-Key Gemini")},
+                        {"label": "Configured keys", "value": llm_status.get("api_key_count", 0)},
+                        {"label": "Model tiers", "value": len(llm_status.get("model_sequence", []))},
+                        {"label": "Active model", "value": active_route.get("model", llm_status.get("model", "-"))},
+                    ],
+                }
+            ])
+            if router_trace:
+                router_frame = pd.DataFrame([
+                    {
+                        "Key": item.get("key", "-"),
+                        "Model": item.get("model", "-"),
+                        "Status": item.get("status", "-"),
+                        "Latency": item.get("latency_seconds", "-"),
+                        "Reason": item.get("reason", ""),
+                    }
+                    for item in router_trace[-12:]
+                ])
+                st.dataframe(router_frame.iloc[::-1], width="stretch", hide_index=True)
+
         if last_llm_decision:
             st.markdown("**Most Recent Gemini Advisory**")
             st.success(
@@ -1681,7 +1805,11 @@ def main():
             compare_cols[0].metric("Local Decision", last_llm_decision.get("local_action_text", "No action stored."))
             compare_cols[1].metric("Gemini Suggestion", last_llm_decision.get("llm_action_text", "No action stored."))
             compare_cols[2].metric("Final Decision", last_llm_decision.get("final_action_text", last_llm_decision.get("action_text", "No action stored.")))
-            st.caption(f"LLM influence: {last_llm_decision.get('influence_label', 'Confirmed')}")
+            changed_fields = last_llm_decision.get("changed_fields", [])
+            if changed_fields:
+                st.success(f"LLM influence: Modified {', '.join(changed_fields).replace('_', ' ')}")
+            else:
+                st.caption(f"LLM influence: {last_llm_decision.get('influence_label', 'Confirmed')} the local decision.")
         else:
             st.info("No Gemini advisory has been recorded yet. In Auto mode, the planner requests Gemini every 10 steps or earlier when queue >= 3, entropy > 3.5, risk > 70, or a decision conflict appears.")
 

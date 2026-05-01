@@ -1,0 +1,91 @@
+{
+  "episodes": 1,
+  "steps_per_episode": 1,
+  "scenarios": [
+    {
+      "scenario": "Normal Day",
+      "agentic": {
+        "avg_search_time_min": 2.1,
+        "avg_utilisation_pct": 39.64,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 79.2,
+        "avg_allocation_success_pct": 100.0
+      },
+      "baseline": {
+        "avg_search_time_min": 2.42,
+        "avg_utilisation_pct": 39.64,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 79.2,
+        "avg_allocation_success_pct": 100.0
+      },
+      "delta_search_time": 0.32,
+      "delta_resilience": 0.0,
+      "delta_hotspots": 0.0
+    },
+    {
+      "scenario": "Exam Rush",
+      "agentic": {
+        "avg_search_time_min": 2.7,
+        "avg_utilisation_pct": 37.22,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 66.4,
+        "avg_allocation_success_pct": 100.0
+      },
+      "baseline": {
+        "avg_search_time_min": 3.11,
+        "avg_utilisation_pct": 37.22,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 66.4,
+        "avg_allocation_success_pct": 100.0
+      },
+      "delta_search_time": 0.41,
+      "delta_resilience": 0.0,
+      "delta_hotspots": 0.0
+    },
+    {
+      "scenario": "Sports Event",
+      "agentic": {
+        "avg_search_time_min": 2.7,
+        "avg_utilisation_pct": 41.25,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 66.4,
+        "avg_allocation_success_pct": 100.0
+      },
+      "baseline": {
+        "avg_search_time_min": 3.11,
+        "avg_utilisation_pct": 41.25,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 66.4,
+        "avg_allocation_success_pct": 100.0
+      },
+      "delta_search_time": 0.41,
+      "delta_resilience": 0.0,
+      "delta_hotspots": 0.0
+    },
+    {
+      "scenario": "Emergency Spillover",
+      "agentic": {
+        "avg_search_time_min": 3.0,
+        "avg_utilisation_pct": 44.39,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 60.0,
+        "avg_allocation_success_pct": 100.0
+      },
+      "baseline": {
+        "avg_search_time_min": 3.45,
+        "avg_utilisation_pct": 44.39,
+        "avg_congestion_hotspots": 0.0,
+        "avg_resilience_score": 60.0,
+        "avg_allocation_success_pct": 100.0
+      },
+      "delta_search_time": 0.45,
+      "delta_resilience": 0.0,
+      "delta_hotspots": 0.0
+    }
+  ],
+  "aggregate": {
+    "avg_search_time_gain_min": 0.4,
+    "avg_resilience_gain": 0.0,
+    "avg_hotspot_reduction": 0.0
+  }
+}

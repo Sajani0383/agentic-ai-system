@@ -91,6 +91,13 @@ class BackendBridge:
     def run_benchmark(self, episodes=3, steps=10):
         return self._post("/benchmark", {"episodes": episodes, "steps_per_episode": steps}, "Benchmark run failed") is not None
 
+    def get_run_report(self):
+        try:
+            return self._request("GET", "/export/report")
+        except Exception as exc:
+            st.error(f"Report export failed: {exc}")
+            return {}
+
     def ask(self, query: str):
         result = self._post("/run", {"input": query}, "Chat request failed")
         if isinstance(result, dict):

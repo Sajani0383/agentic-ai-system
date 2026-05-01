@@ -1,297 +1,7 @@
 {
   "deliveries": [
     {
-      "timestamp": "2026-04-25T05:07:08.597401",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:08.615715",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:09.597343",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Biotech Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:09.616024",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Biotech Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:09.634810",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Biotech Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.606524",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.624908",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.643434",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.551339",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.569919",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.588403",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.662148",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.681040",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:10.699055",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:13.322182",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:13.340841",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:13.358764",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:14.408113",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:14.427147",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:07:14.444833",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:02.892556",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:02.909897",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:02.927266",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:03.570502",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:03.587416",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:03.603931",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:07.040001",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:07.057333",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:07.074207",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:21.707156",
+      "timestamp": "2026-05-01T05:26:20.655414",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -301,7 +11,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:11:21.725231",
+      "timestamp": "2026-05-01T05:26:20.672152",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -311,7 +21,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:11:21.743111",
+      "timestamp": "2026-05-01T05:26:20.688420",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -321,127 +31,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:11:48.481726",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "6 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:48.499101",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "6 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:48.516172",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "6 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:49.095440",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:49.113961",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:11:49.131668",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:00.318309",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:00.335868",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:00.353103",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:22.892356",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:22.909109",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:22.925913",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:22.841284",
+      "timestamp": "2026-05-01T05:26:21.814630",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -451,7 +41,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:12:22.858576",
+      "timestamp": "2026-05-01T05:26:21.831498",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -461,7 +51,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:12:22.875542",
+      "timestamp": "2026-05-01T05:26:21.847904",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -471,37 +61,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:12:56.272967",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "4 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:56.291035",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "4 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:56.308561",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "4 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:12:56.214716",
+      "timestamp": "2026-05-01T05:26:21.864158",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -511,7 +71,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:12:56.233900",
+      "timestamp": "2026-05-01T05:26:21.879994",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -521,7 +81,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:12:56.253898",
+      "timestamp": "2026-05-01T05:26:21.895720",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -531,7 +91,107 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:11.639903",
+      "timestamp": "2026-05-01T05:41:43.785711",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 6 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.813514",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 6 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.388018",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Exam Rush active",
+      "message": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.402074",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Exam Rush active",
+      "message": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.415967",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Exam Rush active",
+      "message": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.430810",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.599110",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:41:43.771749",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:11.693900",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:11.722359",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:11.736917",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -541,7 +201,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:11.659338",
+      "timestamp": "2026-05-01T05:54:11.750474",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -551,7 +211,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:11.677929",
+      "timestamp": "2026-05-01T05:54:11.763913",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -561,37 +221,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:27.361251",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:13:27.381476",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:13:27.401502",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:13:42.303543",
+      "timestamp": "2026-05-01T05:54:12.885706",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Entry queue building",
@@ -601,7 +231,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:42.322165",
+      "timestamp": "2026-05-01T05:54:12.900193",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Entry queue building",
@@ -611,7 +241,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:42.340050",
+      "timestamp": "2026-05-01T05:54:12.914261",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Entry queue building",
@@ -621,67 +251,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:13:57.138994",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:13:57.162804",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:13:57.185875",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:14:04.805136",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:14:04.826533",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:14:04.846864",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:14:39.333813",
+      "timestamp": "2026-05-01T05:54:12.786949",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -691,7 +261,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:14:39.353515",
+      "timestamp": "2026-05-01T05:54:12.805024",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -701,7 +271,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:14:39.374089",
+      "timestamp": "2026-05-01T05:54:12.827423",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -711,37 +281,37 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:14:39.394413",
+      "timestamp": "2026-05-01T05:54:12.842277",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:14:39.414269",
+      "timestamp": "2026-05-01T05:54:12.857102",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:14:39.434063",
+      "timestamp": "2026-05-01T05:54:12.871080",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:01.859050",
+      "timestamp": "2026-05-01T05:54:13.654467",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -751,7 +321,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:01.876368",
+      "timestamp": "2026-05-01T05:54:13.668257",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -761,7 +331,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:01.893707",
+      "timestamp": "2026-05-01T05:54:13.682948",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -771,457 +341,37 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:01.806051",
+      "timestamp": "2026-05-01T05:54:13.612612",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "message": "2 vehicles were rerouted from CRC Block to Tech Park.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:01.824353",
+      "timestamp": "2026-05-01T05:54:13.626579",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "message": "2 vehicles were rerouted from CRC Block to Tech Park.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:01.841757",
+      "timestamp": "2026-05-01T05:54:13.640633",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "message": "2 vehicles were rerouted from CRC Block to Tech Park.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:15:09.640559",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:09.658749",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:09.677452",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:09.586927",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:09.605135",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:09.623106",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:16.842754",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:16.860496",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:16.877636",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:24.634088",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:24.652634",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:24.669547",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:41.326201",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:41.560440",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:41.709154",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:41.726745",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:41.743818",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:41.761152",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:49.131363",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:49.416175",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:15:49.505404",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:05.627424",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "4 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:05.893117",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "4 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:06.030136",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "4 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:22.039641",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:22.056384",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:22.072749",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:21.679063",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:21.975466",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:22.022502",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:39.444007",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:39.688470",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:39.848028",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:47.532421",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:47.550259",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:47.567762",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:47.585114",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:47.602226",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:47.619589",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:56.117831",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:56.176860",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:16:56.546149",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:17:30.124372",
+      "timestamp": "2026-05-01T05:54:14.408316",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -1231,7 +381,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:17:30.349891",
+      "timestamp": "2026-05-01T05:54:14.422005",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -1241,7 +391,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:17:30.510875",
+      "timestamp": "2026-05-01T05:54:14.435718",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -1251,787 +401,37 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:17:29.751764",
+      "timestamp": "2026-05-01T05:54:14.366234",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "message": "2 vehicles were rerouted from Library to Basic Eng Lab.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:17:30.083184",
+      "timestamp": "2026-05-01T05:54:14.380367",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "message": "2 vehicles were rerouted from Library to Basic Eng Lab.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:17:30.103312",
+      "timestamp": "2026-05-01T05:54:14.394561",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "message": "2 vehicles were rerouted from Library to Basic Eng Lab.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:17:56.407339",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:17:56.615400",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:17:56.636128",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:17:56.656852",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:17:56.677043",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:17:56.697533",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:18:13.650803",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:18:13.672005",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:18:13.692231",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:10.074923",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:10.094257",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:10.113333",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.140201",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Hi-Tech Block",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.159198",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Hi-Tech Block",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.178176",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Hi-Tech Block",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.082569",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.101877",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.121053",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.024146",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.043603",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.062937",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.014210",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.033072",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.051748",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.956080",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.975565",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:11.994514",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.809825",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Mech A",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.828293",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Mech A",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.846647",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Mech A",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.753789",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.772928",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:12.791480",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:13.831175",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Mech C",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:13.850632",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Mech C",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:13.869687",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Temporary disruption at Mech C",
-      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
-      "level": "error",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:14.766152",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:14.784285",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:14.802097",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:17.166549",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:17.184659",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:17.202666",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:18.281441",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:18.299402",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:28:18.316893",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:30:47.774820",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:30:47.791961",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:30:47.808798",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:30:47.825358",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:30:47.842136",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:30:47.858847",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:41.542056",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:41.557968",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:41.573848",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:41.589796",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:41.605602",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:41.621340",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:42.515418",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:42.531207",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:42.546654",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:42.562026",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:42.577390",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:42.592758",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.296932",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.311710",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.326499",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.251808",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.267311",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.282116",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:43.993163",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:44.008284",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:44.024006",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:44.279315",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:44.293587",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:44.307677",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:44.985175",
+      "timestamp": "2026-05-01T05:54:15.399669",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -2041,7 +441,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.000378",
+      "timestamp": "2026-05-01T05:54:15.413897",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -2051,7 +451,17 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.820422",
+      "timestamp": "2026-05-01T05:54:15.427980",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:16.366793",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2061,7 +471,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.834856",
+      "timestamp": "2026-05-01T05:54:16.381834",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2071,7 +481,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.849228",
+      "timestamp": "2026-05-01T05:54:16.396528",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2081,67 +491,37 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.863528",
+      "timestamp": "2026-05-01T05:54:16.411087",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from CRC Block to Hi-Tech Block.",
+      "message": "2 vehicles were rerouted from Mech A to Hi-Tech Block.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.877883",
+      "timestamp": "2026-05-01T05:54:16.426348",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from CRC Block to Hi-Tech Block.",
+      "message": "2 vehicles were rerouted from Mech A to Hi-Tech Block.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:45.892244",
+      "timestamp": "2026-05-01T05:54:16.441166",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from CRC Block to Hi-Tech Block.",
+      "message": "2 vehicles were rerouted from Mech A to Hi-Tech Block.",
       "level": "success",
       "delivery_status": "sent",
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:48.330989",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:48.344799",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:48.358593",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:48.246479",
+      "timestamp": "2026-05-01T05:54:18.907349",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2151,7 +531,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:48.261337",
+      "timestamp": "2026-05-01T05:54:18.920765",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2161,7 +541,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:48.275680",
+      "timestamp": "2026-05-01T05:54:18.934774",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2171,747 +551,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:31:48.289581",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:48.303317",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:48.317148",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Automobile Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:49.390494",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:49.403863",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:49.417209",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:49.430504",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:49.443739",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:31:49.457087",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:32:54.231715",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:32:54.244612",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:32:54.257354",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:32:54.270065",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:32:54.282873",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:32:54.295165",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.375773",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.389102",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.402586",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.453291",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.465693",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.478358",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.415867",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.428365",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:25.440933",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:41.617254",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:41.641164",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:48.691402",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:48.705058",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:48.716606",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:41.629385",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 1
-    },
-    {
-      "timestamp": "2026-04-25T05:39:56.391085",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:56.402756",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:39:56.414494",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:18.794767",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "3 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:18.807181",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "3 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:18.818891",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "3 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:26.444602",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:26.466852",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:49.210507",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:49.221337",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:49.231683",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:26.455909",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 1
-    },
-    {
-      "timestamp": "2026-04-25T05:40:56.976005",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:56.992744",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:40:57.013115",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:41:27.807871",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:41:27.818818",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.604121",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.613757",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.623580",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.543374",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.553609",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.563681",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.633568",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "3 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.643370",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "3 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.653040",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Reserved parking window active",
-      "message": "3 slots are being held in Hi-Tech Block for a simulated priority cohort.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.573877",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.584316",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:42:55.594211",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:43:56.007187",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:43:56.017482",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:43:56.027577",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Auto Schedule active",
-      "message": "The system is automatically selecting the current SRM campus parking profile.",
-      "level": "info",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:43:56.037688",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:43:56.060209",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:20.680785",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:20.690979",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:20.700833",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:43:56.048962",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 1
-    },
-    {
-      "timestamp": "2026-04-25T05:44:21.566615",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:21.577564",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:21.588062",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Dynamic allocation applied",
-      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
-      "level": "success",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:45.597101",
-      "channel": "mobile_app",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:45.613659",
-      "channel": "sms_gateway",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:45.625151",
-      "channel": "campus_signage",
-      "event": "Auto Schedule",
-      "title": "Entry queue building",
-      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
-      "level": "warning",
-      "delivery_status": "sent",
-      "retry_count": 0
-    },
-    {
-      "timestamp": "2026-04-25T05:44:46.666248",
+      "timestamp": "2026-05-01T05:54:18.988614",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -2921,7 +561,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:44:46.676754",
+      "timestamp": "2026-05-01T05:54:19.001689",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -2931,7 +571,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:44:46.687333",
+      "timestamp": "2026-05-01T05:54:19.015180",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Reserved parking window active",
@@ -2941,7 +581,147 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:44:46.634114",
+      "timestamp": "2026-05-01T05:54:18.948342",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "1 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:18.961779",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "1 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:18.975492",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "1 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:20.155575",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:20.168394",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:20.181502",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:20.194126",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:20.207076",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:54:20.219339",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:03.720245",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:03.731485",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:03.742819",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:03.648951",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:03.673580",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:03.685637",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -2951,7 +731,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:44:46.645015",
+      "timestamp": "2026-05-01T05:58:03.697573",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -2961,7 +741,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:44:46.655584",
+      "timestamp": "2026-05-01T05:58:03.708798",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Dynamic allocation applied",
@@ -2971,7 +751,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:45:01.211535",
+      "timestamp": "2026-05-01T05:58:25.021708",
       "channel": "mobile_app",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2981,7 +761,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:45:01.222472",
+      "timestamp": "2026-05-01T05:58:25.032730",
       "channel": "sms_gateway",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2991,7 +771,7 @@
       "retry_count": 0
     },
     {
-      "timestamp": "2026-04-25T05:45:01.233839",
+      "timestamp": "2026-05-01T05:58:25.043805",
       "channel": "campus_signage",
       "event": "Auto Schedule",
       "title": "Auto Schedule active",
@@ -2999,6 +779,2226 @@
       "level": "info",
       "delivery_status": "sent",
       "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:25.945092",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:25.956803",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:25.967747",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:25.978806",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "6 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:25.990095",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "6 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:26.000953",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "6 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:26.701031",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to ES Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:26.711928",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to ES Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:26.722721",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to ES Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:27.320408",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:27.331396",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:27.341853",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:27.639761",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:27.650541",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:27.661323",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:28.307274",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:28.317492",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:28.327755",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:28.274900",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:28.285796",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:28.296973",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:29.300798",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:29.316575",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:29.326881",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:31.803040",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:31.814083",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:31.823890",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:31.772271",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:31.782462",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:31.792661",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:32.962444",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:32.972429",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:32.982106",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:32.932186",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:32.942574",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T05:58:32.952482",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:04.006100",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:04.015405",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:04.024267",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:04.033072",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:04.041854",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:04.050617",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.455951",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 5 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.464895",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 5 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.473916",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 5 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.400719",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Exam Rush active",
+      "message": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.409855",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Exam Rush active",
+      "message": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.418522",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Exam Rush active",
+      "message": "Visitors should be redirected early to Tech Park and Hi-Tech Block during exam peaks.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.427433",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.437301",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:19:53.446792",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.276754",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Temporary disruption at Library",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.285563",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Temporary disruption at Library",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.294580",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Temporary disruption at Library",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.248553",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.258061",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.267795",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.220326",
+      "channel": "mobile_app",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.229779",
+      "channel": "sms_gateway",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:20:30.238928",
+      "channel": "campus_signage",
+      "event": "Exam Rush",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:06.512423",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:06.521635",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:06.530658",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:07.405750",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:07.416343",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:07.425793",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:08.021506",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:08.030600",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:08.039658",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:08.696420",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:08.705469",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:08.714458",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:09.491720",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Biotech Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:09.501450",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Biotech Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:09.510759",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Biotech Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:10.428211",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:10.437871",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:10.447177",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:12.901120",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:12.910078",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:12.920200",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:12.865186",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:12.879055",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:12.891839",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:14.011796",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:14.021479",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:28:14.030522",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:09.228626",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:09.236953",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:09.245206",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:09.203390",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Emergency Spillover active",
+      "message": "The system should notify drivers immediately and reroute them away from the affected SRM block.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:09.211961",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Emergency Spillover active",
+      "message": "The system should notify drivers immediately and reroute them away from the affected SRM block.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:09.220301",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Emergency Spillover active",
+      "message": "The system should notify drivers immediately and reroute them away from the affected SRM block.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:21.288276",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:21.404209",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:21.514727",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:56.267272",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to CRC Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:56.276289",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to CRC Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:56.284691",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to CRC Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:57.229493",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 5 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:57.247223",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 5 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:57.202803",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:57.211643",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:57.220360",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.869542",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.877901",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.886126",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:38:57.238429",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 5 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 1
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.817437",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Emergency Spillover active",
+      "message": "The system should notify drivers immediately and reroute them away from the affected SRM block.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.826451",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Emergency Spillover active",
+      "message": "The system should notify drivers immediately and reroute them away from the affected SRM block.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.835274",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Emergency Spillover active",
+      "message": "The system should notify drivers immediately and reroute them away from the affected SRM block.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.843973",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to Biotech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.852652",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to Biotech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:30.861233",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to Biotech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:31.201648",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:31.210473",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:31.219337",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:31.175547",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:31.184601",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:31.193170",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:57.801897",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in CRC Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:57.810660",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in CRC Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:57.819295",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Reserved parking window active",
+      "message": "5 slots are being held in CRC Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:57.775386",
+      "channel": "mobile_app",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to MBA Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:57.784287",
+      "channel": "sms_gateway",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to MBA Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T06:39:57.792979",
+      "channel": "campus_signage",
+      "event": "Emergency Spillover",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to MBA Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.064197",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.073647",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.083090",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.035431",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.045243",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.054805",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.092430",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.102149",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:17.112105",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.078142",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.094811",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.105013",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 4 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.041794",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.052045",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.061701",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.114886",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.125675",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.135528",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.841063",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Temporary disruption at ES Block",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.850794",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Temporary disruption at ES Block",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.860236",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Temporary disruption at ES Block",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.812478",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.822138",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:18.831409",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:19.610193",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:19.619246",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:19.628086",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:19.581927",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:19.591559",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:19.600873",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:20.506616",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:20.516569",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:20.526123",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:21.467123",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:21.477866",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:21.487454",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:23.902536",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:23.912521",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:23.922054",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:25.011713",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:25.022096",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T07:59:25.031337",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:12.959231",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:12.968355",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:12.977455",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:19.315246",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:19.435802",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:19.566383",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:46.666131",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:46.675478",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:46.684426",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Main Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:58.677433",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:58.688167",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:03:58.697649",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Reserved parking window active",
+      "message": "2 slots are being held in Hi-Tech Block for a simulated priority cohort.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:34.004864",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:34.147400",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:34.282584",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:34.292471",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:34.302143",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:34.311505",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:35.090265",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:35.220366",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:04:35.373877",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.022234",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.034137",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.044493",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Admin Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.731501",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.741772",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.752377",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Entry queue building",
+      "message": "Simulated gate queue reached 3 vehicles. Pre-arrival guidance should intensify.",
+      "level": "warning",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.698412",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.710371",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:15.721155",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:23.368887",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to ES Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:23.447135",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to ES Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:23.530806",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to ES Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:31.649601",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from CRC Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:31.862638",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from CRC Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:31.878580",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from CRC Block to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.924725",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Temporary disruption at Biotech Block",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.935854",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Temporary disruption at Biotech Block",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.946586",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Temporary disruption at Biotech Block",
+      "message": "A simulated blockage is limiting inflow, so the agent should protect the rest of the network.",
+      "level": "error",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.528495",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.672899",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.696743",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Auto Schedule active",
+      "message": "The system is automatically selecting the current SRM campus parking profile.",
+      "level": "info",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.892486",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Biotech Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.903287",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Biotech Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:39.913990",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Biotech Block to Tech Park.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:47.613635",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:47.625479",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:47.637473",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from Library to Main Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:55.422322",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from CRC Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:56.060317",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from CRC Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:06:04.382665",
+      "channel": "mobile_app",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:06:04.544323",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:06:04.707049",
+      "channel": "campus_signage",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from MBA Block to Hi-Tech Block.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 0
+    },
+    {
+      "timestamp": "2026-05-01T08:05:55.705309",
+      "channel": "sms_gateway",
+      "event": "Auto Schedule",
+      "title": "Dynamic allocation applied",
+      "message": "2 vehicles were rerouted from CRC Block to Basic Eng Lab.",
+      "level": "success",
+      "delivery_status": "sent",
+      "retry_count": 1
     }
   ]
 }

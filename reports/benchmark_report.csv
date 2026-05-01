@@ -1,0 +1,5 @@
+scenario,agentic_search_time,baseline_search_time,delta_search_time,delta_resilience,delta_hotspots
+Normal Day,2.1,2.42,0.32,0.0,0.0
+Exam Rush,2.7,3.11,0.41,0.0,0.0
+Sports Event,2.7,3.11,0.41,0.0,0.0
+Emergency Spillover,3.0,3.45,0.45,0.0,0.0

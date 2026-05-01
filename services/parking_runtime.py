@@ -4,6 +4,7 @@ import os
 import tempfile
 import asyncio
 import math
+import csv
 from copy import deepcopy
 from threading import RLock
 from datetime import datetime
@@ -470,6 +471,7 @@ class ParkingRuntimeService:
                 "recent_reward_avg": learning_profile.get("recent_reward_avg", 0.0),
                 "llm_memory_rules": deepcopy(learning_profile.get("llm_memory_rules", [])[:8]),
                 "latest_learning_insight": learning_profile.get("latest_learning_insight", "No route pattern consolidated yet."),
+                "recent_route_counts": self._recent_route_counts(limit=12),
             },
             "llm": self._build_visual_llm_state(latest_result),
         }
@@ -535,13 +537,89 @@ class ParkingRuntimeService:
 
     def _build_visual_llm_state(self, latest_result):
         planner = latest_result.get("planner_output", {}) if isinstance(latest_result, dict) else {}
+        llm_status = get_llm_status(ignore_backoff=True)
+        local_action = planner.get("local_decision_snapshot", {}) if isinstance(planner.get("local_decision_snapshot"), dict) else {}
+        llm_action = planner.get("llm_decision_snapshot", {}) if isinstance(planner.get("llm_decision_snapshot"), dict) else {}
+        final_action = latest_result.get("action", {})
+        if not isinstance(final_action, dict) or not final_action:
+            final_action = planner.get("final_decision_snapshot", planner.get("proposed_action", {})) if isinstance(planner.get("final_decision_snapshot", planner.get("proposed_action", {})), dict) else {}
+        changed_fields = []
+        if planner.get("llm_requested") and local_action and llm_action:
+            if local_action.get("action") != llm_action.get("action"):
+                changed_fields.append("action")
+            if local_action.get("from") != llm_action.get("from") or local_action.get("to") != llm_action.get("to"):
+                changed_fields.append("route")
+            if int(local_action.get("vehicles", 0) or 0) != int(llm_action.get("vehicles", 0) or 0):
+                changed_fields.append("vehicle_count")
+        influence_label = "Modified" if planner.get("llm_influence") else ("Confirmed" if planner.get("llm_requested") else "Not Requested")
+        influence_summary = "LLM not requested for this step."
+        if planner.get("llm_requested"):
+            final_differs_from_llm = (
+                llm_action
+                and (
+                    llm_action.get("action") != final_action.get("action")
+                    or llm_action.get("from") != final_action.get("from")
+                    or llm_action.get("to") != final_action.get("to")
+                    or int(llm_action.get("vehicles", 0) or 0) != int(final_action.get("vehicles", 0) or 0)
+                )
+            )
+            if final_differs_from_llm:
+                influence_label = "Overridden"
+                reason = "LLM overridden due to safety/learning constraints"
+                critic = latest_result.get("critic_output", {}) if isinstance(latest_result, dict) else {}
+                local_was_rejected = local_action and local_action.get("action") == "redirect" and final_action.get("action") != local_action.get("action")
+                if local_was_rejected or critic.get("approved") is False:
+                    reason = "Local rejected due to critic risk"
+                influence_summary = (
+                    f"{reason}: Local -> {self._action_to_text(local_action)} "
+                    f"LLM -> {self._action_to_text(llm_action)} "
+                    f"Final -> {self._action_to_text(final_action)}"
+                )
+            elif changed_fields:
+                before = self._action_to_text(local_action)
+                after = self._action_to_text(final_action)
+                influence_summary = f"LLM changed {', '.join(changed_fields).replace('_', ' ')}: {before} -> {after}"
+            elif planner.get("llm_advisory_used"):
+                influence_summary = "LLM reviewed and confirmed the local action without changing route or vehicle count."
+            else:
+                influence_summary = planner.get("llm_fallback_reason") or "LLM was requested but local execution remained authoritative."
         return {
             "requested": bool(planner.get("llm_requested")),
             "used": bool(planner.get("llm_advisory_used")),
             "influence": "modified" if planner.get("llm_influence") else ("confirmed" if planner.get("llm_requested") else "not_requested"),
+            "influence_label": influence_label,
+            "changed_fields": changed_fields,
+            "local_action": deepcopy(local_action),
+            "llm_action": deepcopy(llm_action),
+            "final_action": deepcopy(final_action),
             "source": planner.get("llm_source", "deterministic"),
-            "summary": planner.get("llm_summary") or planner.get("rationale") or planner.get("llm_fallback_reason", ""),
+            "summary": self._short_text(planner.get("llm_summary") or planner.get("rationale") or planner.get("llm_fallback_reason", ""), 220),
+            "influence_summary": influence_summary,
+            "router_mode": llm_status.get("router_mode", ""),
+            "router_trace": deepcopy(llm_status.get("router_trace", [])[-8:]),
+            "active_route": deepcopy(llm_status.get("active_route", {})),
         }
+
+    def _short_text(self, text, limit=220):
+        text = " ".join(str(text or "").split())
+        if len(text) <= limit:
+            return text
+        return text[: max(0, limit - 3)].rstrip() + "..."
+
+    def _recent_route_counts(self, limit=12):
+        counts = {}
+        for cycle in self.memory.get_recent_cycles(limit=limit) or []:
+            action = (
+                cycle.get("action")
+                or cycle.get("execution_output", {}).get("final_action")
+                or cycle.get("planner_output", {}).get("proposed_action")
+                or {}
+            )
+            if not isinstance(action, dict) or action.get("action") != "redirect":
+                continue
+            route_key = f"{action.get('from', '-')}->{action.get('to', '-')}"
+            counts[route_key] = counts.get(route_key, 0) + 1
+        return counts
 
     def _record_movement_events(self, state, latest_transition):
         step = int(latest_transition.get("step", self.environment.step_count) or self.environment.step_count)
@@ -633,6 +711,14 @@ class ParkingRuntimeService:
                     )
                 else:
                     action_text = "No redirect recommended."
+                changed_fields = []
+                if local_action and llm_action:
+                    if local_action.get("action") != llm_action.get("action"):
+                        changed_fields.append("action")
+                    if local_action.get("from") != llm_action.get("from") or local_action.get("to") != llm_action.get("to"):
+                        changed_fields.append("route")
+                    if int(local_action.get("vehicles", 0) or 0) != int(llm_action.get("vehicles", 0) or 0):
+                        changed_fields.append("vehicle_count")
                 return {
                     "step": cycle.get("step"),
                     "timestamp": cycle.get("timestamp") or cycle.get("transition", {}).get("timestamp", ""),
@@ -645,6 +731,7 @@ class ParkingRuntimeService:
                     "llm_action_text": _action_text(llm_action),
                     "final_action_text": _action_text(final_action),
                     "influence_label": "Modified" if planner.get("llm_influence") else "Confirmed",
+                    "changed_fields": changed_fields,
                     "requested": bool(planner.get("llm_requested") or critic.get("llm_requested")),
                 }
         return {}
@@ -752,6 +839,149 @@ class ParkingRuntimeService:
             "latest_step": baseline_comparison,
             "message": "Run the benchmark from the sidebar to compare agent mode against the no-agent baseline.",
         }
+
+    def _action_to_text(self, action):
+        if not isinstance(action, dict) or action.get("action") != "redirect":
+            return "Monitor current SRM parking state."
+        return (
+            f"Redirect {action.get('vehicles', 0)} vehicle(s) from "
+            f"{action.get('from', '-')} to {action.get('to', '-')}."
+        )
+
+    def _build_decision_explanation(self, latest_result, latest_transition):
+        latest_result = latest_result if isinstance(latest_result, dict) else {}
+        planner = latest_result.get("planner_output", {}) or {}
+        critic = latest_result.get("critic_output", {}) or {}
+        executor = latest_result.get("execution_output", {}) or {}
+        action = latest_result.get("action", {}) or {}
+        budget = latest_result.get("reasoning_budget", {}) or {}
+        baseline = latest_result.get("baseline_comparison", {}) or {}
+        kpis = latest_transition.get("kpis", {}) if isinstance(latest_transition, dict) else {}
+        critic_notes = critic.get("critic_notes", []) or []
+        alternatives = latest_result.get("reasoning_summary", {}).get("alternatives", [])
+        if not alternatives:
+            proposed = planner.get("proposed_action", {})
+            alternatives = [
+                self._action_to_text(proposed),
+                "Hold traffic and keep monitoring.",
+                "Use the policy baseline only as advisory context.",
+            ]
+        rejected_reason = (
+            "Lower-ranked alternatives were not selected because they had weaker capacity fit, higher route risk, "
+            "or less expected search-time improvement under the current SRM scenario."
+        )
+        if action.get("action") != "redirect":
+            rejected_reason = (
+                "Redirect alternatives were held back because the critic/controller found no transfer with enough "
+                "benefit to justify disturbing the current allocation."
+            )
+        return {
+            "headline": self._action_to_text(action),
+            "why_this_decision": action.get("reason") or planner.get("rationale") or latest_result.get("reasoning", "The agent selected the safest available action for the current state."),
+            "current_signals": {
+                "scenario": self.environment.get_scenario_mode(),
+                "search_time_min": kpis.get("estimated_search_time_min", 0),
+                "congestion_hotspots": kpis.get("congestion_hotspots", 0),
+                "queue_length": latest_result.get("operational_signals", {}).get("queue_length", 0),
+                "reasoning_budget": budget.get("budget_level", "local_only"),
+            },
+            "agent_chain": [
+                {"agent": "MonitoringAgent", "role": "Observed SRM block occupancy, entries, exits, and free-slot pressure."},
+                {"agent": "DemandAgent", "role": "Estimated near-term demand drift for the active scenario."},
+                {"agent": "BayesianAgent", "role": "Estimated uncertainty and congestion risk."},
+                {"agent": "PlannerAgent", "role": planner.get("rationale") or f"Proposed: {self._action_to_text(planner.get('proposed_action', action))}"},
+                {"agent": "CriticAgent", "role": (critic_notes[0] if critic_notes else "Validated safety, risk, capacity, and utility constraints.")},
+                {"agent": "ExecutorAgent", "role": executor.get("execution_note") or self._action_to_text(executor.get("final_action", action))},
+                {"agent": "RewardAgent", "role": latest_result.get("reward_impact", {}).get("explanation", "Scored the outcome for future route learning.")},
+            ],
+            "selected_action": deepcopy(action),
+            "alternatives_considered": alternatives[:5],
+            "why_not_other_options": rejected_reason,
+            "safety_review": {
+                "approved": bool(critic.get("approved")),
+                "risk_level": critic.get("risk_level", "low"),
+                "risk_score": critic.get("risk_score", 0),
+                "notes": critic_notes,
+            },
+            "expected_impact": {
+                "search_time_delta_min": baseline.get("search_time_delta_min", 0),
+                "hotspot_delta": baseline.get("hotspot_delta", 0),
+                "resilience_delta": baseline.get("resilience_delta", 0),
+                "reward_score": latest_result.get("reward_score", 0),
+            },
+            "llm_context": {
+                "mode": budget.get("budget_level", "local_only"),
+                "planner_requested": bool(planner.get("llm_requested")),
+                "planner_used": bool(planner.get("llm_advisory_used")),
+                "fallback_used": bool(planner.get("llm_fallback_used")),
+                "source": planner.get("llm_source", "deterministic"),
+                "summary": planner.get("llm_summary") or planner.get("llm_fallback_reason") or budget.get("planner_reason", ""),
+                "influence_summary": self._build_visual_llm_state(latest_result).get("influence_summary", ""),
+            },
+        }
+
+    def build_run_report(self):
+        snapshot = self.get_runtime_snapshot()
+        latest_result = snapshot.get("latest_result", {})
+        report = {
+            "generated_at": datetime.utcnow().isoformat(),
+            "project": "SRM Smart Parking Agentic AI System",
+            "scenario_mode": snapshot.get("scenario_mode"),
+            "step": snapshot.get("step"),
+            "goal": snapshot.get("goal", {}),
+            "latest_decision": snapshot.get("decision_explanation", {}),
+            "kpis": snapshot.get("kpis", {}),
+            "benchmark": snapshot.get("benchmark_summary", {}),
+            "learning": snapshot.get("memory_summary", {}).get("learning_profile", {}),
+            "llm_usage": snapshot.get("llm_usage_summary", {}),
+            "recent_actions": [
+                {
+                    "step": cycle.get("step"),
+                    "event": cycle.get("event_context", {}).get("name", snapshot.get("scenario_mode")),
+                    "action": cycle.get("action", {}),
+                    "reward": cycle.get("reward_score", cycle.get("reward", {})),
+                }
+                for cycle in snapshot.get("recent_cycles", [])
+            ],
+            "trace_tail": snapshot.get("trace", [])[-10:],
+            "export_note": "This report is generated from the same runtime snapshot used by the API, dashboard, and visualizer.",
+        }
+        if latest_result.get("baseline_comparison"):
+            report["latest_baseline_comparison"] = latest_result["baseline_comparison"]
+        return report
+
+    def export_benchmark_report(self, output_dir=None):
+        benchmark = deepcopy(self.latest_benchmark) or self.run_benchmark(episodes=3, steps_per_episode=10)
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        output_dir = output_dir or os.path.join(base_dir, "reports")
+        os.makedirs(output_dir, exist_ok=True)
+        json_path = os.path.join(output_dir, "benchmark_report.json")
+        csv_path = os.path.join(output_dir, "benchmark_report.csv")
+        with open(json_path, "w", encoding="utf-8") as file:
+            json.dump(benchmark, file, indent=2)
+        with open(csv_path, "w", encoding="utf-8", newline="") as file:
+            writer = csv.DictWriter(
+                file,
+                fieldnames=[
+                    "scenario",
+                    "agentic_search_time",
+                    "baseline_search_time",
+                    "delta_search_time",
+                    "delta_resilience",
+                    "delta_hotspots",
+                ],
+            )
+            writer.writeheader()
+            for row in benchmark.get("scenarios", []):
+                writer.writerow({
+                    "scenario": row.get("scenario"),
+                    "agentic_search_time": row.get("agentic", {}).get("avg_search_time_min", 0),
+                    "baseline_search_time": row.get("baseline", {}).get("avg_search_time_min", 0),
+                    "delta_search_time": row.get("delta_search_time", 0),
+                    "delta_resilience": row.get("delta_resilience", 0),
+                    "delta_hotspots": row.get("delta_hotspots", 0),
+                })
+        return {"json_path": json_path, "csv_path": csv_path, "benchmark": benchmark}
 
     def _append_trace(self, trace_object):
         trace_object["timestamp"] = datetime.utcnow().isoformat()
@@ -963,6 +1193,7 @@ class ParkingRuntimeService:
         benchmark_summary = self._build_benchmark_snapshot(latest_result)
         last_llm_decision = self._build_last_llm_decision_snapshot()
         llm_usage_summary = self._build_llm_usage_summary()
+        decision_explanation = self._build_decision_explanation(latest_result, latest_transition)
         return {
             "step": current_state["step"],
             "updated_at": current_state["updated_at"],
@@ -1001,6 +1232,7 @@ class ParkingRuntimeService:
             "notification_summary": notification_summary,
             "last_llm_decision": last_llm_decision,
             "llm_usage_summary": llm_usage_summary,
+            "decision_explanation": decision_explanation,
             "assistant_briefing": deepcopy(
                 self.latest_briefing or get_operational_briefing(
                     state,

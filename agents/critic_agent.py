@@ -159,7 +159,7 @@ class CriticAgent:
             reduced_vehicles = max(1, min(2, safe_transfer, int(action.get("vehicles", 1) or 1)))
             if queue_length_val >= 2 or reward_trend < -0.1:
                 notes.append(
-                    f"Critic Recovery: utility is limited, but system pressure is active; approving a reduced micro-action of {reduced_vehicles} vehicle(s)."
+                    f"Critic Recovery Candidate: utility is limited, but system pressure is active; evaluating a reduced micro-action of {reduced_vehicles} vehicle(s)."
                 )
                 revised_action["vehicles"] = reduced_vehicles
                 revised_action["confidence"] = round(max(0.5, float(revised_action.get("confidence", 0.55) or 0.55)), 2)
@@ -212,6 +212,18 @@ class CriticAgent:
             else:
                 notes.insert(0, f"Safety Override: Critical risk ({risk_score}). Reverting to system baseline.")
                 revised_action = {"action": "none"}
+        if not approved:
+            notes = [
+                note for note in notes
+                if "approving a reduced micro-action" not in str(note)
+                and "approved" not in str(note).lower()
+            ]
+        else:
+            notes = [
+                str(note).replace("VETO: ", "Mitigated concern: ")
+                for note in notes
+                if "Safety Override" not in str(note)
+            ]
 
         alternative_actions = self._suggest_alternatives(
             action,

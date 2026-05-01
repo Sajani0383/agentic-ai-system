@@ -218,5 +218,211 @@ class RuntimeOrchestratorTests(unittest.TestCase):
         snapshot = runtime.get_runtime_snapshot()
         self.assertFalse(snapshot["llm_status"]["quota_backoff"]["active"])
 
+    def test_critical_critic_rejection_cannot_execute_redirect(self):
+        env = ParkingEnvironment(zones=["A", "B"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        planner_output = {
+            "proposed_action": {
+                "action": "redirect",
+                "from": "A",
+                "to": "B",
+                "vehicles": 4,
+                "force_micro": True,
+            }
+        }
+        critic_output = {
+            "approved": False,
+            "risk_level": "high",
+            "risk_score": 91.5,
+            "risk_factors": {},
+            "critic_notes": ["Safety Override: Critical risk (91.5). Reverting to system baseline."],
+            "revised_action": {"action": "none"},
+        }
+
+        normalized = controller._validate_critic_contract(critic_output, planner_output)
+        execution = controller.executor_agent.execute(normalized, env)
+        execution = controller._validate_execution_contract(execution, normalized)
+
+        self.assertFalse(normalized["approved"])
+        self.assertEqual(normalized["revised_action"]["action"], "none")
+        self.assertEqual(execution["final_action"]["action"], "none")
+        self.assertEqual(execution["executed_vehicles"], 0)
+
+    def test_approved_micro_action_removes_stop_language(self):
+        env = ParkingEnvironment(zones=["A", "B"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        planner_output = {
+            "proposed_action": {
+                "action": "redirect",
+                "from": "A",
+                "to": "B",
+                "vehicles": 2,
+                "force_micro": True,
+            }
+        }
+        critic_output = {
+            "approved": False,
+            "risk_level": "high",
+            "risk_score": 70,
+            "risk_factors": {},
+            "critic_notes": [
+                "Safety Override: Critical risk (70). Reverting to system baseline.",
+                "VETO: Expected gain is zero or negative.",
+            ],
+            "revised_action": {"action": "redirect", "from": "A", "to": "B", "vehicles": 2},
+        }
+
+        normalized = controller._validate_critic_contract(critic_output, planner_output)
+        note_text = " ".join(normalized["critic_notes"])
+
+        self.assertTrue(normalized["approved"])
+        self.assertNotIn("Safety Override", note_text)
+        self.assertNotIn("Reverting to system baseline", note_text)
+        self.assertIn("Mitigated concern", note_text)
+
+    def test_negative_reward_blocks_failed_route(self):
+        mem = AgentMemory(storage_path=self.mem_path)
+        mem.add_failure("Library", "Main Block", "Negative reward (-0.63): action worsened system.")
+        profile = mem.get_learning_profile(from_zone="Library", to_zone="Main Block")
+
+        self.assertIn("Library->Main Block", profile["blocked_routes"])
+        self.assertGreater(profile["blocked_route_ttl"].get("Library->Main Block", 0), 0)
+
+    def test_llm_avoid_rule_blocks_planner_route(self):
+        env = ParkingEnvironment(zones=["Admin Block", "Basic Eng Lab", "Main Block"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        context = {
+            "state": env.get_state(),
+            "learning_profile": {
+                "blocked_routes": [],
+                "llm_memory_rules": [
+                    {
+                        "route_key": "Admin Block->Basic Eng Lab",
+                        "from": "Admin Block",
+                        "to": "Basic Eng Lab",
+                        "strength": -0.5,
+                        "avoid_count": 1,
+                        "prefer_count": 0,
+                    }
+                ],
+            },
+        }
+        plan = controller._validate_planner_contract(
+            {
+                "proposed_action": {
+                    "action": "redirect",
+                    "from": "Admin Block",
+                    "to": "Basic Eng Lab",
+                    "vehicles": 2,
+                }
+            },
+            context,
+        )
+
+        self.assertEqual(plan["proposed_action"]["action"], "none")
+
+    def test_micro_redirect_skips_llm_avoid_destination(self):
+        env = ParkingEnvironment(zones=["Admin Block", "Basic Eng Lab", "Main Block"])
+        env.state = {
+            "Admin Block": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 8, "exit": 1},
+            "Basic Eng Lab": {"total_slots": 100, "occupied": 10, "free_slots": 90, "entry": 1, "exit": 1},
+            "Main Block": {"total_slots": 100, "occupied": 20, "free_slots": 80, "entry": 1, "exit": 1},
+        }
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        action = controller._build_micro_redirect(
+            {
+                "state": env.state,
+                "demand": {"Admin Block": 20, "Basic Eng Lab": 1, "Main Block": 1},
+                "learning_profile": {
+                    "blocked_routes": [],
+                    "llm_memory_rules": [
+                        {
+                            "route_key": "Admin Block->Basic Eng Lab",
+                            "from": "Admin Block",
+                            "to": "Basic Eng Lab",
+                            "strength": -0.75,
+                            "avoid_count": 2,
+                            "prefer_count": 0,
+                        }
+                    ],
+                },
+            },
+            "test",
+        )
+
+        self.assertEqual(action["from"], "Admin Block")
+        self.assertNotEqual(action["to"], "Basic Eng Lab")
+
+    def test_critic_suggested_replan_is_used_when_required(self):
+        env = ParkingEnvironment(zones=["Admin Block", "Basic Eng Lab", "Main Block"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        critic_output = {
+            "approved": True,
+            "revised_action": {"action": "redirect", "from": "Admin Block", "to": "Basic Eng Lab", "vehicles": 4},
+            "replan_recommendation": {
+                "required": True,
+                "suggested_action": {"action": "redirect", "from": "Admin Block", "to": "Main Block", "vehicles": 2},
+            },
+        }
+
+        self.assertTrue(controller._needs_replan(critic_output))
+        action = controller._select_replan_action(
+            critic_output,
+            {"state": env.get_state(), "learning_profile": {"blocked_routes": []}},
+        )
+
+        self.assertEqual(action["to"], "Main Block")
+        self.assertLessEqual(action["vehicles"], 2)
+
+    def test_learning_gate_replaces_blocked_final_route_before_execution(self):
+        env = ParkingEnvironment(zones=["Admin Block", "Basic Eng Lab", "Main Block"])
+        env.state = {
+            "Admin Block": {"total_slots": 100, "occupied": 96, "free_slots": 4, "entry": 8, "exit": 1},
+            "Basic Eng Lab": {"total_slots": 100, "occupied": 10, "free_slots": 90, "entry": 1, "exit": 1},
+            "Main Block": {"total_slots": 100, "occupied": 20, "free_slots": 80, "entry": 1, "exit": 1},
+        }
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        planner_output = {
+            "proposed_action": {"action": "redirect", "from": "Admin Block", "to": "Basic Eng Lab", "vehicles": 2}
+        }
+        critic_output = {
+            "approved": True,
+            "revised_action": {"action": "redirect", "from": "Admin Block", "to": "Basic Eng Lab", "vehicles": 2},
+            "critic_notes": [],
+        }
+        _, gated = controller._enforce_learning_before_execution(
+            planner_output,
+            critic_output,
+            {
+                "state": env.state,
+                "demand": {"Admin Block": 20, "Basic Eng Lab": 1, "Main Block": 1},
+                "learning_profile": {"blocked_routes": ["Admin Block->Basic Eng Lab"]},
+            },
+        )
+
+        self.assertEqual(gated["revised_action"]["action"], "redirect")
+        self.assertNotEqual(gated["revised_action"]["to"], "Basic Eng Lab")
+
+    def test_negative_reward_reduces_next_transfer_before_blocking(self):
+        env = ParkingEnvironment(zones=["A", "B"])
+        mem = AgentMemory(storage_path=self.mem_path)
+        controller = AgentController(environment=env, memory=mem)
+        planner_output = {
+            "proposed_action": {"action": "redirect", "from": "A", "to": "B", "vehicles": 6, "confidence": 0.8}
+        }
+        controller._apply_controller_pressure_guard(
+            planner_output,
+            {"learning_profile": {"last_reward": -0.15}},
+        )
+
+        self.assertLessEqual(planner_output["proposed_action"]["vehicles"], 2)
+        self.assertTrue(planner_output["proposed_action"]["reward_reduced"])
+
 if __name__ == "__main__":
     unittest.main()

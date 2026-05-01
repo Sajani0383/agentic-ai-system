@@ -142,7 +142,11 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv("PARKING_ALLOWED_ORIGINS", "*").split(",")
+        if origin.strip()
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -242,6 +246,8 @@ def root(_authorized=Depends(require_api_key)):
         "metrics_endpoint": "/metrics",
         "learning_endpoint": "/learning",
         "decision_endpoint": "/decision",
+        "explain_endpoint": "/explain",
+        "export_report_endpoint": "/export/report",
         "agents_endpoint": "/agents",
         "autonomy_endpoint": "/autonomy/status",
         "capabilities_endpoint": "/capabilities",
@@ -381,7 +387,8 @@ def learning(_authorized=Depends(require_api_key)):
 @app.get("/decision")
 def decision(_authorized=Depends(require_api_key)):
     def build():
-        latest = get_runtime_snapshot().get("latest_result", {})
+        snapshot = get_runtime_snapshot()
+        latest = snapshot.get("latest_result", {})
         return {
             "mode": latest.get("mode"),
             "planner_output": latest.get("planner_output", {}),
@@ -394,9 +401,20 @@ def decision(_authorized=Depends(require_api_key)):
                 "reward_score": latest.get("reward_score"),
             },
             "autonomy": latest.get("autonomy", {}),
+            "explanation": snapshot.get("decision_explanation", {}),
         }
 
     return safe_call(build, "Decision read failed")
+
+
+@app.get("/explain")
+def explain(_authorized=Depends(require_api_key)):
+    return safe_call(lambda: get_runtime_snapshot().get("decision_explanation", {}), "Explanation read failed")
+
+
+@app.get("/export/report")
+def export_report(_authorized=Depends(require_api_key)):
+    return safe_call(runtime_service.build_run_report, "Run report export failed")
 
 
 @app.get("/agents")
@@ -465,6 +483,9 @@ def capabilities(_authorized=Depends(require_api_key)):
             "reward_tracking": True,
             "structured_kpis": True,
             "benchmarking": True,
+            "benchmark_report_export": True,
+            "decision_explainability": True,
+            "run_report_export": True,
             "mock_notifications": True,
             "file_persistence": True,
             "dashboard_available": True,
@@ -475,6 +496,12 @@ def capabilities(_authorized=Depends(require_api_key)):
             "database_storage": False,
             "multi_user_queueing": False,
             "production_auth_rbac": False,
+        },
+        "production_extension_plan": {
+            "sensor_feed": "Replace simulated entry/exit counts with gate counters, camera events, or ANPR feeds.",
+            "driver_app": "Use the notification service contract to push route suggestions to mobile clients.",
+            "digital_signage": "Subscribe signage displays to the same notification feed used by the dashboard.",
+            "admin_override": "Add operator approval policies around selected high-impact redirects.",
         },
         "active_scenario": snapshot.get("scenario_mode"),
         "llm_status": snapshot.get("llm_status", {}),

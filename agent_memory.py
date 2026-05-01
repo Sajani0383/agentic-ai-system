@@ -170,16 +170,29 @@ class AdaptiveLearningProfile:
             route_profile["attempts"] += 1
             attempts = route_profile["attempts"]
             route_profile["avg_reward"] = round(((route_profile["avg_reward"] * (attempts - 1)) + reward_score) / attempts, 2)
-            route_profile["success_bias"] = round(min(1.6, max(0.2, route_profile["success_bias"] + (0.09 if reward_score > 0 else -0.12))), 2)
+            if reward_score < -0.1:
+                bias_delta = -0.18
+            elif reward_score > 0.1:
+                bias_delta = 0.12
+            else:
+                bias_delta = 0.04 if reward_score > 0 else -0.08
+            route_profile["success_bias"] = round(min(1.6, max(0.2, route_profile["success_bias"] + bias_delta)), 2)
             
-            if reward_score < -0.3:
+            if reward_score < -0.1:
+                self.state["global_transfer_bias"] = round(max(0.1, float(self.state.get("global_transfer_bias", 1.0)) - 0.18), 2)
+                self.state["latest_learning_insight"] = (
+                    f"Learning: reward {reward_score} reduced transfer confidence for {route_key}; "
+                    "next redirect will be smaller unless conditions improve."
+                )
+
+            if reward_score < -0.25:
                 # Strong reward shift - dramatically alter global bounds
                 self.state["global_transfer_bias"] = round(max(0.1, float(self.state.get("global_transfer_bias", 1.0)) - 0.5), 2)
                 self.state["latest_learning_insight"] = f"CRITICAL SHIFT: System performance degraded (Reward: {reward_score}). Slashing global transfer bias to {self.state['global_transfer_bias']}x to force policy change."
                 self.state["force_recovery_redirect_next_step"] = True
                 if route_profile["avg_reward"] <= -0.2 or self.state.get("last_policy_reward", 0.0) <= -0.2:
                     self.add_failure(action.get("from"), action.get("to"), reason=f"Reward collapse ({reward_score}) triggered adaptive route penalty.")
-            else:
+            elif reward_score >= -0.1:
                 feedback_direction = "reduced" if reward_score > 0 else "increased"
                 self.state["latest_learning_insight"] = f"Previous execution on {route_key} {feedback_direction} search time. Strategy confidence is now {route_profile['success_bias']}x."
             # Trigger consolidation every 5 updates
@@ -206,11 +219,12 @@ class AdaptiveLearningProfile:
         # Auto-block routes after repeated failures, then let decay re-open them.
         blocked = self.state.setdefault("blocked_routes", [])
         blocked_ttl = self.state.setdefault("blocked_route_ttl", {})
-        if consec[route_key] >= 2 and route_key not in blocked:
+        severe_negative = "negative reward" in str(reason).lower() or "reward collapse" in str(reason).lower()
+        if (consec[route_key] >= 2 or severe_negative) and route_key not in blocked:
             blocked.append(route_key)
-            blocked_ttl[route_key] = 6
+            blocked_ttl[route_key] = 6 if consec[route_key] >= 2 else 4
             self.state["latest_learning_insight"] = (
-                f"Memory: Route {route_key} BLOCKED after {consec[route_key]} consecutive failures — "
+                f"Memory: Route {route_key} BLOCKED after {consec[route_key]} negative outcome(s) — "
                 f"system will select alternative destinations."
             )
         # Decay: track successful steps per route to auto-unblock

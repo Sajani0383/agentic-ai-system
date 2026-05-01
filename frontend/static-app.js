@@ -39,6 +39,12 @@ function formatTimestamp(value) {
   });
 }
 
+function shortText(value, limit = 180) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit - 3).trim()}...`;
+}
+
 function occupancyLevel(occupied, capacity) {
   const ratio = capacity ? occupied / capacity : 0;
   if (ratio >= 0.7) return "high";
@@ -87,7 +93,16 @@ function buildMiniMap(state) {
     if (sourceIndex >= 0 && destIndex >= 0) {
       const source = campusPosition(latestAction.from, sourceIndex, entries.length);
       const dest = campusPosition(latestAction.to, destIndex, entries.length);
-      arrow = `<svg class="map-arrow" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="${source.left}" y1="${source.top}" x2="${dest.left}" y2="${dest.top}"></line></svg>`;
+      arrow = `
+        <svg class="map-arrow" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line x1="${source.left}" y1="${source.top}" x2="${dest.left}" y2="${dest.top}"></line>
+          ${Array.from({ length: Math.min(6, Number(latestAction.vehicles || 1)) }, (_, index) => `
+            <circle r="1.2" class="map-flow-dot dot-${index}">
+              <animateMotion dur="1.8s" begin="${index * 0.18}s" repeatCount="indefinite" path="M${source.left},${source.top} L${dest.left},${dest.top}" />
+            </circle>
+          `).join("")}
+        </svg>
+      `;
     }
   }
   return `
@@ -113,7 +128,20 @@ function buildDecisionPanel(state) {
     ? `${action.from || latestAction?.from || "-"} -> ${action.to || latestAction?.to || "-"}`
     : "No active route transfer";
   const llm = state.llm || {};
-  const llmText = llm.used ? "LLM adjusted decision" : (llm.requested ? "LLM requested; local execution used" : "Local agent reasoning");
+  const changedFields = Array.isArray(llm.changed_fields) ? llm.changed_fields : [];
+  const llmText = llm.used
+    ? `LLM ${llm.influence_label || "Confirmed"}${changedFields.length ? `: changed ${changedFields.join(", ").replace("_", " ")}` : ""}`
+    : (llm.requested ? "LLM requested; local execution used" : "Local agent reasoning");
+  const localAction = llm.local_action || {};
+  const llmAction = llm.llm_action || {};
+  const finalAction = llm.final_action || action;
+  const llmComparison = llm.requested ? `
+    <div class="llm-comparison">
+      <div><span>Local</span><strong>${formatActionCompact(localAction)}</strong></div>
+      <div><span>Gemini</span><strong>${formatActionCompact(llmAction)}</strong></div>
+      <div><span>Final</span><strong>${formatActionCompact(finalAction)}</strong></div>
+    </div>
+  ` : "";
   return `
     <section class="decision-panel ${action.action === "redirect" ? "flash-decision" : ""}">
       <div>
@@ -122,10 +150,41 @@ function buildDecisionPanel(state) {
         <p>${route}</p>
       </div>
       <div class="decision-detail">
+        <div class="llm-badge ${llm.influence === "modified" ? "modified" : "confirmed"}">LLM Influence: ${llm.influence_label || "Not Requested"}</div>
         <strong>${state.agent_thought || state.decision_reason || "Planner is monitoring live parking state."}</strong>
         <span>${state.decision_reason || "Waiting for the next agent decision."}</span>
-        <small>${llmText}${llm.summary ? ` - ${llm.summary}` : ""}</small>
+        <small>${shortText(llm.influence_summary || `${llmText}${llm.summary ? ` - ${llm.summary}` : ""}`, 210)}</small>
+        ${llm.summary ? `<details class="llm-details"><summary>LLM reasoning</summary><small>${shortText(llm.summary, 520)}</small></details>` : ""}
+        ${llmComparison}
       </div>
+    </section>
+  `;
+}
+
+function formatActionCompact(action) {
+  if (!action || action.action !== "redirect") return "Monitor";
+  return `${action.from || "-"} -> ${action.to || "-"} (${action.vehicles || 0})`;
+}
+
+function buildLLMRouterPanel(state) {
+  const llm = state.llm || {};
+  const trace = Array.isArray(llm.router_trace) ? llm.router_trace.slice(-6).reverse() : [];
+  if (!llm.router_mode && !trace.length) return "";
+  return `
+    <section class="router-panel">
+      <div class="board-header">
+        <div>
+          <h2>LLM Orchestrator</h2>
+          <span>${llm.router_mode || "Single-Key Gemini"}${llm.active_route?.model ? ` · Active model ${llm.active_route.model}` : ""}</span>
+        </div>
+      </div>
+      ${trace.length ? `<div class="router-steps">${trace.map((item) => `
+        <div class="router-step ${item.status || "pending"}">
+          <strong>${item.key || "-"}</strong>
+          <span>${item.model || "-"}</span>
+          <small>${item.status || "pending"}${item.reason ? ` · ${item.reason}` : ""}</small>
+        </div>
+      `).join("")}</div>` : `<div class="fallback-panel compact"><span>Router trace will appear after the next Gemini attempt.</span></div>`}
     </section>
   `;
 }
@@ -155,6 +214,13 @@ function buildLearningPanel(state) {
   const learning = state.learning || {};
   const rules = learning.llm_memory_rules || [];
   const blocked = learning.blocked_routes || [];
+  const recentRouteCounts = learning.recent_route_counts || {};
+  const repeatedRoutes = Object.entries(recentRouteCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+  const current = state.latest_decision || {};
+  const currentRoute = current.action === "redirect" ? `${current.from}->${current.to}` : "";
+  const blockedConflict = currentRoute && blocked.includes(currentRoute);
   return `
     <section class="learning-panel">
       <div class="board-header">
@@ -167,10 +233,17 @@ function buildLearningPanel(state) {
         <div><span>Reward Trend</span><strong>${Number(learning.recent_reward_avg || 0).toFixed(2)}</strong></div>
         <div><span>Blocked Routes</span><strong>${blocked.length}</strong></div>
         <div><span>LLM Memory Rules</span><strong>${rules.length}</strong></div>
+        <div><span>Route Diversity</span><strong>${repeatedRoutes.length ? "Active" : "Open"}</strong></div>
       </div>
-      ${(blocked.length || rules.length) ? `<div class="route-tags">
+      ${blockedConflict ? `<div class="learning-warning">Route ${currentRoute} was just penalized and is now blocked for future steps.</div>` : ""}
+      ${(blocked.length || rules.length || repeatedRoutes.length) ? `<div class="route-tags">
         ${blocked.slice(0, 4).map((route) => `<span class="route-tag bad">Inefficient ${route}</span>`).join("")}
-        ${rules.slice(0, 4).map((rule) => `<span class="route-tag good">Optimized ${rule.route_key || `${rule.from || "-"}->${rule.to || "-"}`}</span>`).join("")}
+        ${rules.slice(0, 4).map((rule) => {
+          const route = rule.route_key || `${rule.from || "-"}->${rule.to || "-"}`;
+          const avoid = Number(rule.strength || 0) < 0 || Number(rule.avoid_count || 0) > Number(rule.prefer_count || 0);
+          return `<span class="route-tag ${avoid ? "bad" : "good"}">${avoid ? "Avoid" : "Prefer"} ${route}</span>`;
+        }).join("")}
+        ${repeatedRoutes.map(([route, count]) => `<span class="route-tag caution">Recently used ${route} x${count}</span>`).join("")}
       </div>` : ""}
     </section>
   `;
@@ -226,7 +299,7 @@ function pickVisibleVehicles(vehicles) {
   return visible;
 }
 
-function buildArrowMarkup(action, layout) {
+function buildArrowMarkup(action, layout, boardWidth, boardHeight) {
   if (!action || action.type !== "redirect" || !layout[action.from] || !layout[action.to]) return "";
   const source = layout[action.from];
   const destination = layout[action.to];
@@ -234,8 +307,9 @@ function buildArrowMarkup(action, layout) {
   const y1 = source.y + source.height / 2;
   const x2 = destination.x + destination.width / 2;
   const y2 = destination.y + destination.height / 2;
+  const vehicleCount = Math.max(0, Number(action.vehicles || 0));
   return `
-    <svg class="flow-overlay" viewBox="0 0 1800 1400" preserveAspectRatio="none">
+    <svg class="flow-overlay" viewBox="0 0 ${boardWidth} ${boardHeight}" preserveAspectRatio="none">
       <defs>
         <marker id="flow-arrow" markerWidth="14" markerHeight="14" refX="8" refY="4" orient="auto">
           <path d="M0,0 L0,8 L8,4 z" fill="#8ad8ff"></path>
@@ -251,7 +325,20 @@ function buildArrowMarkup(action, layout) {
         stroke-linecap="round"
         marker-end="url(#flow-arrow)"
       ></line>
+      ${Array.from({ length: vehicleCount }, (_, index) => `
+        <text class="flow-vehicle-dot" font-size="24">
+          ${index < Number(action.car_vehicles || 0) ? "🚗" : "🏍"}
+          <animateMotion dur="1.9s" begin="${index * 0.14}s" repeatCount="indefinite" path="M${x1},${y1} L${x2},${y2}" />
+        </text>
+      `).join("")}
     </svg>
+    ${Array.from({ length: vehicleCount }, (_, index) => `
+      <div
+        class="route-particle ${index < Number(action.car_vehicles || 0) ? "car" : "bike"}"
+        style="--x1:${x1}px; --y1:${y1}px; --x2:${x2}px; --y2:${y2}px; --delay:${index * 0.16}s;"
+        title="Moving vehicle ${index + 1} of ${vehicleCount}"
+      >${index < Number(action.car_vehicles || 0) ? "🚗" : "🏍"}</div>
+    `).join("")}
   `;
 }
 
@@ -267,21 +354,21 @@ function buildEntryFlow(block) {
 }
 
 function buildPreviewSlots(blockName, block, vehicles) {
-  const previewSlots = 24;
-  const occupied = Number(block.occupied || 0);
-  const capacity = Number(block.capacity || 0);
+  const previewSlots = 36;
+  const capacity = Math.max(0, Number(block.capacity || 0));
+  const occupied = Math.min(capacity, Math.max(0, Number(block.occupied || 0)));
   const occupiedPreview = capacity ? Math.min(previewSlots, Math.round((occupied / capacity) * previewSlots)) : 0;
   const vehiclesHere = vehicles.filter((vehicle) => vehicle.block === blockName).slice(0, occupiedPreview);
   return Array.from({ length: previewSlots }, (_, index) => {
     const filled = index < occupiedPreview;
     const vehicle = vehiclesHere[index];
     const icon = vehicle ? (vehicle.type === "bike" ? "🏍" : "🚗") : "";
-    return `<div class="slot ${filled ? "occupied" : "free"}">${icon}</div>`;
+    return `<div class="slot ${filled ? "occupied" : "free"}">${icon || (filled ? "•" : "")}</div>`;
   }).join("");
 }
 
 function buildDetailSlots(blockName, block, vehicles) {
-  const capacity = Number(block.capacity || 0);
+  const capacity = Math.max(0, Number(block.capacity || 0));
   const occupiedSet = new Map(vehicles.filter((vehicle) => vehicle.block === blockName).map((vehicle) => [vehicle.slot, vehicle]));
   const carSlots = Number(block.car_slots || capacity);
   return Array.from({ length: capacity }, (_, index) => {
@@ -349,8 +436,12 @@ function render(state, error = "") {
   const boardHeight = rows * 286 + Math.max(0, rows - 1) * 24;
   const latestAction = state.actions?.length ? state.actions[state.actions.length - 1] : null;
   const visibleVehicles = pickVisibleVehicles(state.vehicles || []);
-  const totalCapacity = blockEntries.reduce((sum, [, block]) => sum + Number(block.capacity || 0), 0);
-  const totalOccupied = blockEntries.reduce((sum, [, block]) => sum + Number(block.occupied || 0), 0);
+  const totalVehicles = (state.vehicles || []).length;
+  const totalCapacity = blockEntries.reduce((sum, [, block]) => sum + Math.max(0, Number(block.capacity || 0)), 0);
+  const totalOccupied = blockEntries.reduce((sum, [, block]) => {
+    const capacity = Math.max(0, Number(block.capacity || 0));
+    return sum + Math.min(capacity, Math.max(0, Number(block.occupied || 0)));
+  }, 0);
   const totalFree = Math.max(0, totalCapacity - totalOccupied);
 
   app.innerHTML = `
@@ -374,6 +465,7 @@ function render(state, error = "") {
 
       ${error ? `<div class="fallback-panel"><strong>API unavailable.</strong><span>${error}</span></div>` : ""}
       ${buildDecisionPanel(state)}
+      ${buildLLMRouterPanel(state)}
       ${buildAlertsPanel(state)}
       ${buildMiniMap(state)}
 
@@ -394,9 +486,9 @@ function render(state, error = "") {
           <small>Campus-wide free capacity</small>
         </div>
         <div class="summary-card">
-          <span>Rendered Vehicles</span>
-          <strong>${visibleVehicles.length}</strong>
-          <small>Visible on block previews</small>
+          <span>Vehicle State</span>
+          <strong>${formatNumber(totalVehicles)}</strong>
+          <small>${formatNumber(visibleVehicles.length)} sampled in previews; all visible inside block detail</small>
         </div>
       </section>
 
@@ -414,22 +506,23 @@ function render(state, error = "") {
         </div>
 
         <div class="board" style="height:${boardHeight}px">
-          ${buildArrowMarkup(latestAction, layout)}
+          ${buildArrowMarkup(latestAction, layout, containerWidth, boardHeight)}
           ${blockEntries.map(([name, block]) => {
             const blockLayout = layout[name];
-            const occupied = Number(block.occupied || 0);
-            const capacity = Number(block.capacity || 0);
+            const capacity = Math.max(0, Number(block.capacity || 0));
+            const occupied = Math.min(capacity, Math.max(0, Number(block.occupied || 0)));
             const freeSlots = Math.max(0, capacity - occupied);
             const level = occupancyLevel(occupied, capacity);
             const activeRedirect = latestAction && (latestAction.from === name || latestAction.to === name) ? " active-block" : "";
             const sourceClass = latestAction?.from === name ? " source-block" : "";
             const destinationClass = latestAction?.to === name ? " destination-block" : "";
+            const inactiveClass = latestAction?.type === "redirect" && latestAction.from !== name && latestAction.to !== name ? " inactive-route" : "";
             const selected = selectedBlock === name ? " selected-block" : "";
             const progress = capacity ? Math.round((occupied / capacity) * 100) : 0;
             const carSlots = Number(block.car_slots || capacity);
             const bikeSlots = Number(block.bike_slots || Math.max(0, capacity - carSlots));
             return `
-              <button class="block-card ${level}${activeRedirect}${sourceClass}${destinationClass}${selected}" data-block="${name}" style="transform:translate(${blockLayout?.x || 0}px, ${blockLayout?.y || 0}px); width:${blockLayout?.width || 328}px; height:${blockLayout?.height || 286}px;">
+              <button class="block-card ${level}${activeRedirect}${sourceClass}${destinationClass}${inactiveClass}${selected}" data-block="${name}" style="transform:translate(${blockLayout?.x || 0}px, ${blockLayout?.y || 0}px); width:${blockLayout?.width || 328}px; height:${blockLayout?.height || 286}px;">
                 <div class="block-top">
                   <div>
                     <div class="block-kicker">Parking Block</div>
@@ -497,37 +590,42 @@ function animateRedirect(action, oldState, currentState, layout) {
   const board = document.querySelector(".board");
   if (!board || !layout[action.from] || !layout[action.to]) return;
 
-  const previousVehicles = new Map((oldState.vehicles || []).map((vehicle) => [vehicle.id, vehicle]));
-  const currentVehicles = new Map((currentState.vehicles || []).map((vehicle) => [vehicle.id, vehicle]));
-  const movingIds = (action.vehicle_ids || []).slice(0, 3);
-  const count = movingIds.length || Math.min(3, Number(action.vehicles || 0));
+  const count = Math.max(0, Number(action.vehicles || 0));
   if (!count) return;
+  const fromEl = document.querySelector(`[data-block="${cssAttr(action.from)}"]`);
+  const toEl = document.querySelector(`[data-block="${cssAttr(action.to)}"]`);
+  if (fromEl && toEl) animateVehicles(count, fromEl, toEl);
+}
 
-  Array.from({ length: count }, (_, index) => movingIds[index]).forEach((vehicleId, index) => {
-    const fromVehicle = previousVehicles.get(vehicleId);
-    const toVehicle = currentVehicles.get(vehicleId);
-    const fromPosition = fromVehicle ? vehicleScreenPosition(fromVehicle, layout) : {
-      left: layout[action.from].x + layout[action.from].width / 2,
-      top: layout[action.from].y + layout[action.from].height / 2,
-    };
-    const toPosition = toVehicle ? vehicleScreenPosition(toVehicle, layout) : {
-      left: layout[action.to].x + layout[action.to].width / 2,
-      top: layout[action.to].y + layout[action.to].height / 2,
-    };
-    const ghost = document.createElement("div");
-    ghost.className = "vehicle-ghost";
-    const type = toVehicle?.type || fromVehicle?.type || (index < Number(action.car_vehicles || 0) ? "car" : "bike");
-    ghost.textContent = type === "bike" ? "🏍" : "🚗";
-    ghost.style.left = `${fromPosition.left + index * 8}px`;
-    ghost.style.top = `${fromPosition.top + index * 8}px`;
-    board.appendChild(ghost);
-    requestAnimationFrame(() => {
-      ghost.style.left = `${toPosition.left + index * 8}px`;
-      ghost.style.top = `${toPosition.top + index * 8}px`;
-      ghost.style.opacity = "0.15";
-    });
-    window.setTimeout(() => ghost.remove(), 1300);
-  });
+function cssAttr(value) {
+  return String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function animateVehicles(count, fromEl, toEl) {
+  for (let i = 0; i < count; i++) {
+    const vehicle = document.createElement("div");
+    vehicle.className = "vehicle-dot";
+
+    const from = fromEl.getBoundingClientRect();
+    const to = toEl.getBoundingClientRect();
+    const offset = (i - (count - 1) / 2) * 9;
+
+    vehicle.style.position = "fixed";
+    vehicle.style.left = `${from.left + from.width / 2 + offset}px`;
+    vehicle.style.top = `${from.top + from.height / 2 + offset}px`;
+    vehicle.style.transition = "all 0.8s ease";
+
+    document.body.appendChild(vehicle);
+
+    setTimeout(() => {
+      vehicle.style.left = `${to.left + to.width / 2 + offset}px`;
+      vehicle.style.top = `${to.top + to.height / 2 + offset}px`;
+    }, 50 + i * 35);
+
+    setTimeout(() => {
+      vehicle.remove();
+    }, 950 + i * 35);
+  }
 }
 
 async function fetchState() {
