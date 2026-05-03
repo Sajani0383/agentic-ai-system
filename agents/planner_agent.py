@@ -390,7 +390,8 @@ class PlannerAgent:
             )
             if alternative:
                 action["to"] = alternative
-                action["vehicles"] = max(1, min(2, safe_transfer_capacity or 2, state.get(alternative, {}).get("free_slots", 0)))
+                micro_cap = 2 + (int((insight or {}).get("queue_length", 0) or demand.get(action.get("from"), 0) or 0) % 4)
+                action["vehicles"] = max(1, min(micro_cap, safe_transfer_capacity or micro_cap, state.get(alternative, {}).get("free_slots", 0)))
                 action["reason"] = f"Memory hard block avoided {route_key}; rerouting micro-action to {alternative}."
                 action["force_micro"] = True
             else:
@@ -416,7 +417,8 @@ class PlannerAgent:
                 learning_profile,
             )
             if source_zone and destination_zone:
-                vehicles = max(1, min(2, safe_transfer_capacity or 2, state[destination_zone].get("free_slots", 0)))
+                micro_cap = 2 + (int((insight or {}).get("queue_length", 0) or demand.get(source_zone, 0) or 0) % 4)
+                vehicles = max(1, min(micro_cap, safe_transfer_capacity or micro_cap, state[destination_zone].get("free_slots", 0)))
                 action = {
                     "action": "redirect",
                     "from": source_zone,
@@ -735,7 +737,8 @@ class PlannerAgent:
                 destination_zone = alternative
                 destination_free = state.get(destination_zone, {}).get("free_slots", 0)
                 safe_transfer_capacity = min(safe_transfer_capacity or adaptive_limits["max_transfer"], destination_free)
-            vehicles = max(1, min(2 if force_micro_action else max(1, int(vehicles * 0.7)), safe_transfer_capacity))
+            micro_cap = 2 + (int((insight or {}).get("queue_length", 0) or demand.get(source_zone, 0) or 0) % 4)
+            vehicles = max(1, min(micro_cap if force_micro_action else max(1, int(vehicles * 0.7)), safe_transfer_capacity))
             reason_prefix = f"🧠 Learning Applied: Throttling traffic due to negative reward drift ({recent_reward_avg}). "
             learning_applied = True
         elif recent_reward_avg > 0.1 and vehicles > 0:

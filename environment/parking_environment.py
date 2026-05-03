@@ -1,6 +1,6 @@
 import random
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ml.predict import predict_demand
 
@@ -170,7 +170,7 @@ class ParkingEnvironment:
             new_state,
             action,
             transfer_report,
-            datetime.now().isoformat(),
+            datetime.now(timezone.utc).isoformat(),
             event_context,
             notifications,
             kpis,
@@ -184,6 +184,20 @@ class ParkingEnvironment:
             self.history.pop(0)
 
         return new_state, environment_score
+
+    def force_full_capacity(self):
+        return self.force_occupancy_ratio(0.995, jitter=0.005)
+
+    def force_occupancy_ratio(self, ratio, jitter=0.02):
+        ratio = max(0.05, min(0.995, float(ratio or 0.5)))
+        jitter = max(0.0, min(0.08, float(jitter or 0.0)))
+        for zone in self.zones:
+            total = int(self.state[zone].get("total_slots", 0) or 0)
+            adjustment = self.rng.uniform(-jitter, jitter) if jitter else 0.0
+            occupied = int(round(total * max(0.0, min(0.995, ratio + adjustment))))
+            self.state[zone]["occupied"] = max(0, min(total, occupied))
+        self._validate_internal_state()
+        return self.get_state()
 
     def set_scenario_mode(self, scenario_mode):
         self.scenario_mode = scenario_mode if scenario_mode in self.event_catalog else "Auto Schedule"

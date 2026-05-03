@@ -424,5 +424,171 @@ class RuntimeOrchestratorTests(unittest.TestCase):
         self.assertLessEqual(planner_output["proposed_action"]["vehicles"], 2)
         self.assertTrue(planner_output["proposed_action"]["reward_reduced"])
 
+    def test_user_entry_updates_unified_vehicle_state(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        response = runtime.register_user_entry({
+            "name": "Demo User",
+            "vehicle_number": "TN01AB1234",
+            "user_type": "student",
+            "vehicle_type": "car",
+            "preferred_block": "Main Block",
+            "gate": "Gate1",
+        })
+        snapshot = runtime.get_runtime_snapshot()
+
+        self.assertIn(response["status"], {"assigned", "redirected"})
+        self.assertIn("user_vehicles", snapshot)
+        self.assertTrue(any(vehicle.get("number") == "TN01AB1234" for vehicle in snapshot["user_vehicles"]))
+        self.assertGreaterEqual(snapshot["vehicle_stats"]["user"], 1)
+        self.assertTrue(any(event.get("event") == "entry" for event in snapshot["events"]))
+
+    def test_user_exit_tracks_exit_event_with_dashboard_name(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        runtime.register_user_entry({
+            "name": "Private User",
+            "vehicle_number": "TN02CD5678",
+            "user_type": "staff",
+            "vehicle_type": "bike",
+            "gate": "Gate2",
+        })
+        response = runtime.register_user_exit({"vehicle_number": "TN02CD5678"})
+        snapshot = runtime.get_runtime_snapshot()
+
+        self.assertEqual(response["notification"], "Exit completed")
+        self.assertTrue(any(vehicle.get("status") == "exited" for vehicle in snapshot["user_vehicles"]))
+        self.assertTrue(any(event.get("event") == "exit" for event in snapshot["events"]))
+        self.assertTrue(any(user.get("name") == "Private User" for user in snapshot["users"]))
+        self.assertTrue(any(vehicle.get("name") == "Private User" for vehicle in snapshot["user_vehicles"]))
+
+    def test_user_entry_does_not_duplicate_parked_events(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        payload = {
+            "name": "Repeat User",
+            "vehicle_number": "TN03REPEAT",
+            "user_type": "student",
+            "vehicle_type": "car",
+            "gate": "Gate1",
+        }
+        runtime.register_user_entry(payload)
+        runtime.register_user_entry({"vehicle_number": "TN03REPEAT", "gate": "Gate2"})
+        events = [
+            event.get("event")
+            for event in runtime.get_runtime_snapshot()["events"]
+            if event.get("vehicle_number") == "TN03REPEAT"
+        ]
+
+        self.assertEqual(events.count("entry"), 1)
+        self.assertEqual(events.count("parked"), 1)
+
+    def test_vehicle_event_normalization_removes_repeated_state_rows(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        runtime.vehicle_events = [
+            {"id": "EV-1", "vehicle_number": "TN05BE8852", "event": "entry", "timestamp": "t1"},
+            {"id": "EV-2", "vehicle_number": "TN05BE8852", "event": "parked", "timestamp": "t2"},
+            {"id": "EV-3", "vehicle_number": "TN05BE8852", "event": "entry", "timestamp": "t3"},
+            {"id": "EV-4", "vehicle_number": "TN05BE8852", "event": "parked", "timestamp": "t4"},
+            {"id": "EV-5", "vehicle_number": "TN05BE8852", "event": "parked", "timestamp": "t5"},
+            {"id": "EV-6", "vehicle_number": "TN05BE8852", "event": "exit", "timestamp": "t6"},
+        ]
+
+        events = [
+            event.get("event")
+            for event in runtime.get_runtime_snapshot()["events"]
+            if event.get("vehicle_number") == "TN05BE8852"
+        ]
+
+        self.assertEqual(events, ["entry", "parked", "exit"])
+
+    def test_simulated_redirect_event_is_not_repeated_for_same_step(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        vehicle = {
+            "id": 1,
+            "number": "SIM-1",
+            "type": "car",
+            "user_type": "simulated",
+            "status": "redirecting",
+            "block": "Tech Park",
+            "gate": "Gate1",
+        }
+        runtime._record_vehicle_event(
+            "redirect",
+            vehicle,
+            from_block="MBA Block",
+            to_block="Tech Park",
+            decision_step=42,
+        )
+        runtime._record_vehicle_event(
+            "redirect",
+            vehicle,
+            from_block="MBA Block",
+            to_block="Tech Park",
+            decision_step=42,
+        )
+
+        events = [
+            event
+            for event in runtime.get_runtime_snapshot()["events"]
+            if event.get("vehicle_number") == "SIM-1" and event.get("event") == "redirect"
+        ]
+
+        self.assertEqual(len(events), 1)
+
+    def test_exit_count_uses_vehicle_status_not_duplicate_history(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        runtime.register_user_entry({
+            "name": "Exit Count",
+            "vehicle_number": "TN04EXIT",
+            "user_type": "visitor",
+            "vehicle_type": "car",
+            "gate": "Gate1",
+        })
+        runtime.register_user_exit({"vehicle_number": "TN04EXIT"})
+        runtime.vehicle_events.append({
+            "id": "manual-duplicate",
+            "vehicle_number": "TN04EXIT",
+            "event": "exit",
+            "timestamp": "duplicate",
+        })
+
+        stats = runtime.get_runtime_snapshot()["vehicle_stats"]
+
+        self.assertEqual(stats["exited"], 1)
+        self.assertEqual(stats["user"], 1)
+        self.assertEqual(stats["entering"], 0)
+        self.assertEqual(stats["exiting"], 0)
+
+    def test_unknown_exit_returns_user_friendly_not_found(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        response = runtime.register_user_exit({"vehicle_number": "UNKNOWN"})
+
+        self.assertEqual(response["status"], "not_found")
+        self.assertEqual(response["notification"], "Vehicle not found")
+
+    def test_snapshot_exposes_agentic_integrity_report(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        runtime.step()
+        snapshot = runtime.get_runtime_snapshot()
+        integrity = snapshot["agentic_integrity"]
+
+        self.assertIn("score", integrity)
+        self.assertIn("checks", integrity)
+        self.assertGreaterEqual(integrity["score"], 80)
+        self.assertFalse(integrity["issues"]["bad_capacity_blocks"])
+
+    def test_demo_pressure_profiles_change_real_occupancy(self):
+        runtime = ParkingRuntimeService(storage_path=self.state_path)
+        normal = runtime.apply_demo_pressure("normal")
+        heavy = runtime.apply_demo_pressure("near_full")
+
+        def occupancy(snapshot):
+            blocks = snapshot["blocks"]
+            occupied = sum(block["occupied"] for block in blocks.values())
+            capacity = sum(block["capacity"] for block in blocks.values())
+            return occupied / capacity
+
+        self.assertLess(occupancy(normal), 0.65)
+        self.assertGreater(occupancy(heavy), 0.9)
+        self.assertFalse(heavy["agentic_integrity"]["issues"]["bad_capacity_blocks"])
+
 if __name__ == "__main__":
     unittest.main()

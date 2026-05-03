@@ -10,12 +10,37 @@ def signal_cards(event_context, latest_result, kpis, goal):
     action_reason = action.get("reason")
     if not action_reason:
         action_reason = critic_notes[0] if critic_notes else "The agent is holding position because current pressure does not justify a transfer."
+    local_target = action.get("to") or "-"
+    local_source = action.get("from") or "-"
+    pressure_focus = event_context.get("pressure_focus") or event_context.get("focus_zone", "-")
+    source_note = f" | Action source: {local_source}" if local_source != "-" else ""
+    action_name = str(action.get("action", "none")).upper()
+    if action_name == "NONE":
+        action_name = "IDLE"
+    if action_name not in {"REDIRECT", "REPLAN", "IDLE"}:
+        action_name = "REDIRECT" if action.get("from") and action.get("to") else "IDLE"
+    vehicle_ids = action.get("vehicle_ids") or []
+    vehicle_note = f" | Vehicles: {', '.join(map(str, vehicle_ids[:5]))}" if vehicle_ids else ""
+    reward_score = float(latest_result.get("reward_score", 0) or 0)
+    search_delta = latest_result.get("baseline_comparison", {}).get("search_time_delta_min")
+    reward_note = ""
+    if reward_score < -0.05 and search_delta and float(search_delta or 0) > 0:
+        reward_note = " Reward penalized execution cost despite search improvement."
+    recommendation_note = (
+        f"Recommended (global): {event_context.get('recommended_zone', '-')} | "
+        f"Chosen (local): {local_target}. Global handles incoming flow; local resolves active congestion."
+    )
+    perception_note = (
+        f"Focus = pressure source: {pressure_focus}. Source = rerouting origin: {local_source}."
+        if local_source != "-" else f"Focus = pressure source: {pressure_focus}."
+    )
     
     cards = [
-        {"label": "SRM Scenario", "value": event_context.get("name", "Normal Day"), "note": f"Severity: {event_context.get('severity', 'low').title()} | Focus block: {event_context.get('focus_zone', '-')}"},
-        {"label": "Allocation Strategy", "value": latest_result.get("strategy", event_context.get("allocation_strategy", "Balanced utilisation")), "note": f"Recommended SRM block: {event_context.get('recommended_zone', '-')}"},
-        {"label": "Live Decision", "value": f"{action.get('action', 'none').upper()} | {latest_result.get('mode', 'idle').replace('_', ' ')}", "note": action_reason},
-        {"label": "Measured Outcome", "value": f"{kpis.get('estimated_search_time_min', 0)} min search time", "note": f"Avg Utilisation: {kpis.get('space_utilisation_pct', 0)}%"},
+        {"label": "SRM Scenario", "value": event_context.get("name", "Normal Day"), "note": f"Severity: {event_context.get('severity', 'low').title()} | Pressure focus: {pressure_focus}{source_note}"},
+        {"label": "Allocation Strategy", "value": latest_result.get("strategy", event_context.get("allocation_strategy", "Balanced utilisation")), "note": recommendation_note},
+        {"label": "Live Decision", "value": action_name, "note": f"{action_reason}{vehicle_note}"},
+        {"label": "Decision Link", "value": f"{local_source} → {local_target}" if local_source != "-" and local_target != "-" else "Monitoring", "note": perception_note},
+        {"label": "Measured Outcome", "value": f"{kpis.get('estimated_search_time_min', 0)} min search time", "note": f"Avg Utilisation: {kpis.get('space_utilisation_pct', 0)}%.{reward_note}"},
     ]
     
     render_html_block("<div class='signal-grid'>" + "".join(
@@ -25,9 +50,17 @@ def signal_cards(event_context, latest_result, kpis, goal):
 
 def render_story_cards(goal, latest_result, event_context, kpis):
     action = latest_result.get("action", {})
+    target_blocks = goal.get("target_congested_zones")
+    goal_value = "Maintain balanced load"
+    if target_blocks not in (None, "", "-"):
+        try:
+            target_count = int(target_blocks)
+        except (TypeError, ValueError):
+            target_count = None
+        goal_value = "Maintain low congestion" if target_count == 0 else f"{target_blocks} hotspot target"
     story_cards = [
         {"title": "Why The Agent Acted", "value": event_context.get("focus_zone", "SRM"), "copy": action.get("reason", "The agent is waiting for enough SRM block pressure to justify reallocation.")},
-        {"title": "Active Goal", "value": f"{goal.get('target_congested_zones', '-') } block target", "copy": goal.get("objective", "No active goal yet.")},
+        {"title": "Active Goal", "value": goal_value, "copy": goal.get("objective", "No active goal yet.")},
         {"title": "Student Outcome", "value": f"{kpis.get('estimated_search_time_min', 0)} min", "copy": "Estimated parking search time after the current allocation decision."},
     ]
     render_html_block("<div class='story-grid'>" + "".join(

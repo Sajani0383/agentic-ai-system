@@ -142,7 +142,8 @@ class CriticAgent:
                     is_negligible = False
 
         # Allow safe micro-actions to explore and act
-        if action.get("action") == "redirect" and int(action.get("vehicles", 0)) <= 2 and scoring.get("risk_score", 0) < 70 and expected_gain > 0:
+        micro_cap = 2 + (int(queue_length_val or 0) % 4)
+        if action.get("action") == "redirect" and int(action.get("vehicles", 0)) <= micro_cap and scoring.get("risk_score", 0) < 70 and expected_gain > 0:
             if is_negligible:
                 is_negligible = False
                 notes.append("Micro-action approved: low risk single vehicle transfer allowed despite utility threshold.")
@@ -156,7 +157,7 @@ class CriticAgent:
             notes.append(f"Safety Alert: Route {route_key} is temporarily blocked by memory after repeated failures.")
             revised_action = {"action": "none"}
         elif is_negligible:
-            reduced_vehicles = max(1, min(2, safe_transfer, int(action.get("vehicles", 1) or 1)))
+            reduced_vehicles = max(1, min(micro_cap, safe_transfer, int(action.get("vehicles", micro_cap) or micro_cap)))
             if queue_length_val >= 2 or reward_trend < -0.1:
                 notes.append(
                     f"Critic Recovery Candidate: utility is limited, but system pressure is active; evaluating a reduced micro-action of {reduced_vehicles} vehicle(s)."
@@ -194,11 +195,11 @@ class CriticAgent:
         if revised_action.get("action") == "redirect" and not is_negligible and not hard_unsafe:
             approved = True
             if risk_score >= 80:
-                partial_vehicles = max(1, min(2, int(revised_action.get("vehicles", 1) or 1)))
+                partial_vehicles = max(1, min(micro_cap, int(revised_action.get("vehicles", micro_cap) or micro_cap)))
                 revised_action["vehicles"] = partial_vehicles
                 notes.insert(0, f"Critic Mitigation: High risk detected ({risk_score}), approving reduced micro-action of {partial_vehicles}.")
             elif 40 <= risk_score < 80 and reward_trend < -0.3:
-                reduced = max(1, min(2, int(revised_action.get("vehicles", 1))))
+                reduced = max(1, min(micro_cap, int(revised_action.get("vehicles", micro_cap))))
                 if reduced < int(revised_action.get("vehicles", 1)):
                     revised_action["vehicles"] = reduced
                     notes.insert(0, f"Critic Recovery: Moderate risk with negative reward trend, approving reduced micro-action of {reduced} vehicle(s).")
@@ -207,7 +208,7 @@ class CriticAgent:
         if not approved and revised_action.get("action") == "redirect":
             if not hard_unsafe and risk_score < 90 and (queue_length_val >= 2 or reward_trend < -0.1):
                 approved = True
-                revised_action["vehicles"] = max(1, min(2, int(revised_action.get("vehicles", 1) or 1)))
+                revised_action["vehicles"] = max(1, min(micro_cap, int(revised_action.get("vehicles", micro_cap) or micro_cap)))
                 notes.insert(0, f"Critic Replan Assist: Pressure is active, so a reduced micro-action of {revised_action['vehicles']} vehicle(s) remains executable.")
             else:
                 notes.insert(0, f"Safety Override: Critical risk ({risk_score}). Reverting to system baseline.")

@@ -37,7 +37,7 @@ DEFAULT_GEMINI_MODEL_SEQUENCE = [
     model.strip()
     for model in os.getenv(
         "GEMINI_MODEL_SEQUENCE",
-        "gemini-2.5-flash,gemini-1.5-flash,gemini-flash-latest",
+        "gemini-flash-lite-latest,gemini-2.0-flash-lite,gemini-2.0-flash-lite-001,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-flash-latest,gemini-2.5-flash",
     ).split(",")
     if model.strip()
 ]
@@ -177,6 +177,18 @@ def _is_daily_quota_llm_error(message):
         or "GENERATIVELANGUAGE.GOOGLEAPIS.COM/GENERATE_CONTENT_FREE_TIER_REQUESTS" in text
     )
 
+def _is_model_unavailable_llm_error(message):
+    text = (message or "").upper()
+    return (
+        ("MODEL" in text or "MODELS/" in text)
+        and (
+            "NOT_FOUND" in text
+            or "IS NOT FOUND" in text
+            or "NOT SUPPORTED FOR GENERATECONTENT" in text
+            or "INVALID_ARGUMENT" in text
+        )
+    )
+
 
 def _clean_key(raw):
     cleaned = (raw or "").strip()
@@ -234,13 +246,15 @@ class GeminiLLMWrapper:
         self.call_lock = threading.Lock()
         self.last_call_time = 0.0
         self._cache = {}
+        self._route_cursor = 0
         # NOTE: No shared executor — each invoke() creates a fresh one inside a
         # `with` block so Python's interpreter-shutdown ThreadPoolExecutor cleanup
         # can never fire on a stale reference and raise
         # "cannot schedule new futures after shutdown".
         
         self.TIMEOUT_SECONDS = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "15.0"))
-        self.RATE_LIMIT_DELAY = 1.0    # 1 second spacing protects QPS quotas
+        self.MAX_ATTEMPTS_PER_CALL = max(1, int(os.getenv("GEMINI_MAX_ATTEMPTS_PER_CALL", "2")))
+        self.RATE_LIMIT_DELAY = max(0.0, float(os.getenv("GEMINI_RATE_LIMIT_DELAY", "0.25")))
 
     def invoke(self, prompt):
         # 1. Evaluate Cache 
@@ -259,13 +273,25 @@ class GeminiLLMWrapper:
 
         last_exc = None
         trace = []
-        for key_index, api_key in enumerate(self.api_keys):
+        if not self.api_keys:
+            raise RuntimeError("No Gemini API keys are available for routing.")
+        start_index = self._route_cursor % len(self.api_keys)
+        self._route_cursor += 1
+        key_order = list(range(start_index, len(self.api_keys))) + list(range(0, start_index))
+        attempt_count = 0
+        for key_index in key_order:
+            if attempt_count >= self.MAX_ATTEMPTS_PER_CALL:
+                break
+            api_key = self.api_keys[key_index]
             key_label = _key_label(key_index)
             if STATUS_MANAGER.is_key_backoff_active(key_label):
                 trace.append({"key": key_label, "model": "-", "status": "skipped", "reason": "key cooldown active"})
                 continue
             key_quota_failures = 0
             for model in self.models:
+                if attempt_count >= self.MAX_ATTEMPTS_PER_CALL:
+                    break
+                attempt_count += 1
                 start_time = time.time()
                 executor = None
                 future = None
@@ -304,11 +330,15 @@ class GeminiLLMWrapper:
                         STATUS_MANAGER.set_router_trace(trace)
                         raise
                     if _is_quota_llm_error(message):
+                        attempt_count = max(0, attempt_count - 1)
                         key_quota_failures += 1
                         continue
-                    if "INVALID_ARGUMENT" in message.upper() and ("MODEL" in message.upper() or "NOT FOUND" in message.upper()):
+                    if _is_model_unavailable_llm_error(message):
+                        attempt_count = max(0, attempt_count - 1)
+                        STATUS_MANAGER.set_error("")
                         continue
                     if _is_terminal_llm_error(message):
+                        attempt_count = max(0, attempt_count - 1)
                         STATUS_MANAGER.mark_key_backoff(key_label, message, seconds=6 * 60 * 60, kind="terminal")
                         break
                     if _is_connectivity_llm_error(message) or "503" in message or "UNAVAILABLE" in message.upper():
@@ -323,6 +353,13 @@ class GeminiLLMWrapper:
                             executor.shutdown(wait=False)
             if key_quota_failures >= len(self.models):
                 STATUS_MANAGER.mark_key_backoff(key_label, "All configured Gemini model tiers returned quota/rate-limit errors.", seconds=6 * 60 * 60, kind="daily_quota")
+        if attempt_count >= self.MAX_ATTEMPTS_PER_CALL:
+            trace.append({
+                "key": "-",
+                "model": "-",
+                "status": "bounded",
+                "reason": f"attempt cap reached ({self.MAX_ATTEMPTS_PER_CALL})",
+            })
         STATUS_MANAGER.set_router_trace(trace)
         if last_exc:
             message = f"{type(last_exc).__name__}: {last_exc}"
@@ -356,7 +393,7 @@ class GeminiLLMWrapper:
         text = str(message or "")
         if _is_quota_llm_error(text):
             return "quota/rate-limit"
-        if "INVALID_ARGUMENT" in text.upper() and ("MODEL" in text.upper() or "NOT FOUND" in text.upper()):
+        if _is_model_unavailable_llm_error(text):
             return "model unavailable"
         if _is_connectivity_llm_error(text):
             return "timeout/connectivity"
@@ -406,8 +443,12 @@ def get_llm_status(ignore_backoff=False):
     status["message"] = f"Gemini SDK is configured with {len(api_keys)} key route(s) and {len(model_sequence)} model tier(s)."
     last_err = STATUS_MANAGER.get_error()
     backoff = STATUS_MANAGER.get_backoff()
+    key_backoffs = STATUS_MANAGER.get_key_backoffs()
+    available_key_count = max(0, len(api_keys) - len(key_backoffs))
+    has_spare_key = available_key_count > 0
     status["quota_backoff"] = backoff
-    if backoff.get("active") and not ignore_backoff:
+    status["available_key_count"] = available_key_count
+    if backoff.get("active") and not ignore_backoff and not has_spare_key:
         status["available"] = False
         if backoff.get("kind") == "daily_quota":
             status["message"] = (
@@ -425,6 +466,11 @@ def get_llm_status(ignore_backoff=False):
                 f"Retry will resume in {backoff.get('remaining_seconds', 0)} seconds."
             )
         return status
+    if backoff.get("active") and has_spare_key:
+        status["message"] = (
+            f"Gemini router has {available_key_count} available key route(s) after recent "
+            f"{backoff.get('kind', 'provider')} cooldowns; it will keep trying healthy routes."
+        )
     
     # If we are ignoring backoff, we treat it as available even if a backoff is active
     status["available"] = True
@@ -442,14 +488,26 @@ def get_llm_status(ignore_backoff=False):
 
     if last_err:
         if _is_terminal_llm_error(last_err):
-            status["available"] = False
-            status["message"] = "Gemini is disabled because the configured API key is invalid or expired."
+            status["available"] = has_spare_key
+            status["message"] = (
+                f"Gemini router is skipping invalid/expired key routes; {available_key_count} route(s) remain available."
+                if has_spare_key
+                else "Gemini is disabled because the configured API key is invalid or expired."
+            )
         elif _is_daily_quota_llm_error(last_err):
-            status["available"] = False
-            status["message"] = "Gemini daily free-tier quota is exhausted. Autonomous Edge Intelligence will continue with simulated/local reasoning until quota resets."
+            status["available"] = has_spare_key
+            status["message"] = (
+                f"Some Gemini free-tier routes hit daily quota; {available_key_count} route(s) remain available for failover."
+                if has_spare_key
+                else "Gemini daily free-tier quota is exhausted. Autonomous Edge Intelligence will continue with simulated/local reasoning until quota resets."
+            )
         elif _is_quota_llm_error(last_err):
-            status["available"] = False
-            status["message"] = "Autonomous Edge Intelligence mode active (Provider Quota Optimization). System remains fully operational via high-fidelity local models."
+            status["available"] = has_spare_key
+            status["message"] = (
+                f"Provider quota optimization active; {available_key_count} Gemini route(s) remain available for the next request."
+                if has_spare_key
+                else "Autonomous Edge Intelligence mode active (Provider Quota Optimization). System remains fully operational via high-fidelity local models."
+            )
         elif "503" in last_err or "UNAVAILABLE" in last_err.upper():
             status["message"] = "Distributed intelligence is temporarily localized due to provider overhead."
         elif "TIMEOUT" in last_err.upper() or _is_connectivity_llm_error(last_err):

@@ -10,6 +10,30 @@ def inject_styles():
                 radial-gradient(circle at top left, rgba(77,163,255,0.12), transparent 28%),
                 linear-gradient(180deg, #09111b 0%, {PALETTE["bg"]} 100%);
         }}
+        .stApp,
+        .stApp > div,
+        [data-testid="stAppViewContainer"],
+        [data-testid="stMain"],
+        [data-testid="stVerticalBlock"],
+        [data-testid="stBlock"],
+        [data-testid="stTabs"] {{
+            opacity: 1 !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+        }}
+        [data-testid="stStatusWidget"],
+        [data-testid="stDecoration"],
+        [data-testid="stToolbar"],
+        [data-testid="stDeployButton"],
+        [data-testid="stModal"],
+        [data-testid="stDialog"],
+        div[role="dialog"],
+        div[data-baseweb="modal"] {{
+            backdrop-filter: none !important;
+        }}
+        div[data-baseweb="modal"] > div {{
+            background: transparent !important;
+        }}
         [data-testid="stSidebar"] {{
             background: linear-gradient(180deg, #1c202b 0%, #222632 100%);
             border-right: 1px solid rgba(255,255,255,0.06);
@@ -203,7 +227,7 @@ def inject_styles():
         }}
         .status-bar {{
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 0.65rem;
             margin: 0.7rem 0 0.45rem;
             padding: 0.85rem;
@@ -430,6 +454,20 @@ def inject_styles():
             font-size: 0.92rem;
             line-height: 1.55;
         }}
+        .llm-detail-row {{
+            padding: 0.78rem 0.95rem;
+            border-radius: 12px;
+            border: 1px solid rgba(138,216,255,0.16);
+            background: rgba(255,255,255,0.035);
+            color: #d8e2ef;
+            line-height: 1.55;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            margin: 0.45rem 0;
+        }}
+        .llm-detail-row strong {{
+            color: #ffffff;
+        }}
         .slot-board {{
             display: grid;
             grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.18fr);
@@ -525,6 +563,67 @@ def inject_styles():
             color: #d8e2ef;
             font-size: 0.93rem;
             line-height: 1.5;
+        }}
+        .metric-card {{
+            min-height: 138px;
+            border-radius: 18px;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(15,27,41,0.96), rgba(8,16,27,0.96));
+            box-shadow: 0 16px 42px rgba(0,0,0,0.2);
+        }}
+        .metric-card span,
+        .metric-card small {{
+            display: block;
+            color: {PALETTE["muted"]};
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }}
+        .metric-card strong {{
+            display: block;
+            color: {PALETTE["text"]};
+            font-size: 1.65rem;
+            line-height: 1.08;
+            margin: 0.38rem 0;
+            overflow-wrap: anywhere;
+        }}
+        .metric-card.danger-card {{
+            border-color: rgba(255,116,108,0.32);
+            background: linear-gradient(180deg, rgba(74,21,28,0.34), rgba(8,16,27,0.96));
+            box-shadow: 0 0 28px rgba(255,116,108,0.12);
+        }}
+        .metric-card.success-card {{
+            border-color: rgba(75,211,138,0.32);
+            background: linear-gradient(180deg, rgba(19,62,43,0.34), rgba(8,16,27,0.96));
+            box-shadow: 0 0 28px rgba(75,211,138,0.12);
+        }}
+        .metric-card.route-card {{
+            border-color: rgba(77,163,255,0.36);
+            background:
+                repeating-linear-gradient(90deg, transparent 0 24px, rgba(255,255,255,0.08) 24px 36px, transparent 36px 56px),
+                linear-gradient(180deg, rgba(18,47,78,0.48), rgba(8,16,27,0.96));
+            position: relative;
+            overflow: hidden;
+        }}
+        .metric-card.route-card::after {{
+            content: "";
+            position: absolute;
+            left: -22%;
+            right: auto;
+            top: 72%;
+            width: 36px;
+            height: 10px;
+            border-radius: 999px;
+            background: #8ad8ff;
+            box-shadow: 0 0 16px rgba(138,216,255,0.9);
+            animation: dashboardRouteMove 1.2s ease-in-out infinite;
+        }}
+        @keyframes dashboardRouteMove {{
+            0% {{ left: -20%; opacity: 0; }}
+            15% {{ opacity: 1; }}
+            85% {{ opacity: 1; }}
+            100% {{ left: 105%; opacity: 0; }}
         }}
         @keyframes realtimePulse {{
             0%, 100% {{ opacity: 0.55; transform: scale(0.95); }}

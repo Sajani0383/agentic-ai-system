@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from copy import deepcopy
 from agent_memory import AgentMemory
 from agents.bayesian_agent import BayesianAgent
@@ -27,7 +28,8 @@ class AgentController:
             "min_resilience_score": 60,
             "max_memory_history": 1000,
             "llm_mode": "auto",
-            "llm_stride_steps": 10,
+            "llm_stride_steps": int(os.getenv("GEMINI_HEARTBEAT_STEPS", "5")),
+            "gemini_budget_limit": int(os.getenv("GEMINI_BUDGET_LIMIT", "80")),
             "force_llm": False,
         }
         self.config = {**default_config, **(config or {})}
@@ -524,6 +526,14 @@ class AgentController:
             else:
                 action["vehicles"] = vehicles
                 action["confidence"] = float(action.get("confidence", 0.5) or 0.0)
+                if action.get("force_micro") or action.get("controller_forced"):
+                    action["vehicles"] = self._bounded_micro_vehicle_count(
+                        state,
+                        from_zone,
+                        to_zone,
+                        requested=max(2, vehicles),
+                        hard_cap=5,
+                    )
                 action.setdefault("expected_gain", 0.0)
                 action.setdefault("reason", "Planner selected redirect.")
         plan["proposed_action"] = action
@@ -554,7 +564,8 @@ class AgentController:
             candidate = action if action.get("action") == "redirect" else suggested if isinstance(suggested, dict) else {}
             if candidate.get("action") == "redirect" and float(review.get("risk_score", 100.0) or 100.0) < 90:
                 action = deepcopy(candidate)
-                action["vehicles"] = max(1, min(2, int(action.get("vehicles", 1) or 1)))
+                varied_micro = 2 + (int(getattr(self.environment, "step_count", 0) or 0) % 4)
+                action["vehicles"] = max(1, min(5, max(varied_micro, int(action.get("vehicles", 1) or 1))))
                 action["reason"] = (
                     f"{action.get('reason', 'Critic reduced the action for safety.')} "
                     "Contract repair preserved a safe micro-action for replan."
@@ -569,7 +580,8 @@ class AgentController:
                 and not review.get("risk_factors", {}).get("blocked_zone")
             ):
                 action = deepcopy(planner_action)
-                action["vehicles"] = max(1, min(2, int(action.get("vehicles", 1) or 1)))
+                varied_micro = 2 + (int(getattr(self.environment, "step_count", 0) or 0) % 4)
+                action["vehicles"] = max(1, min(5, max(varied_micro, int(action.get("vehicles", 1) or 1))))
                 action["force_micro"] = True
                 review["approved"] = True
                 review["risk_level"] = "high"
@@ -652,7 +664,7 @@ class AgentController:
             if last_reward < -0.1 and int(action.get("vehicles", 0) or 0) > 1:
                 action = deepcopy(action)
                 original = int(action.get("vehicles", 1) or 1)
-                action["vehicles"] = max(1, min(2, original // 2))
+                action["vehicles"] = max(1, min(3, original // 2))
                 action["force_micro"] = True
                 action["reward_reduced"] = True
                 action["reason"] = (
@@ -662,7 +674,7 @@ class AgentController:
                 planner_output["proposed_action"] = action
             if confidence < 0.55 and int(action.get("vehicles", 0) or 0) > 1:
                 action = deepcopy(action)
-                action["vehicles"] = 1 if confidence < 0.5 else min(2, int(action.get("vehicles", 1) or 1))
+                action["vehicles"] = 1 if confidence < 0.5 else min(3, int(action.get("vehicles", 1) or 1))
                 action["force_micro"] = True
                 action["low_confidence_reduced"] = True
                 action["reason"] = (
@@ -730,14 +742,21 @@ class AgentController:
         replacement = deepcopy(action)
         replacement["from"] = source
         replacement["to"] = destination
-        replacement["vehicles"] = max(1, min(int(replacement.get("vehicles", 2) or 2), 3, state[destination].get("free_slots", 0)))
+        replacement["vehicles"] = self._bounded_micro_vehicle_count(
+            state,
+            source,
+            destination,
+            requested=max(2, int(replacement.get("vehicles", 2) or 2)),
+            hard_cap=5,
+        )
         replacement["force_micro"] = True
         replacement["controller_forced"] = True
         replacement["expected_gain"] = max(0.25, float(replacement.get("expected_gain", 0.0) or 0.0))
         replacement["route_diversity_applied"] = True
         replacement["reason"] = (
-            f"{replacement.get('reason', 'Agent selected a safe redirect.')} "
-            f"Route diversity guard avoided repeating {route_key}; selected {source}->{destination}."
+            f"Route diversity checked recent usage for {route_key}; selected {source}->{destination} "
+            f"because {destination} has {state[destination].get('free_slots', 0)} free slots "
+            "and is the strongest available buffer after learning constraints."
         ).strip()
         planner_output["proposed_action"] = replacement
         planner_output["route_diversity_applied"] = True
@@ -772,7 +791,14 @@ class AgentController:
             if self._route_is_blocked_or_avoided(learning, route_key):
                 continue
             candidate = deepcopy(candidate)
-            candidate["vehicles"] = max(1, min(2, int(candidate.get("vehicles", 1) or 1)))
+            state = context.get("state", {})
+            candidate["vehicles"] = self._bounded_micro_vehicle_count(
+                state,
+                candidate.get("from"),
+                candidate.get("to"),
+                requested=int(candidate.get("vehicles", 2) or 2),
+                hard_cap=5,
+            )
             candidate["force_micro"] = True
             candidate.setdefault("reason", "Critic replan selected a reduced safe alternative.")
             return candidate
@@ -820,10 +846,30 @@ class AgentController:
             )
         return planner_output, critic_output
 
+    def _bounded_micro_vehicle_count(self, state, source, destination, requested=2, minimum=1, hard_cap=5):
+        step = int(getattr(self.environment, "step_count", 0) or 0)
+        varied = 2 + (step % 4)
+        requested = max(minimum, int(requested or varied))
+        destination_free = int(state.get(destination, {}).get("free_slots", 0) or 0)
+        source_occupied = int(state.get(source, {}).get("occupied", requested) or requested)
+        return max(minimum, min(varied, requested, hard_cap, destination_free, source_occupied))
+
     def _build_micro_redirect(self, context, reason):
         state = context.get("state", {})
         if len(state) < 2:
             return {"action": "none", "reason": "No alternate zone is available for micro-action."}
+        signals = context.get("operational_signals", {}) or {}
+        stable_tick = (
+            int(getattr(self.environment, "step_count", 0) or 0) % 9 == 0
+            and int(signals.get("queue_length", 0) or 0) <= 1
+            and float((context.get("learning_profile") or {}).get("recent_reward_avg", 0.0) or 0.0) >= -0.05
+        )
+        if stable_tick:
+            return {
+                "action": "none",
+                "reason": "Campus pressure is stable; agents are observing this step instead of forcing a redirect.",
+                "confidence": 0.72,
+            }
         learning = context.get("learning_profile", {})
         llm_rules = learning.get("llm_memory_rules", [])
         route_counts, source_counts, destination_counts = self._recent_route_pressure(limit=12)
@@ -876,11 +922,11 @@ class AgentController:
             ),
         )
         route_key = f"{source_zone}->{destination_zone}"
-        vehicles = max(1, min(2, state[destination_zone].get("free_slots", 0)))
+        vehicles = self._bounded_micro_vehicle_count(state, source_zone, destination_zone, requested=2, hard_cap=5)
         if llm_strength_by_zone.get(destination_zone, 0.0) >= 0.75:
-            vehicles = max(1, min(3, state[destination_zone].get("free_slots", 0)))
+            vehicles = self._bounded_micro_vehicle_count(state, source_zone, destination_zone, requested=4, hard_cap=5)
         if route_counts.get(route_key, 0) >= 2:
-            vehicles = 1
+            vehicles = max(1, min(vehicles, 3))
         return {
             "action": "redirect",
             "from": source_zone,
@@ -1028,7 +1074,7 @@ class AgentController:
 
         cooldown_remaining = max(0, cfg["cooldown_steps"] - (current_step - self.last_llm_call_step))
         cooldown_active = cooldown_remaining > 0
-        llm_stride = 10
+        llm_stride = max(3, int(self.config.get("llm_stride_steps", os.getenv("GEMINI_HEARTBEAT_STEPS", "5"))))
         scheduled_llm_due = decision_step % llm_stride == 0
         recent_cycles = self.memory.get_recent_cycles(limit=500)
         gemini_calls_today = sum(
@@ -1036,7 +1082,8 @@ class AgentController:
             for cycle in recent_cycles
             if cycle.get("planner_output", {}).get("llm_requested")
         )
-        gemini_budget_guard_active = gemini_calls_today >= 18
+        gemini_budget_limit = max(10, int(self.config.get("gemini_budget_limit", os.getenv("GEMINI_BUDGET_LIMIT", "80"))))
+        gemini_budget_guard_active = gemini_calls_today >= gemini_budget_limit
 
         next_scheduled_step = decision_step if scheduled_llm_due else ((decision_step // llm_stride) + 1) * llm_stride
         steps_until_next_llm = 0 if scheduled_llm_due else max(0, next_scheduled_step - decision_step)
@@ -1124,7 +1171,7 @@ class AgentController:
                 local_simulated_advisory = self._build_local_simulated_advisory(context)
                 llm_trigger_active = False
                 llm_trigger_reason = "budget_guard"
-                gate_notes.append("Budget guard active: 18 Gemini calls already used, so the controller is preserving the remaining quota.")
+                gate_notes.append(f"Budget guard active: {gemini_budget_limit} Gemini attempts already used, so the controller is preserving quota.")
             elif not llm_status.get("available"):
                 if cached_advisory:
                     gated_level = "cached_planner"
@@ -1253,7 +1300,7 @@ class AgentController:
                 "llm_mode": llm_mode,
                 "llm_stride_steps": llm_stride,
                 "gemini_calls_today": gemini_calls_today,
-                "gemini_budget_limit": 18,
+                "gemini_budget_limit": gemini_budget_limit,
                 "gemini_budget_guard_active": gemini_budget_guard_active,
                 "scheduled_llm_due": scheduled_llm_due,
                 "event_trigger_due": event_trigger_due,

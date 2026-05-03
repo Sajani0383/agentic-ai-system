@@ -746,7 +746,9 @@ class AgentMemory:
     def _save_to_disk(self):
         try:
             os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
-            with open(self.storage_path, "w", encoding="utf-8") as file:
+            temp_path = f"{self.storage_path}.tmp.{os.getpid()}"
+            with open(temp_path, "w", encoding="utf-8") as file:
                 json.dump(self.export(), file, indent=2)
+            os.replace(temp_path, self.storage_path)
         except OSError as e:
             logging.error(f"AgentMemory IO Save Error: -> {e}")

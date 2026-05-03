@@ -156,8 +156,10 @@ class TraceLogger:
             "saved_at": datetime.utcnow().isoformat(),
             "traces": self.traces,
         }
-        with open(self.storage_path, "w", encoding="utf-8") as file:
+        temp_path = f"{self.storage_path}.tmp.{os.getpid()}"
+        with open(temp_path, "w", encoding="utf-8") as file:
             json.dump(payload, file, indent=2)
+        os.replace(temp_path, self.storage_path)
 
 
 trace_logger = TraceLogger()

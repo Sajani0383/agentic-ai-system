@@ -23,6 +23,7 @@ class MockNotificationService:
         self.storage_path = storage_path or os.path.join(base_dir, "memory", "notification_feed.json")
         self.deliveries = []
         self.queue = []      # Priority queue using heapq
+        self._queue_seq = 0
         self.dedup_cache = {} # hash -> expiry_time
         self.last_flush = time.time()
         self.logger = logger or trace_logger
@@ -88,8 +89,9 @@ class MockNotificationService:
                     "msg_hash": msg_hash
                 }
                 
-                # Push to heap: format is (priority, timestamp, msg_record)
-                heapq.heappush(self.queue, (priority, datetime.utcnow().timestamp(), msg_record))
+                # Include a monotonic sequence so heap ties never compare dict payloads.
+                self._queue_seq += 1
+                heapq.heappush(self.queue, (priority, datetime.utcnow().timestamp(), self._queue_seq, msg_record))
                 batch.append(msg_record)
                 self.logger.log("-", "notification_queued", {"channel": channel, "title": msg_record['title']}, level="INFO")
 
@@ -108,7 +110,11 @@ class MockNotificationService:
         retry_elements = []
 
         while self.queue:
-            priority, ts, msg = heapq.heappop(self.queue)
+            item = heapq.heappop(self.queue)
+            if len(item) == 4:
+                priority, ts, seq, msg = item
+            else:
+                priority, ts, msg = item
             
             # Simulate chance of failure. SMS gateway fails 5% of the time.
             drop_rate = 0.05 if msg["channel"] == "sms_gateway" else 0.01
@@ -122,7 +128,8 @@ class MockNotificationService:
                 msg["retry_count"] += 1
                 if msg["retry_count"] < 3:
                     msg["delivery_status"] = "queued"  # Will retry
-                    retry_elements.append((priority, current_time, msg))
+                    self._queue_seq += 1
+                    retry_elements.append((priority, current_time, self._queue_seq, msg))
                     self.logger.log("-", "notification_failed_retry", {"channel": msg["channel"], "title": msg["title"], "retry": msg["retry_count"]}, level="WARN")
                 else:
                     msg["delivery_status"] = "failed"
@@ -164,8 +171,10 @@ class MockNotificationService:
 
     def flush(self):
         os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
-        with open(self.storage_path, "w", encoding="utf-8") as file:
+        temp_path = f"{self.storage_path}.tmp.{os.getpid()}"
+        with open(temp_path, "w", encoding="utf-8") as file:
             json.dump({"deliveries": self.deliveries}, file, indent=2)
+        os.replace(temp_path, self.storage_path)
 
     def reset(self):
         self.deliveries = []

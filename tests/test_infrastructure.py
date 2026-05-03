@@ -5,6 +5,7 @@ import asyncio
 from logs.logger import SimulationLogger
 from adk.trace_logger import TraceLogger
 from communication.message_bus import MessageBus
+from ui.logic.state_manager import CacheManager
 
 class InfrastructureTests(unittest.TestCase):
     def setUp(self):
@@ -85,6 +86,39 @@ class InfrastructureTests(unittest.TestCase):
         logger.log_step({"step_number": 2, "mode": "M", "action": {}})
         # Should flush
         self.assertTrue(os.path.exists(file_path))
+
+    def test_state_frame_uses_backend_capacity_as_single_source(self):
+        frame = CacheManager.get_state_frame({
+            "Main Block": {
+                "capacity": 420,
+                "total_slots": 0,
+                "car_slots": 120,
+                "bike_slots": 300,
+                "occupied": 110,
+                "free_slots": 310,
+                "entry": 1,
+                "exit": 2,
+            },
+            "Legacy Bad Block": {
+                "capacity": 0,
+                "car_slots": 0,
+                "bike_slots": 300,
+                "occupied": 110,
+                "free_slots": 0,
+                "entry": 0,
+                "exit": 0,
+            },
+        }, step=1)
+
+        main = frame[frame["Zone"] == "Main Block"].iloc[0]
+        self.assertEqual(list(frame.columns).count("Capacity"), 1)
+        self.assertEqual(int(main["Capacity"]), 420)
+        self.assertEqual(int(main["Car Slots"]) + int(main["Bike Slots"]), 420)
+        self.assertEqual(int(main["Occupied"]) + int(main["Free"]), 420)
+
+        repaired = frame[frame["Zone"] == "Legacy Bad Block"].iloc[0]
+        self.assertEqual(int(repaired["Capacity"]), 300)
+        self.assertEqual(int(repaired["Occupied"]) + int(repaired["Free"]), 300)
         
 if __name__ == "__main__":
     unittest.main()

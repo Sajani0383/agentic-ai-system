@@ -2,6 +2,14 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
+def _recent_window_rows(rows, limit=12):
+    cleaned = [row for row in rows if isinstance(row, dict)]
+    cleaned = cleaned[-limit:]
+    for index, row in enumerate(cleaned, start=1):
+        row["sample"] = index
+        row["backend_step"] = row.get("step", index)
+    return cleaned
+
 def build_zone_chart(state_frame):
     if state_frame.empty:
         return None
@@ -64,25 +72,30 @@ def build_flow_chart(recent_states):
         action = item.get("action", {}) or item.get("transition", {}).get("applied_action", {})
         if action.get("action") == "redirect":
             redirect_steps.append(step)
-            
-    frame = pd.DataFrame(rows).melt(id_vars="step", var_name="metric", value_name="vehicles")
+    rows = _recent_window_rows(rows)
+    step_to_sample = {row["backend_step"]: row["sample"] for row in rows}
+    redirect_samples = [step_to_sample.get(step) for step in redirect_steps if step_to_sample.get(step)]
+    frame = pd.DataFrame(rows).melt(id_vars=["sample", "backend_step"], var_name="metric", value_name="vehicles")
     fig = px.area(
         frame,
-        x="step",
+        x="sample",
         y="vehicles",
         color="metric",
-        title="Vehicle Movement Over Time",
+        title="Recent Vehicle Movement Window",
         color_discrete_sequence=["#8dc8ff", "#388ae5", "#ff9d91"],
+        hover_data={"backend_step": True, "sample": True},
     )
     
-    for step_num in redirect_steps:
-        fig.add_vline(x=step_num, line_width=2, line_dash="dash", line_color="rgba(75, 211, 138, 0.45)", annotation_text="Action", annotation_position="top left", annotation_font_color="rgba(75, 211, 138, 0.8)")
+    for sample_num in redirect_samples:
+        fig.add_vline(x=sample_num, line_width=2, line_dash="dash", line_color="rgba(75, 211, 138, 0.45)", annotation_text="Action", annotation_position="top left", annotation_font_color="rgba(75, 211, 138, 0.8)")
         
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         legend_title_text="",
         margin=dict(l=10, r=10, t=50, b=10),
+        xaxis_title="Recent sample",
+        yaxis_title="Vehicles",
     )
     return fig
 
@@ -110,27 +123,32 @@ def build_kpi_chart(recent_states):
     if not rows:
         return None
 
-    frame = pd.DataFrame(rows).melt(id_vars="step", var_name="metric", value_name="value")
+    rows = _recent_window_rows(rows)
+    step_to_sample = {row["backend_step"]: row["sample"] for row in rows}
+    redirect_samples = [step_to_sample.get(step) for step in redirect_steps if step_to_sample.get(step)]
+    frame = pd.DataFrame(rows).melt(id_vars=["sample", "backend_step"], var_name="metric", value_name="value")
     if frame.empty:
         return None
     fig = px.line(
         frame,
-        x="step",
+        x="sample",
         y="value",
         color="metric",
         markers=True,
-        title="Search Time and Congestion Trend",
+        title="Recent Search Time and Congestion Trend",
         color_discrete_sequence=["#ff9d91", "#8dc8ff"],
+        hover_data={"backend_step": True, "sample": True},
     )
     
-    for step_num in redirect_steps:
-        fig.add_vline(x=step_num, line_width=2, line_dash="dash", line_color="rgba(75, 211, 138, 0.45)", annotation_text="Agent Action", annotation_position="top left", annotation_font_color="rgba(75, 211, 138, 0.8)")
+    for sample_num in redirect_samples:
+        fig.add_vline(x=sample_num, line_width=2, line_dash="dash", line_color="rgba(75, 211, 138, 0.45)", annotation_text="Action", annotation_position="top left", annotation_font_color="rgba(75, 211, 138, 0.8)")
         
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         legend_title_text="",
         margin=dict(l=10, r=10, t=50, b=10),
+        xaxis_title="Recent sample",
     )
     return fig
 

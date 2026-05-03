@@ -39,6 +39,9 @@ class ResetRequest(BaseModel):
 class ScenarioRequest(BaseModel):
     scenario_mode: str
 
+class DemoPressureRequest(BaseModel):
+    profile: str = "normal"
+
 class LLMModeRequest(BaseModel):
     llm_mode: str
 
@@ -54,6 +57,21 @@ class BenchmarkRequest(BaseModel):
 class AutonomyRequest(BaseModel):
     interval_seconds: float = 2.0
     max_steps: Optional[int] = None
+
+
+class UserEntryRequest(BaseModel):
+    name: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    user_type: Optional[str] = "visitor"
+    vehicle_type: Optional[str] = "car"
+    destination: Optional[str] = None
+    preferred_block: Optional[str] = None
+    gate: Optional[str] = "Gate1"
+
+
+class UserExitRequest(BaseModel):
+    vehicle_number: str
+    gate: Optional[str] = None
 
 
 class AutonomousLoop:
@@ -287,6 +305,18 @@ def scenario(request: ScenarioRequest, _authorized=Depends(require_api_key)):
     return safe_call(lambda: set_runtime_scenario(request.scenario_mode), "Scenario update failed")
 
 
+@app.post("/scenario/force-full")
+def force_full_capacity(_authorized=Depends(require_api_key)):
+    return safe_call(lambda: runtime_service.apply_demo_pressure("full"), "Force full capacity failed")
+
+
+@app.post("/scenario/demo-pressure")
+def demo_pressure(request: DemoPressureRequest, _authorized=Depends(require_api_key)):
+    if request.profile not in {"normal", "heavy", "near_full", "full"}:
+        raise HTTPException(status_code=422, detail="profile must be one of normal, heavy, near_full, or full.")
+    return safe_call(lambda: runtime_service.apply_demo_pressure(request.profile), "Demo pressure update failed")
+
+
 @app.post("/llm/mode")
 def set_llm_mode(request: LLMModeRequest, _authorized=Depends(require_api_key)):
     _validate_non_empty(request.llm_mode, "llm_mode")
@@ -362,6 +392,38 @@ def state(response: Response, _authorized=Depends(require_api_key)):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return safe_call(get_runtime_snapshot, "State read failed")
+
+
+@app.get("/client-state")
+def client_state(response: Response, _authorized=Depends(require_api_key)):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return safe_call(runtime_service.get_client_snapshot, "Client state read failed")
+
+
+@app.get("/expo-state")
+def expo_state(response: Response, _authorized=Depends(require_api_key)):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    def _read():
+        snapshot = runtime_service.get_expo_snapshot()
+        snapshot["autonomy"] = autonomous_loop.status()
+        return snapshot
+
+    return safe_call(_read, "Expo state read failed")
+
+
+@app.post("/user-entry")
+def user_entry(request: UserEntryRequest, _authorized=Depends(require_api_key)):
+    return safe_call(lambda: runtime_service.register_user_entry(request.dict()), "User entry failed")
+
+
+@app.post("/user-exit")
+def user_exit(request: UserExitRequest, _authorized=Depends(require_api_key)):
+    return safe_call(lambda: runtime_service.register_user_exit(request.dict()), "User exit failed")
 
 
 @app.get("/trace")

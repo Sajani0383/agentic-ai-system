@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SRM Parking User App</title>
+    <link rel="stylesheet" href="./user-styles.css?v=sync-fix-20260503" />
+  </head>
+  <body>
+    <main class="user-shell">
+      <section class="user-card">
+        <div class="user-header">
+          <span>SRM Smart Parking</span>
+          <h1 id="screen-title">Parking Assistant</h1>
+        </div>
+
+        <div id="screen"></div>
+
+        <section class="exit-panel">
+          <h2>Exit Parking</h2>
+          <form id="exit-form" class="inline-form">
+            <input name="vehicle_number" autocomplete="off" placeholder="Vehicle number" required />
+            <button type="submit">Exit</button>
+          </form>
+          <div id="exit-result" class="mini-result hidden"></div>
+        </section>
+      </section>
+    </main>
+    <script type="module" src="./user-app.js?v=sync-fix-20260503"></script>
+  </body>
+</html>

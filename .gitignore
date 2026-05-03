@@ -3,5 +3,27 @@ __pycache__/
 .env
 parking_env/
 logs/*.log
+logs/*.pid
+logs/simulation/*.csv
 .DS_Store
 simulation_logs.csv
+
+# Local virtual environments and caches
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Frontend dependency/build output
+frontend/node_modules/
+frontend/dist/
+
+# Local run artifacts
+test_output.txt
+tmp_log.txt
+memory/*.tmp.*
+*.tmp
+*.bak
+*~
